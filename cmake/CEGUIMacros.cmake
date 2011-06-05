@@ -162,27 +162,34 @@ macro (cegui_add_dependency _TARGET_NAME _DEP_NAME)
 
 endmacro()
 
-
 ###############################################################################
 #
 # Define a CEGUI library to be built and optionally installed.
 #
-# Note: this creates a regular lib and a static lib with the _Static suffix.
+# Note: this creates a regular lib (or module) and a static lib with the
+#       _Static suffix.
 #
 # Parameters:
 #       _LIB_NAME           - Name of the library to create.
+#       _IS_MODULE          - Specifies whether to create a module or shared lib
 #       _SOURCE_FILES_VAR   - Variable holding the source file names.
 #       _HEADER_FILES_VAR   - Variable holding the header file names.
 #       _INSTALL_BIN        - For linux, TRUE if the lib should be installed
 #       _INSTALL_HEADERS    - For linux, TRUE if the headers should be installed
 #
 ###############################################################################
-macro (cegui_add_library _LIB_NAME _SOURCE_FILES_VAR _HEADER_FILES_VAR _INSTALL_BIN _INSTALL_HEADERS)
+macro (cegui_add_library_impl _LIB_NAME _IS_MODULE _SOURCE_FILES_VAR _HEADER_FILES_VAR _INSTALL_BIN _INSTALL_HEADERS)
     file (RELATIVE_PATH _REL_SRC_DIR "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     string (REPLACE src include _REL_INC_DIR ${_REL_SRC_DIR})
     string(TOUPPER ${_LIB_NAME} _CEGUI_EXPORT_DEFINE)
 
     include_directories("${CMAKE_SOURCE_DIR}/${_REL_INC_DIR}")
+
+    if (${_IS_MODULE})
+        set (_LIB_TYPE MODULE)
+    else()
+        set (_LIB_TYPE SHARED)
+    endif()
 
     ###########################################################################
     #                       STATIC LIBRARY SET UP
@@ -195,7 +202,8 @@ macro (cegui_add_library _LIB_NAME _SOURCE_FILES_VAR _HEADER_FILES_VAR _INSTALL_
     ###########################################################################
     #                       SHARED LIBRARY SET UP
     ###########################################################################
-    add_library(${_LIB_NAME} SHARED ${${_SOURCE_FILES_VAR}} ${${_HEADER_FILES_VAR}})
+    add_library(${_LIB_NAME} ${_LIB_TYPE} ${${_SOURCE_FILES_VAR}} ${${_HEADER_FILES_VAR}})
+    set_target_properties(${_LIB_NAME} PROPERTIES DEFINE_SYMBOL ${_CEGUI_EXPORT_DEFINE}_EXPORTS)
 
     if (NOT CEGUI_BUILD_SHARED_LIBS_WITH_STATIC_DEPENDENCIES)
         set_target_properties(${_LIB_NAME} PROPERTIES
@@ -208,18 +216,29 @@ macro (cegui_add_library _LIB_NAME _SOURCE_FILES_VAR _HEADER_FILES_VAR _INSTALL_
             INSTALL_NAME_DIR ${CEGUI_APPLE_DYLIB_INSTALL_PATH}
             BUILD_WITH_INSTALL_RPATH TRUE
         )
+
+        # Force the somewhat standard .dylib extension for modules over the use of
+        # the .so extension
+        if (${_IS_MODULE})
+            set_target_properties(${_LIB_NAME} PROPERTIES SUFFIX ".dylib")
+        endif()
+
     else()
         set_target_properties(${_LIB_NAME} PROPERTIES
             INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CEGUI_LIB_INSTALL_DIR}"
         )
     endif()
 
-    if (NOT APPLE OR CEGUI_APPLE_DYLIB_SET_VERSION_INFO)
-        set_target_properties(${_LIB_NAME} PROPERTIES
-            VERSION ${CEGUI_ABI_VERSION}
-            SOVERSION ${CEGUI_ABI_CURRENT}
-            DEFINE_SYMBOL ${_CEGUI_EXPORT_DEFINE}_EXPORTS
-        )
+    # Do not version modules, since we dlopen these directly and need to know
+    # the name is what we think it will be (and not rely on symlinks which will
+    # not be installed always, but usually only as part of *-dev packages).
+    if (NOT ${_IS_MODULE})
+        if (NOT APPLE OR CEGUI_APPLE_DYLIB_SET_VERSION_INFO)
+            set_target_properties(${_LIB_NAME} PROPERTIES
+                VERSION ${CEGUI_ABI_VERSION}
+                SOVERSION ${CEGUI_ABI_CURRENT}
+            )
+        endif()
     endif()
 
     ###########################################################################
@@ -245,6 +264,21 @@ macro (cegui_add_library _LIB_NAME _SOURCE_FILES_VAR _HEADER_FILES_VAR _INSTALL_
         string (REPLACE "cegui/src" "" _REL_HEADER_DIR ${_REL_SRC_DIR})
         install(FILES ${${_HEADER_FILES_VAR}} DESTINATION "${CEGUI_INCLUDE_INSTALL_DIR}/${CMAKE_PROJECT_NAME}/${_REL_HEADER_DIR}")
     endif()
+endmacro()
+
+#
+# Define loadable module - this is loaded dynamically at runtime and not linked
+# to (except in static builds)
+#
+macro (cegui_add_loadable_module _MODULE_NAME _SOURCE_FILES_VAR _HEADER_FILES_VAR)
+    cegui_add_library_impl(${_MODULE_NAME} TRUE ${_SOURCE_FILES_VAR} ${_HEADER_FILES_VAR} TRUE FALSE)
+endmacro()
+
+#
+# Define a regular library - this is usually linked to directly.
+#
+macro (cegui_add_library _LIB_NAME _SOURCE_FILES_VAR _HEADER_FILES_VAR)
+    cegui_add_library_impl(${_LIB_NAME} FALSE ${_SOURCE_FILES_VAR} ${_HEADER_FILES_VAR} TRUE TRUE)
 endmacro()
 
 #
@@ -407,13 +441,8 @@ macro( cegui_add_python_module PYTHON_MODULE_NAME SOURCE_DIR EXTRA_LIBS )
     target_link_libraries(${PYTHON_MODULE_NAME} ${CEGUI_BASE_LIBNAME} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${EXTRA_LIBS} )
     set_target_properties(${PYTHON_MODULE_NAME} PROPERTIES PREFIX "")
 
-    # link the default modules when doing a static build.
-    if (NOT BUILD_SHARED_LIBS)
-        target_link_libraries(${PYTHON_MODULE_NAME}
-            ${CEGUI_STATIC_XMLPARSER_MODULE}
-            ${CEGUI_STATIC_IMAGECODEC_MODULE}
-            ${CEGUI_FALAGARD_WR_LIBNAME}
-        )
+    if (WIN32)
+        set_target_properties(${PYTHON_MODULE_NAME} PROPERTIES SUFFIX ".pyd")
     endif()
 
     if (NOT APPLE)
