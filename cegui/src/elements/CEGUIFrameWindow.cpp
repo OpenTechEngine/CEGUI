@@ -42,12 +42,6 @@ namespace CEGUI
 const String FrameWindow::EventNamespace("FrameWindow");
 const String FrameWindow::WidgetTypeName("CEGUI/FrameWindow");
 
-
-/*************************************************************************
-	Definitions for Properties
-*************************************************************************/
-FrameWindowProperties::RollUpState				FrameWindow::d_rollUpStateProperty;
-
 /*************************************************************************
 	Constants
 *************************************************************************/
@@ -216,6 +210,13 @@ void FrameWindow::toggleRollup(void)
 
 }
 
+void FrameWindow::setRolledup(bool val)
+{
+    if(val != isRolledup())
+    {
+        toggleRollup();
+    }
+}
 
 /*************************************************************************
 	Move the window by the pixel offsets specified in 'offset'.	
@@ -766,34 +767,37 @@ void FrameWindow::addFrameWindowProperties(void)
         &FrameWindow::setRollupEnabled, &FrameWindow::isRollupEnabled, true
     ); // TODO: Inconsistency between RollUp and Rollup
 
-	addProperty(&d_rollUpStateProperty);
+    CEGUI_DEFINE_PROPERTY(FrameWindow, bool,
+        "RollUpState", "Property to get/set the roll-up / shade state of the window.  Value is either \"True\" or \"False\".",
+        &FrameWindow::setRolledup, &FrameWindow::isRolledup, false
+    );
 
-	CEGUI_DEFINE_PROPERTY(FrameWindow, bool,
+    CEGUI_DEFINE_PROPERTY(FrameWindow, bool,
         "DragMovingEnabled", "Property to get/set the setting for whether the user may drag the window around by its title bar. Value is either \"True\" or \"False\".",
         &FrameWindow::setDragMovingEnabled, &FrameWindow::isDragMovingEnabled, true
     );
 
-	CEGUI_DEFINE_PROPERTY(FrameWindow, float,
+    CEGUI_DEFINE_PROPERTY(FrameWindow, float,
         "SizingBorderThickness", "Property to get/set the setting for the sizing border thickness. Value is a float specifying the border thickness in pixels.",
         &FrameWindow::setSizingBorderThickness, &FrameWindow::getSizingBorderThickness, 8.0f
     );
 
-	CEGUI_DEFINE_PROPERTY(FrameWindow, Image*,
+    CEGUI_DEFINE_PROPERTY(FrameWindow, Image*,
         "NSSizingCursorImage", "Property to get/set the N-S (up-down) sizing cursor image for the FrameWindow. Value should be \"set:[imageset name] image:[image name]\".",
         &FrameWindow::setNSSizingCursorImage, &FrameWindow::getNSSizingCursorImage, 0
     );
 
-	CEGUI_DEFINE_PROPERTY(FrameWindow, Image*,
+    CEGUI_DEFINE_PROPERTY(FrameWindow, Image*,
         "EWSizingCursorImage", "Property to get/set the E-W (left-right) sizing cursor image for the FrameWindow. Value should be \"set:[imageset name] image:[image name]\".",
         &FrameWindow::setEWSizingCursorImage, &FrameWindow::getEWSizingCursorImage, 0
     );
 
-	CEGUI_DEFINE_PROPERTY(FrameWindow, Image*,
+    CEGUI_DEFINE_PROPERTY(FrameWindow, Image*,
         "NWSESizingCursorImage", "Property to get/set the NW-SE diagonal sizing cursor image for the FrameWindow. Value should be \"set:[imageset name] image:[image name]\".",
         &FrameWindow::setNWSESizingCursorImage, &FrameWindow::getNWSESizingCursorImage, 0
     );
 
-	CEGUI_DEFINE_PROPERTY(FrameWindow, Image*,
+    CEGUI_DEFINE_PROPERTY(FrameWindow, Image*,
         "NESWSizingCursorImage", "Property to get/set the NE-SW diagonal sizing cursor image for the FramwWindow. Value should be \"set:[imageset name] image:[image name]\".",
         &FrameWindow::setNESWSizingCursorImage, &FrameWindow::getNESWSizingCursorImage, 0
     );
@@ -927,3 +931,4 @@ void FrameWindow::onDragSizingEnded(WindowEventArgs& e)
 //----------------------------------------------------------------------------//
 
 } // End of  CEGUI namespace section
+

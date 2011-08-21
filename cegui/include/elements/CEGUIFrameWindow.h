@@ -32,8 +32,6 @@
 
 #include "../CEGUIBase.h"
 #include "../CEGUIWindow.h"
-#include "CEGUIFrameWindowProperties.h"
-
 
 #if defined(_MSC_VER)
 #	pragma warning(push)
@@ -171,6 +169,14 @@ public:
 	*/
 	bool	isRollupEnabled(void) const					{return d_rollupEnabled;}
 
+    /*!
+    \brief
+        Sets whether the window is currently rolled up (a.k.a shaded).
+
+    \see
+        Window::isRolledup
+    */
+    void    setRolledup(bool val);
 
 	/*!
 	\brief
@@ -265,7 +271,6 @@ public:
 		Nothing
 	*/
 	void	toggleRollup(void);
-
 
 	/*!
 	\brief
@@ -701,11 +706,6 @@ protected:
 
 private:
 	/*************************************************************************
-		Static Properties for this class
-	*************************************************************************/
-	static FrameWindowProperties::RollUpState		d_rollUpStateProperty;
-
-	/*************************************************************************
 		Private methods
 	*************************************************************************/
 	void	addFrameWindowProperties(void);
@@ -718,3 +718,4 @@ private:
 #endif
 
 #endif	// end of guard _CEGUIFrameWindow_h_
+
