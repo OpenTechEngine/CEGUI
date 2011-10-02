@@ -6,36 +6,36 @@ file (GLOB WIDGET_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" elements/*
 file (GLOB FALAGARD_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" falagard/*.cpp)
 set (CORE_SOURCE_FILES ${CORE_SOURCE_FILES} ${WIDGET_SOURCE_FILES} ${FALAGARD_SOURCE_FILES})
 
-file (GLOB CORE_HEADER_FILES ../include/*.h)
-file (GLOB WIDGET_HEADER_FILES ../include/elements/*.h)
-file (GLOB FALAGARD_HEADER_FILES ../include/falagard/*.h)
+file (GLOB CORE_HEADER_FILES ../include/CEGUI/*.h)
+file (GLOB WIDGET_HEADER_FILES ../include/CEGUI/elements/*.h)
+file (GLOB FALAGARD_HEADER_FILES ../include/CEGUI/falagard/*.h)
 
 list (APPEND CORE_HEADER_FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/../include/CEGUIConfig.h
-    ${CMAKE_CURRENT_BINARY_DIR}/../include/CEGUIVersion.h
+    ${CMAKE_CURRENT_BINARY_DIR}/../include/CEGUI/Config.h
+    ${CMAKE_CURRENT_BINARY_DIR}/../include/CEGUI/Version.h
 )
 
 # never compile this directly, it's included in another file
 list (REMOVE_ITEM CORE_SOURCE_FILES minibidi.cpp)
 
 if (NOT CEGUI_HAS_DEFAULT_LOGGER)
-    list (REMOVE_ITEM CORE_SOURCE_FILES CEGUIDefaultLogger.cpp)
+    list (REMOVE_ITEM CORE_SOURCE_FILES DefaultLogger.cpp)
 endif()
 
 if (NOT CEGUI_HAS_FREETYPE)
-    list (REMOVE_ITEM CORE_SOURCE_FILES CEGUIFreeTypeFont.cpp)
+    list (REMOVE_ITEM CORE_SOURCE_FILES FreeTypeFont.cpp)
 endif()
 
 if (NOT CEGUI_HAS_PCRE_REGEX)
-    list (REMOVE_ITEM CORE_SOURCE_FILES CEGUIPCRERegexMatcher.cpp)
+    list (REMOVE_ITEM CORE_SOURCE_FILES PCRERegexMatcher.cpp)
 endif()
 
 if (NOT CEGUI_USE_FRIBIDI)
-    list (REMOVE_ITEM CORE_SOURCE_FILES CEGUIFribidiVisualMapping.cpp)
+    list (REMOVE_ITEM CORE_SOURCE_FILES FribidiVisualMapping.cpp)
 endif()
 
 if (NOT CEGUI_USE_MINIBIDI)
-    list (REMOVE_ITEM CORE_SOURCE_FILES CEGUIMinibidiVisualMapping.cpp)
+    list (REMOVE_ITEM CORE_SOURCE_FILES MinibidiVisualMapping.cpp)
 endif ()
 
 if (CEGUI_HAS_MINIZIP_RESOURCE_PROVIDER)
@@ -46,14 +46,14 @@ if (CEGUI_HAS_MINIZIP_RESOURCE_PROVIDER)
         list (APPEND CORE_SOURCE_FILES minizip/iowin32.cpp)
     endif()
 else()
-    list (REMOVE_ITEM CORE_SOURCE_FILES CEGUIMinizipResourceProvider.cpp)
+    list (REMOVE_ITEM CORE_SOURCE_FILES MinizipResourceProvider.cpp)
 endif()
 
 if (NOT CEGUI_HAS_EXPRESSION_DIM)
     list(REMOVE_ITEM CORE_SOURCE_FILES
-        falagard/CEGUIFalExpressionDim.cpp
-        falagard/CEGUIFalExpressionDimParser.cpp
-        falagard/CEGUIFalExpressionDimScanner.cpp
+        falagard/ExpressionDim.cpp
+        falagard/ExpressionDimParser.cpp
+        falagard/ExpressionDimScanner.cpp
     )
 endif()
 
