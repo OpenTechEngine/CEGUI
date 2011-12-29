@@ -51,32 +51,17 @@ namespace CEGUI
                 d_writeCausesLayout(layoutOnWrite)
                 {}
         virtual ~PropertyDefinitionBase() {}
-        /*!
-        \brief
-            Sets the value of the property.
-
-        \note
-            When overriding the set() member of PropertyDefinitionBase, you MUST
-            call the base class implementation after you have set the property
-            value (i.e. you must call PropertyDefinitionBase::set()).
-
-        \param receiver
-            Pointer to the target object.
-
-        \param value
-            A String object that contains a textual representation of the new value to assign to the Property.
-
-        \return
-            Nothing.
-
-        \exception InvalidRequestException  Thrown when the Property was unable to interpret the content of \a value.
-        */
-//        void set(PropertyReceiver* receiver, const String& value);
 
         /*!
         \brief
             Writes an xml representation of the PropertyDefinitionBase based
             object to \a out_stream.
+
+		\param receiver
+			Property receiver is usually used by CEGUI::Property derived classes to get the value,
+			however for property definitions it is usually unused and 0 may be passed in its place!
+
+			The parameter is there mostly for the signature to match CEGUI::Property::writeXMLToStream
 
         \param xml_stream
             Stream where xml data should be output.
@@ -110,6 +95,7 @@ namespace CEGUI
         }
 
     protected:
+
         virtual void setNative_impl(PropertyReceiver* receiver,typename Helper::pass_type value)
         {
             if (d_writeCausesLayout)
