@@ -233,16 +233,6 @@ void WidgetLookFeel::clearPropertyInitialisers()
 //---------------------------------------------------------------------------//
 void WidgetLookFeel::initialiseWidget(Window& widget) const
 {
-    // add required child widgets
-    WidgetComponentPtrMap wcm;
-    appendChildWidgetComponents(wcm);
-    for (WidgetComponentPtrMap::const_iterator wci = wcm.begin();
-         wci != wcm.end();
-         ++wci)
-    {
-        wci->second->create(widget);
-    }
-
     // add new property definitions
     PropertyDefinitionPtrMap pdm;
     appendPropertyDefinitions(pdm);
@@ -255,6 +245,16 @@ void WidgetLookFeel::initialiseWidget(Window& widget) const
         // write default value to get things set up properly
         widget.setProperty(pdi->first,
                            pdi->second->getDefault(&widget));
+    }
+
+    // add required child widgets
+    WidgetComponentPtrMap wcm;
+    appendChildWidgetComponents(wcm);
+    for (WidgetComponentPtrMap::const_iterator wci = wcm.begin();
+         wci != wcm.end();
+         ++wci)
+    {
+        wci->second->create(widget);
     }
 
     // add new property link definitions
