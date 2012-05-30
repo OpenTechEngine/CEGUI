@@ -132,7 +132,9 @@ Window::LookNFeelProperty Window::d_lookNFeelProperty;
 //----------------------------------------------------------------------------//
 Window::WindowRendererProperty::WindowRendererProperty() : TplWindowProperty<Window,String>(
     "WindowRenderer",
-    "Property to get/set the windows assigned window renderer objects name.  "
+    "Property to get/set the assigned WindowRenderer object type. For "
+    "advanced use only. See the api reference for Window::setWindowRenderer "
+    "for more information. "
     "Value is a string.",
     "Window", &Window::setWindowRenderer,&Window::getWindowRendererName, "")
     {}
@@ -150,7 +152,9 @@ void Window::WindowRendererProperty::writeXMLToStream(const PropertyReceiver* re
 //----------------------------------------------------------------------------//
 Window::LookNFeelProperty::LookNFeelProperty() : TplWindowProperty<Window,String>(
     "LookNFeel",
-    "Property to get/set the windows assigned look'n'feel.  Value is a string.",
+    "Property to get/set the assigned look'n'feel. For advanced use only. See "
+    "the api reference for Window::setLookNFeel for more informaton. "
+    "Value is a string.",
     "Window", &Window::setLookNFeel,&Window::getLookNFeel, "")
     {}
 
@@ -1842,6 +1846,9 @@ const String& Window::getLookNFeel() const
 //----------------------------------------------------------------------------//
 void Window::setLookNFeel(const String& look)
 {
+    if (d_lookName == look)
+        return;
+
     if (!d_windowRenderer)
         CEGUI_THROW(NullObjectException("Window::setLookNFeel: There must be a "
             "window renderer assigned to the window '" + d_name +
@@ -2709,6 +2716,9 @@ void Window::onDragDropItemDropped(DragDropEventArgs& e)
 //----------------------------------------------------------------------------//
 void Window::setWindowRenderer(const String& name)
 {
+    if (d_windowRenderer && d_windowRenderer->getName() == name)
+        return;
+
     WindowRendererManager& wrm = WindowRendererManager::getSingleton();
     if (d_windowRenderer != 0)
     {
