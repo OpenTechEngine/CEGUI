@@ -39,6 +39,12 @@
 #include "CEGUI/ResourceProvider.h"
 #include <vector>
 
+#if defined(__WIN32__) || defined(_WIN32)
+#   include "CEGUI/Win32StringTranscoder.h"
+#else
+#   include "CEGUI/IconvStringTranscoder.h"
+#endif
+
 #if defined(_MSC_VER)
 #	pragma warning(push)
 #	pragma warning(disable : 4275)
@@ -548,6 +554,19 @@ public:
     GUIContext& createGUIContext(RenderTarget& rt);
     void destroyGUIContext(GUIContext& context);
 
+    /*!
+    \brief adds factories for all the basic window types
+
+    You do not need to call this manually! Standard Window factories will be
+    added automatically. One occasion when you will need this is if you
+    remove all window factories from WindowFactoryManager and want to add the
+    standard ones back
+    */
+    void addStandardWindowFactories();
+
+    //! Return the system StringTranscoder object
+    static const StringTranscoder& getStringTranscoder();
+
 private:
     // unimplemented constructors / assignment
     System(const System& obj);
@@ -599,9 +618,6 @@ protected:
 
     //! output the standard log header
     void outputLogHeader();
-
-    //! adds factories for all the basic window types
-    void addStandardWindowFactories();
 
     //! create the other core system singleton objects (except the logger)
     void createSingletons();
@@ -670,6 +686,12 @@ protected:
 
     typedef std::vector<GUIContext* CEGUI_VECTOR_ALLOC(GUIContext*)> GUIContextCollection;
     GUIContextCollection d_guiContexts;
+    //! instance of class that can convert string encodings
+#if defined(__WIN32__) || defined(_WIN32)
+    static const Win32StringTranscoder d_stringTranscoder;
+#else
+    static const IconvStringTranscoder d_stringTranscoder;
+#endif
 };
 
 } // End of  CEGUI namespace section
