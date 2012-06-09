@@ -2497,7 +2497,14 @@ public:
     //! Remove the named property from the XML ban list for this window.
     void unbanPropertyFromXML(const String& property_name);
 
-    //! Return whether the named property is banned from XML
+    /*!
+    \brief
+        Return whether the named property is banned from XML
+
+    \note
+        Read-only properties and properties that can't write to XML streams
+        are implicitly banned. This method will return true for them.
+    */
     bool isPropertyBannedFromXML(const String& property_name) const;
 
     //! Add the given property to the XML ban list for this window.
@@ -2506,7 +2513,14 @@ public:
     //! Remove the given property from the XML ban list for this window.
     void unbanPropertyFromXML(const Property* property);
 
-    //! Return whether the given property is banned from XML
+    /*!
+    \brief
+        Return whether given property is banned from XML
+
+    \note
+        Read-only properties and properties that can't write to XML streams
+        are implicitly banned. This method will return true for them.
+    */
     bool isPropertyBannedFromXML(const Property* property) const;
 
     /*!
@@ -2604,6 +2618,18 @@ public:
         CEGUI - for example to form part of a multi-element 'compound' widget.
     */
     void setAutoWindow(bool is_auto);
+
+    /*!
+    \brief
+        Return whether Window thinks mouse is currently within its area.
+
+    \note
+        If the mouse cursor has moved or Window's area has changed since the
+        last time the GUIContext updated the window hit information, the value
+        returned here may be inaccurate - this is not a bug, but is required
+        to ensure correct handling of certain events.
+    */
+    bool isMouseContainedInArea() const;
 
     // overridden from Element
     const Sizef& getRootContainerSize() const;
@@ -3431,7 +3457,6 @@ protected:
     /*************************************************************************
         Implementation Data
     *************************************************************************/
-    //! definition of type used for the list of attached child windows.
     //! definition of type used for the list of child windows to be drawn
     typedef std::vector<Window*
         CEGUI_VECTOR_ALLOC(Window*)> ChildDrawList;
@@ -3587,6 +3612,10 @@ protected:
 
     //! GUIContext.  Set when this window is used as a root window.
     GUIContext* d_guiContext;
+
+    //! true when mouse is contained within this Window's area.
+    bool d_containsMouse;
+
 private:
     /*************************************************************************
         May not copy or assign Window objects
