@@ -223,6 +223,10 @@ struct Thumb_wrapper : CEGUI::Thumb, bp::wrapper< CEGUI::Thumb > {
         CEGUI::Window::endInitialisation( );
     }
 
+    void fireAreaChangeEvents( bool const moved, bool const sized ){
+        CEGUI::Element::fireAreaChangeEvents( moved, sized );
+    }
+
     virtual void fireEvent( ::CEGUI::String const & name, ::CEGUI::EventArgs & args, ::CEGUI::String const & eventNamespace="" ) {
         if( bp::override func_fireEvent = this->get_override( "fireEvent" ) )
             func_fireEvent( boost::ref(name), boost::ref(args), boost::ref(eventNamespace) );
@@ -395,6 +399,14 @@ struct Thumb_wrapper : CEGUI::Thumb, bp::wrapper< CEGUI::Thumb > {
         return CEGUI::Window::isTopOfZOrder(  );
     }
 
+    void layoutLookNFeelChildWidgets(  ){
+        CEGUI::Window::layoutLookNFeelChildWidgets(  );
+    }
+
+    void markCachedWindowRectsInvalid(  ){
+        CEGUI::Window::markCachedWindowRectsInvalid(  );
+    }
+
     virtual bool moveToFront_impl( bool wasClicked ){
         if( bp::override func_moveToFront_impl = this->get_override( "moveToFront_impl" ) )
             return func_moveToFront_impl( wasClicked );
@@ -405,6 +417,10 @@ struct Thumb_wrapper : CEGUI::Thumb, bp::wrapper< CEGUI::Thumb > {
     
     virtual bool default_moveToFront_impl( bool wasClicked ){
         return CEGUI::Window::moveToFront_impl( wasClicked );
+    }
+
+    void notifyChildrenOfSizeChange( bool const non_client, bool const client ){
+        CEGUI::Element::notifyChildrenOfSizeChange( non_client, client );
     }
 
     void notifyClippingChanged(  ){
@@ -1035,16 +1051,16 @@ struct Thumb_wrapper : CEGUI::Thumb, bp::wrapper< CEGUI::Thumb > {
         CEGUI::Window::onZChanged( boost::ref(e) );
     }
 
-    virtual void performChildWindowLayout(  ) {
+    virtual void performChildWindowLayout( bool nonclient_sized_hint=false, bool client_sized_hint=false ) {
         if( bp::override func_performChildWindowLayout = this->get_override( "performChildWindowLayout" ) )
-            func_performChildWindowLayout(  );
+            func_performChildWindowLayout( nonclient_sized_hint, client_sized_hint );
         else{
-            this->CEGUI::Window::performChildWindowLayout(  );
+            this->CEGUI::Window::performChildWindowLayout( nonclient_sized_hint, client_sized_hint );
         }
     }
     
-    void default_performChildWindowLayout(  ) {
-        CEGUI::Window::performChildWindowLayout( );
+    void default_performChildWindowLayout( bool nonclient_sized_hint=false, bool client_sized_hint=false ) {
+        CEGUI::Window::performChildWindowLayout( nonclient_sized_hint, client_sized_hint );
     }
 
     virtual bool performCopy( ::CEGUI::Clipboard & clipboard ) {
@@ -1938,6 +1954,17 @@ void register_Thumb_class(){
                 , default_endInitialisation_function_type(&Thumb_wrapper::default_endInitialisation) );
         
         }
+        { //::CEGUI::Element::fireAreaChangeEvents
+        
+            typedef void ( Thumb_wrapper::*fireAreaChangeEvents_function_type )( bool const,bool const ) ;
+            
+            Thumb_exposer.def( 
+                "fireAreaChangeEvents"
+                , fireAreaChangeEvents_function_type( &Thumb_wrapper::fireAreaChangeEvents )
+                , ( bp::arg("moved"), bp::arg("sized") )
+                , "! helper to fire events based on changes to area rect\n" );
+        
+        }
         { //::CEGUI::EventSet::fireEvent
         
             typedef void ( ::CEGUI::EventSet::*fireEvent_function_type )( ::CEGUI::String const &,::CEGUI::EventArgs &,::CEGUI::String const & ) ;
@@ -2237,6 +2264,26 @@ void register_Thumb_class(){
                 *\n" );
         
         }
+        { //::CEGUI::Window::layoutLookNFeelChildWidgets
+        
+            typedef void ( Thumb_wrapper::*layoutLookNFeelChildWidgets_function_type )(  ) ;
+            
+            Thumb_exposer.def( 
+                "layoutLookNFeelChildWidgets"
+                , layoutLookNFeelChildWidgets_function_type( &Thumb_wrapper::layoutLookNFeelChildWidgets )
+                , "mark the rect caches defined on Window invalid (does not affect Element)\n" );
+        
+        }
+        { //::CEGUI::Window::markCachedWindowRectsInvalid
+        
+            typedef void ( Thumb_wrapper::*markCachedWindowRectsInvalid_function_type )(  ) ;
+            
+            Thumb_exposer.def( 
+                "markCachedWindowRectsInvalid"
+                , markCachedWindowRectsInvalid_function_type( &Thumb_wrapper::markCachedWindowRectsInvalid )
+                , "mark the rect caches defined on Window invalid (does not affect Element)\n" );
+        
+        }
         { //::CEGUI::Window::moveToFront_impl
         
             typedef bool ( Thumb_wrapper::*moveToFront_impl_function_type )( bool ) ;
@@ -2253,6 +2300,16 @@ void register_Thumb_class(){
                     Should return true if some action was taken, or false if there was\n\
                     nothing to be done.\n\
                 *\n" );
+        
+        }
+        { //::CEGUI::Element::notifyChildrenOfSizeChange
+        
+            typedef void ( Thumb_wrapper::*notifyChildrenOfSizeChange_function_type )( bool const,bool const ) ;
+            
+            Thumb_exposer.def( 
+                "notifyChildrenOfSizeChange"
+                , notifyChildrenOfSizeChange_function_type( &Thumb_wrapper::notifyChildrenOfSizeChange )
+                , ( bp::arg("non_client"), bp::arg("client") ) );
         
         }
         { //::CEGUI::Window::notifyClippingChanged
@@ -3226,13 +3283,14 @@ void register_Thumb_class(){
         }
         { //::CEGUI::Window::performChildWindowLayout
         
-            typedef void ( ::CEGUI::Window::*performChildWindowLayout_function_type )(  ) ;
-            typedef void ( Thumb_wrapper::*default_performChildWindowLayout_function_type )(  ) ;
+            typedef void ( ::CEGUI::Window::*performChildWindowLayout_function_type )( bool,bool ) ;
+            typedef void ( Thumb_wrapper::*default_performChildWindowLayout_function_type )( bool,bool ) ;
             
             Thumb_exposer.def( 
                 "performChildWindowLayout"
                 , performChildWindowLayout_function_type(&::CEGUI::Window::performChildWindowLayout)
-                , default_performChildWindowLayout_function_type(&Thumb_wrapper::default_performChildWindowLayout) );
+                , default_performChildWindowLayout_function_type(&Thumb_wrapper::default_performChildWindowLayout)
+                , ( bp::arg("nonclient_sized_hint")=(bool)(false), bp::arg("client_sized_hint")=(bool)(false) ) );
         
         }
         { //::CEGUI::Window::performCopy

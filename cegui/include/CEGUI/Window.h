@@ -2170,15 +2170,35 @@ public:
 
     /*!
     \brief
-        method called to perform extended laying out of attached child windows.
+        Layout child window content.
 
-        The system may call this at various times (like when it is resized for
-        example), and it may be invoked directly where required.
+        Laying out of child content includes:
+            - ensuring content specified in any assigned WidgetLook has its area
+              rectangles sychronised.
+            - assigned WindowRenderer given the opportunity to update child
+              content areas as needed.
+            - All content is then potentially updated via the onParentSized
+              notification as required by changes in non-client and client area
+              rectangles.
 
-    \return
-        Nothing.
+        The system may call this at various times (like when a window is resized
+        for example), and it may be invoked directly where required.
+
+    \param nonclient_sized_hint
+        Hint that the non-client area rectangle has changed size.
+
+    \param client_sized_hint
+        Hint that the client area rectangle has changed size.
+
+    \note
+        The hint parameters are essentially a way to force onParentSized
+        notifications for a given type (client / nonclient) of child window.
+        Setting a hint to false does not mean a notification will not happen,
+        instead it means that the function is to do its best to determine
+        whether a given notification is required to be sent.
     */
-    virtual void performChildWindowLayout();
+    virtual void performChildWindowLayout(bool nonclient_sized_hint = false,
+                                          bool client_sized_hint = false);
 
     /*!
     \brief
@@ -3409,6 +3429,10 @@ protected:
 
     //! handler function for when font render size changes.
     virtual bool handleFontRenderSizeChange(const EventArgs& args);
+
+    // mark the rect caches defined on Window invalid (does not affect Element)
+    void markCachedWindowRectsInvalid();
+    void layoutLookNFeelChildWidgets();
 
     /*************************************************************************
         Properties for Window base class

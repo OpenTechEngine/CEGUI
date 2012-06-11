@@ -31,6 +31,10 @@ struct Element_wrapper : CEGUI::Element, bp::wrapper< CEGUI::Element > {
         CEGUI::Element::addElementProperties(  );
     }
 
+    void fireAreaChangeEvents( bool const moved, bool const sized ){
+        CEGUI::Element::fireAreaChangeEvents( moved, sized );
+    }
+
     virtual ::CEGUI::Rectf getUnclippedInnerRect_impl( bool skipAllPixelAlignment ) const {
         if( bp::override func_getUnclippedInnerRect_impl = this->get_override( "getUnclippedInnerRect_impl" ) )
             return func_getUnclippedInnerRect_impl( skipAllPixelAlignment );
@@ -57,6 +61,10 @@ struct Element_wrapper : CEGUI::Element, bp::wrapper< CEGUI::Element > {
 
     bool isInnerRectSizeChanged(  ) const {
         return CEGUI::Element::isInnerRectSizeChanged(  );
+    }
+
+    void notifyChildrenOfSizeChange( bool const non_client, bool const client ){
+        CEGUI::Element::notifyChildrenOfSizeChange( non_client, client );
     }
 
     virtual void notifyScreenAreaChanged( bool recursive=true ) {
@@ -421,6 +429,17 @@ void register_Element_class(){
                 "calculatePixelSize"
                 , calculatePixelSize_function_type( &::CEGUI::Element::calculatePixelSize )
                 , ( bp::arg("skipAllPixelAlignment")=(bool)(false) ) );
+        
+        }
+        { //::CEGUI::Element::fireAreaChangeEvents
+        
+            typedef void ( Element_wrapper::*fireAreaChangeEvents_function_type )( bool const,bool const ) ;
+            
+            Element_exposer.def( 
+                "fireAreaChangeEvents"
+                , fireAreaChangeEvents_function_type( &Element_wrapper::fireAreaChangeEvents )
+                , ( bp::arg("moved"), bp::arg("sized") )
+                , "! helper to fire events based on changes to area rect\n" );
         
         }
         { //::CEGUI::Element::getArea
@@ -976,6 +995,16 @@ void register_Element_class(){
             @see\n\
                 Element.setPixelAligned\n\
             *\n" );
+        
+        }
+        { //::CEGUI::Element::notifyChildrenOfSizeChange
+        
+            typedef void ( Element_wrapper::*notifyChildrenOfSizeChange_function_type )( bool const,bool const ) ;
+            
+            Element_exposer.def( 
+                "notifyChildrenOfSizeChange"
+                , notifyChildrenOfSizeChange_function_type( &Element_wrapper::notifyChildrenOfSizeChange )
+                , ( bp::arg("non_client"), bp::arg("client") ) );
         
         }
         { //::CEGUI::Element::notifyScreenAreaChanged

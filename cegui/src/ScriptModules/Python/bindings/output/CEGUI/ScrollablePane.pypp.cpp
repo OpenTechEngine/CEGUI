@@ -311,6 +311,10 @@ struct ScrollablePane_wrapper : CEGUI::ScrollablePane, bp::wrapper< CEGUI::Scrol
         CEGUI::Window::endInitialisation( );
     }
 
+    void fireAreaChangeEvents( bool const moved, bool const sized ){
+        CEGUI::Element::fireAreaChangeEvents( moved, sized );
+    }
+
     virtual void fireEvent( ::CEGUI::String const & name, ::CEGUI::EventArgs & args, ::CEGUI::String const & eventNamespace="" ) {
         if( bp::override func_fireEvent = this->get_override( "fireEvent" ) )
             func_fireEvent( boost::ref(name), boost::ref(args), boost::ref(eventNamespace) );
@@ -459,6 +463,14 @@ struct ScrollablePane_wrapper : CEGUI::ScrollablePane, bp::wrapper< CEGUI::Scrol
         return CEGUI::Window::isTopOfZOrder(  );
     }
 
+    void layoutLookNFeelChildWidgets(  ){
+        CEGUI::Window::layoutLookNFeelChildWidgets(  );
+    }
+
+    void markCachedWindowRectsInvalid(  ){
+        CEGUI::Window::markCachedWindowRectsInvalid(  );
+    }
+
     virtual bool moveToFront_impl( bool wasClicked ){
         if( bp::override func_moveToFront_impl = this->get_override( "moveToFront_impl" ) )
             return func_moveToFront_impl( wasClicked );
@@ -469,6 +481,10 @@ struct ScrollablePane_wrapper : CEGUI::ScrollablePane, bp::wrapper< CEGUI::Scrol
     
     virtual bool default_moveToFront_impl( bool wasClicked ){
         return CEGUI::Window::moveToFront_impl( wasClicked );
+    }
+
+    void notifyChildrenOfSizeChange( bool const non_client, bool const client ){
+        CEGUI::Element::notifyChildrenOfSizeChange( non_client, client );
     }
 
     void notifyClippingChanged(  ){
@@ -1099,16 +1115,16 @@ struct ScrollablePane_wrapper : CEGUI::ScrollablePane, bp::wrapper< CEGUI::Scrol
         CEGUI::Window::onZChanged( boost::ref(e) );
     }
 
-    virtual void performChildWindowLayout(  ) {
+    virtual void performChildWindowLayout( bool nonclient_sized_hint=false, bool client_sized_hint=false ) {
         if( bp::override func_performChildWindowLayout = this->get_override( "performChildWindowLayout" ) )
-            func_performChildWindowLayout(  );
+            func_performChildWindowLayout( nonclient_sized_hint, client_sized_hint );
         else{
-            this->CEGUI::Window::performChildWindowLayout(  );
+            this->CEGUI::Window::performChildWindowLayout( nonclient_sized_hint, client_sized_hint );
         }
     }
     
-    void default_performChildWindowLayout(  ) {
-        CEGUI::Window::performChildWindowLayout( );
+    void default_performChildWindowLayout( bool nonclient_sized_hint=false, bool client_sized_hint=false ) {
+        CEGUI::Window::performChildWindowLayout( nonclient_sized_hint, client_sized_hint );
     }
 
     virtual bool performCopy( ::CEGUI::Clipboard & clipboard ) {
@@ -2404,6 +2420,17 @@ void register_ScrollablePane_class(){
                 , default_endInitialisation_function_type(&ScrollablePane_wrapper::default_endInitialisation) );
         
         }
+        { //::CEGUI::Element::fireAreaChangeEvents
+        
+            typedef void ( ScrollablePane_wrapper::*fireAreaChangeEvents_function_type )( bool const,bool const ) ;
+            
+            ScrollablePane_exposer.def( 
+                "fireAreaChangeEvents"
+                , fireAreaChangeEvents_function_type( &ScrollablePane_wrapper::fireAreaChangeEvents )
+                , ( bp::arg("moved"), bp::arg("sized") )
+                , "! helper to fire events based on changes to area rect\n" );
+        
+        }
         { //::CEGUI::EventSet::fireEvent
         
             typedef void ( ::CEGUI::EventSet::*fireEvent_function_type )( ::CEGUI::String const &,::CEGUI::EventArgs &,::CEGUI::String const & ) ;
@@ -2677,6 +2704,26 @@ void register_ScrollablePane_class(){
                 *\n" );
         
         }
+        { //::CEGUI::Window::layoutLookNFeelChildWidgets
+        
+            typedef void ( ScrollablePane_wrapper::*layoutLookNFeelChildWidgets_function_type )(  ) ;
+            
+            ScrollablePane_exposer.def( 
+                "layoutLookNFeelChildWidgets"
+                , layoutLookNFeelChildWidgets_function_type( &ScrollablePane_wrapper::layoutLookNFeelChildWidgets )
+                , "mark the rect caches defined on Window invalid (does not affect Element)\n" );
+        
+        }
+        { //::CEGUI::Window::markCachedWindowRectsInvalid
+        
+            typedef void ( ScrollablePane_wrapper::*markCachedWindowRectsInvalid_function_type )(  ) ;
+            
+            ScrollablePane_exposer.def( 
+                "markCachedWindowRectsInvalid"
+                , markCachedWindowRectsInvalid_function_type( &ScrollablePane_wrapper::markCachedWindowRectsInvalid )
+                , "mark the rect caches defined on Window invalid (does not affect Element)\n" );
+        
+        }
         { //::CEGUI::Window::moveToFront_impl
         
             typedef bool ( ScrollablePane_wrapper::*moveToFront_impl_function_type )( bool ) ;
@@ -2693,6 +2740,16 @@ void register_ScrollablePane_class(){
                     Should return true if some action was taken, or false if there was\n\
                     nothing to be done.\n\
                 *\n" );
+        
+        }
+        { //::CEGUI::Element::notifyChildrenOfSizeChange
+        
+            typedef void ( ScrollablePane_wrapper::*notifyChildrenOfSizeChange_function_type )( bool const,bool const ) ;
+            
+            ScrollablePane_exposer.def( 
+                "notifyChildrenOfSizeChange"
+                , notifyChildrenOfSizeChange_function_type( &ScrollablePane_wrapper::notifyChildrenOfSizeChange )
+                , ( bp::arg("non_client"), bp::arg("client") ) );
         
         }
         { //::CEGUI::Window::notifyClippingChanged
@@ -3683,13 +3740,14 @@ void register_ScrollablePane_class(){
         }
         { //::CEGUI::Window::performChildWindowLayout
         
-            typedef void ( ::CEGUI::Window::*performChildWindowLayout_function_type )(  ) ;
-            typedef void ( ScrollablePane_wrapper::*default_performChildWindowLayout_function_type )(  ) ;
+            typedef void ( ::CEGUI::Window::*performChildWindowLayout_function_type )( bool,bool ) ;
+            typedef void ( ScrollablePane_wrapper::*default_performChildWindowLayout_function_type )( bool,bool ) ;
             
             ScrollablePane_exposer.def( 
                 "performChildWindowLayout"
                 , performChildWindowLayout_function_type(&::CEGUI::Window::performChildWindowLayout)
-                , default_performChildWindowLayout_function_type(&ScrollablePane_wrapper::default_performChildWindowLayout) );
+                , default_performChildWindowLayout_function_type(&ScrollablePane_wrapper::default_performChildWindowLayout)
+                , ( bp::arg("nonclient_sized_hint")=(bool)(false), bp::arg("client_sized_hint")=(bool)(false) ) );
         
         }
         { //::CEGUI::Window::performCopy
