@@ -2194,6 +2194,7 @@
             <Property name="NormalImage" value="set:TaharezLook image:ComboboxListButtonNormal" />
             <Property name="HoverImage" value="set:TaharezLook image:ComboboxListButtonHover" />
             <Property name="PushedImage" value="set:TaharezLook image:ComboboxListButtonNormal" />
+            <Property name="DisabledImage" value="set:TaharezLook image:ComboboxListButtonNormal" />
         </Child>
         <StateImagery name="Enabled" />
         <StateImagery name="Disabled" />
@@ -4439,6 +4440,10 @@
     ***************************************************
     -->
     <WidgetLook name="TaharezLook/ImageButton">
+        <PropertyDefinition name="NormalImageColour" initialValue="FFFFFFFF" redrawOnWrite="true" />
+        <PropertyDefinition name="HoverImageColour" initialValue="FFFFFFFF" redrawOnWrite="true" />
+        <PropertyDefinition name="PushedImageColour" initialValue="FFFFFFFF" redrawOnWrite="true" />
+        <PropertyDefinition name="DisabledImageColour" initialValue="FF7F7F7F" redrawOnWrite="true" />
         <PropertyDefinition name="NormalImage" initialValue="" redrawOnWrite="true" />
         <PropertyDefinition name="HoverImage" initialValue="" redrawOnWrite="true" />
         <PropertyDefinition name="PushedImage" initialValue="" redrawOnWrite="true" />
@@ -4454,6 +4459,7 @@
                     <Dim type="Height" ><UnifiedDim scale="1" type="Height" /></Dim>
                 </Area>
                 <ImageProperty name="NormalImage" />
+                <ColourProperty name="NormalImageColour" />
                 <VertFormatProperty name="VertImageFormatting" />
                 <HorzFormatProperty name="HorzImageFormatting" />
             </ImageryComponent>
@@ -4467,6 +4473,7 @@
                     <Dim type="Height" ><UnifiedDim scale="1" type="Height" /></Dim>
                 </Area>
                 <ImageProperty name="HoverImage" />
+                <ColourProperty name="HoverImageColour" />
                 <VertFormatProperty name="VertImageFormatting" />
                 <HorzFormatProperty name="HorzImageFormatting" />
             </ImageryComponent>
@@ -4480,6 +4487,7 @@
                     <Dim type="Height" ><UnifiedDim scale="1" type="Height" /></Dim>
                 </Area>
                 <ImageProperty name="PushedImage" />
+                <ColourProperty name="PushedImageColour" />
                 <VertFormatProperty name="VertImageFormatting" />
                 <HorzFormatProperty name="HorzImageFormatting" />
             </ImageryComponent>
@@ -4493,6 +4501,7 @@
                     <Dim type="Height" ><UnifiedDim scale="1" type="Height" /></Dim>
                 </Area>
                 <ImageProperty name="DisabledImage" />
+                <ColourProperty name="DisabledImageColour" />
                 <VertFormatProperty name="VertImageFormatting" />
                 <HorzFormatProperty name="HorzImageFormatting" />
             </ImageryComponent>
