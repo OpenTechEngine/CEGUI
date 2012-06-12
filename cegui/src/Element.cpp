@@ -471,9 +471,6 @@ void Element::setArea_impl(const UVector2& pos, const USize& size,
     d_unclippedOuterRect.invalidateCache();
     d_unclippedInnerRect.invalidateCache();
 
-    // have we moved the element?
-    bool moved = false;
-
     // save original size so we can work out how to behave later on
     const Sizef oldSize(d_pixelSize);
     
@@ -486,31 +483,28 @@ void Element::setArea_impl(const UVector2& pos, const USize& size,
     // If this is a top/left edge sizing op, only modify position if the size
     // actually changed.  If it is not a sizing op, then position may always
     // change.
-    if (!topLeftSizing || sized)
-    {
-        // only update position if a change has occurred.
-        if (pos != d_area.d_min)
-        {
-            d_area.setPosition(pos);
-            moved = true;
-        }
-    }
+    const bool moved = (!topLeftSizing || sized) && pos != d_area.d_min;
 
-    // fire events as required
+    if (moved)
+        d_area.setPosition(pos);
+
     if (fireEvents)
+        fireAreaChangeEvents(moved, sized);
+}
+
+//----------------------------------------------------------------------------//
+void Element::fireAreaChangeEvents(const bool moved, const bool sized)
+{
+    if (moved)
     {
         ElementEventArgs args(this);
+        onMoved(args);
+    }
 
-        if (moved)
-        {
-            onMoved(args);
-            // reset handled so 'sized' event can re-use (since  wo do not care
-            // about it)
-            args.handled = 0;
-        }
-
-        if (sized)
-            onSized(args);
+    if (sized)
+    {
+        ElementEventArgs args(this);
+        onSized(args);
     }
 }
 
@@ -627,49 +621,45 @@ Rectf Element::getUnclippedInnerRect_impl(bool skipAllPixelAlignment) const
 //----------------------------------------------------------------------------//
 void Element::onSized(ElementEventArgs& e)
 {
-    // screen area changes when we're resized.
-    // NB: Called non-recursive since the onParentSized notifications will deal
-    // more selectively with child element cases.
     notifyScreenAreaChanged(false);
-
-    // inform children their parent has been re-sized
-    const size_t child_count = getChildCount();
-    for (size_t i = 0; i < child_count; ++i)
-    {
-        ElementEventArgs args(this);
-        d_children[i]->onParentSized(args);
-    }
+    notifyChildrenOfSizeChange(true, true);
 
     fireEvent(EventSized, e, EventNamespace);
 }
 
 //----------------------------------------------------------------------------//
+void Element::notifyChildrenOfSizeChange(const bool non_client,
+                                         const bool client)
+{
+    const size_t child_count = getChildCount();
+    for (size_t i = 0; i < child_count; ++i)
+    {
+        Element * const child = d_children[i];
+
+        if ((non_client && child->isNonClient()) ||
+            (client && !child->isNonClient()))
+        {
+            ElementEventArgs args(this);
+            d_children[i]->onParentSized(args);
+        }
+    }
+}
+
+//----------------------------------------------------------------------------//
 void Element::onParentSized(ElementEventArgs& e)
 {
-    // set element area back on itself to cause minimum and maximum size
-    // constraints to be applied as required.  (fire no events though)
+    d_unclippedOuterRect.invalidateCache();
+    d_unclippedInnerRect.invalidateCache();
 
-    setArea_impl(d_area.getPosition(), d_area.getSize(), false, false);
+    const Sizef oldSize(d_pixelSize);
+    d_pixelSize = calculatePixelSize();
+    const bool sized = (d_pixelSize != oldSize) || isInnerRectSizeChanged();
 
     const bool moved =
         ((d_area.d_min.d_x.d_scale != 0) || (d_area.d_min.d_y.d_scale != 0) ||
          (d_horizontalAlignment != HA_LEFT) || (d_verticalAlignment != VA_TOP));
-    const bool sized =
-        ((d_area.d_max.d_x.d_scale != 0) || (d_area.d_max.d_y.d_scale != 0) ||
-         isInnerRectSizeChanged());
 
-    // now see if events should be fired.
-    if (moved)
-    {
-        ElementEventArgs args(this);
-        onMoved(args);
-    }
-
-    if (sized)
-    {
-        ElementEventArgs args(this);
-        onSized(args);
-    }
+    fireAreaChangeEvents(moved, sized);
 
     fireEvent(EventParentSized, e, EventNamespace);
 }

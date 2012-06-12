@@ -1097,6 +1097,11 @@ protected:
     //! Default implementation of function to return Element's inner rect area.
     virtual Rectf getUnclippedInnerRect_impl(bool skipAllPixelAlignment) const;
 
+    //! helper to fire events based on changes to area rect
+    void fireAreaChangeEvents(const bool moved, const bool sized);
+    void notifyChildrenOfSizeChange(const bool non_client,
+                                    const bool client);
+
     /*************************************************************************
         Event trigger methods
     *************************************************************************/

@@ -263,6 +263,14 @@ struct Window_wrapper : CEGUI::Window, bp::wrapper< CEGUI::Window > {
         return CEGUI::Window::isTopOfZOrder(  );
     }
 
+    void layoutLookNFeelChildWidgets(  ){
+        CEGUI::Window::layoutLookNFeelChildWidgets(  );
+    }
+
+    void markCachedWindowRectsInvalid(  ){
+        CEGUI::Window::markCachedWindowRectsInvalid(  );
+    }
+
     virtual bool moveToFront_impl( bool wasClicked ){
         if( bp::override func_moveToFront_impl = this->get_override( "moveToFront_impl" ) )
             return func_moveToFront_impl( wasClicked );
@@ -879,16 +887,16 @@ struct Window_wrapper : CEGUI::Window, bp::wrapper< CEGUI::Window > {
         CEGUI::Window::onZChanged( boost::ref(e) );
     }
 
-    virtual void performChildWindowLayout(  ) {
+    virtual void performChildWindowLayout( bool nonclient_sized_hint=false, bool client_sized_hint=false ) {
         if( bp::override func_performChildWindowLayout = this->get_override( "performChildWindowLayout" ) )
-            func_performChildWindowLayout(  );
+            func_performChildWindowLayout( nonclient_sized_hint, client_sized_hint );
         else{
-            this->CEGUI::Window::performChildWindowLayout(  );
+            this->CEGUI::Window::performChildWindowLayout( nonclient_sized_hint, client_sized_hint );
         }
     }
     
-    void default_performChildWindowLayout(  ) {
-        CEGUI::Window::performChildWindowLayout( );
+    void default_performChildWindowLayout( bool nonclient_sized_hint=false, bool client_sized_hint=false ) {
+        CEGUI::Window::performChildWindowLayout( nonclient_sized_hint, client_sized_hint );
     }
 
     virtual bool performCopy( ::CEGUI::Clipboard & clipboard ) {
@@ -1111,6 +1119,10 @@ struct Window_wrapper : CEGUI::Window, bp::wrapper< CEGUI::Window > {
         CEGUI::NamedElement::addNamedElementProperties(  );
     }
 
+    void fireAreaChangeEvents( bool const moved, bool const sized ){
+        CEGUI::Element::fireAreaChangeEvents( moved, sized );
+    }
+
     virtual void fireEvent( ::CEGUI::String const & name, ::CEGUI::EventArgs & args, ::CEGUI::String const & eventNamespace="" ) {
         if( bp::override func_fireEvent = this->get_override( "fireEvent" ) )
             func_fireEvent( boost::ref(name), boost::ref(args), boost::ref(eventNamespace) );
@@ -1157,6 +1169,10 @@ struct Window_wrapper : CEGUI::Window, bp::wrapper< CEGUI::Window > {
 
     bool isInnerRectSizeChanged(  ) const {
         return CEGUI::Element::isInnerRectSizeChanged(  );
+    }
+
+    void notifyChildrenOfSizeChange( bool const non_client, bool const client ){
+        CEGUI::Element::notifyChildrenOfSizeChange( non_client, client );
     }
 
     virtual void onHorizontalAlignmentChanged( ::CEGUI::ElementEventArgs & e ){
@@ -3610,6 +3626,26 @@ void register_Window_class(){
                 *\n" );
         
         }
+        { //::CEGUI::Window::layoutLookNFeelChildWidgets
+        
+            typedef void ( Window_wrapper::*layoutLookNFeelChildWidgets_function_type )(  ) ;
+            
+            Window_exposer.def( 
+                "layoutLookNFeelChildWidgets"
+                , layoutLookNFeelChildWidgets_function_type( &Window_wrapper::layoutLookNFeelChildWidgets )
+                , "mark the rect caches defined on Window invalid (does not affect Element)\n" );
+        
+        }
+        { //::CEGUI::Window::markCachedWindowRectsInvalid
+        
+            typedef void ( Window_wrapper::*markCachedWindowRectsInvalid_function_type )(  ) ;
+            
+            Window_exposer.def( 
+                "markCachedWindowRectsInvalid"
+                , markCachedWindowRectsInvalid_function_type( &Window_wrapper::markCachedWindowRectsInvalid )
+                , "mark the rect caches defined on Window invalid (does not affect Element)\n" );
+        
+        }
         { //::CEGUI::Window::moveBehind
         
             typedef void ( ::CEGUI::Window::*moveBehind_function_type )( ::CEGUI::Window const * const ) ;
@@ -4714,13 +4750,14 @@ void register_Window_class(){
         }
         { //::CEGUI::Window::performChildWindowLayout
         
-            typedef void ( ::CEGUI::Window::*performChildWindowLayout_function_type )(  ) ;
-            typedef void ( Window_wrapper::*default_performChildWindowLayout_function_type )(  ) ;
+            typedef void ( ::CEGUI::Window::*performChildWindowLayout_function_type )( bool,bool ) ;
+            typedef void ( Window_wrapper::*default_performChildWindowLayout_function_type )( bool,bool ) ;
             
             Window_exposer.def( 
                 "performChildWindowLayout"
                 , performChildWindowLayout_function_type(&::CEGUI::Window::performChildWindowLayout)
-                , default_performChildWindowLayout_function_type(&Window_wrapper::default_performChildWindowLayout) );
+                , default_performChildWindowLayout_function_type(&Window_wrapper::default_performChildWindowLayout)
+                , ( bp::arg("nonclient_sized_hint")=(bool)(false), bp::arg("client_sized_hint")=(bool)(false) ) );
         
         }
         { //::CEGUI::Window::performCopy
@@ -6295,6 +6332,17 @@ void register_Window_class(){
             *\n" );
         
         }
+        { //::CEGUI::Element::fireAreaChangeEvents
+        
+            typedef void ( Window_wrapper::*fireAreaChangeEvents_function_type )( bool const,bool const ) ;
+            
+            Window_exposer.def( 
+                "fireAreaChangeEvents"
+                , fireAreaChangeEvents_function_type( &Window_wrapper::fireAreaChangeEvents )
+                , ( bp::arg("moved"), bp::arg("sized") )
+                , "! helper to fire events based on changes to area rect\n" );
+        
+        }
         { //::CEGUI::EventSet::fireEvent
         
             typedef void ( ::CEGUI::EventSet::*fireEvent_function_type )( ::CEGUI::String const &,::CEGUI::EventArgs &,::CEGUI::String const & ) ;
@@ -6384,6 +6432,16 @@ void register_Window_class(){
                 "isInnerRectSizeChanged"
                 , isInnerRectSizeChanged_function_type( &Window_wrapper::isInnerRectSizeChanged )
                 , "! helper to return whether the inner rect size has changed\n" );
+        
+        }
+        { //::CEGUI::Element::notifyChildrenOfSizeChange
+        
+            typedef void ( Window_wrapper::*notifyChildrenOfSizeChange_function_type )( bool const,bool const ) ;
+            
+            Window_exposer.def( 
+                "notifyChildrenOfSizeChange"
+                , notifyChildrenOfSizeChange_function_type( &Window_wrapper::notifyChildrenOfSizeChange )
+                , ( bp::arg("non_client"), bp::arg("client") ) );
         
         }
         { //::CEGUI::Element::onHorizontalAlignmentChanged

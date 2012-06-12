@@ -1820,23 +1820,25 @@ void Window::setInheritsTooltipText(bool setting)
 void Window::setArea_impl(const UVector2& pos, const USize& size,
                           bool topLeftSizing, bool fireEvents)
 {
+    markCachedWindowRectsInvalid();
     Element::setArea_impl(pos, size, topLeftSizing, fireEvents);
-    
-    // we make sure the screen areas are recached when this is called as we need
-    // it in most cases
-    d_outerRectClipperValid = false;
-    d_innerRectClipperValid = false;
-    d_hitTestRectValid = false;
 
     //if (moved || sized)
     // FIXME: This is potentially wasteful
-    
     getGUIContext().updateWindowContainingMouse();
 
     // update geometry position and clipping if nothing from above appears to
     // have done so already (NB: may be occasionally wasteful, but fixes bugs!)
     if (!d_unclippedOuterRect.isCacheValid())
         updateGeometryRenderSettings();
+}
+
+//----------------------------------------------------------------------------//
+void Window::markCachedWindowRectsInvalid()
+{
+    d_outerRectClipperValid = false;
+    d_innerRectClipperValid = false;
+    d_hitTestRectValid = false;
 }
 
 //----------------------------------------------------------------------------//
@@ -1900,27 +1902,43 @@ void Window::setModalState(bool state)
 }
 
 //----------------------------------------------------------------------------//
-void Window::performChildWindowLayout()
+void Window::performChildWindowLayout(const bool nonclient_sized_hint,
+                                      const bool client_sized_hint)
+{
+    const Sizef old_size(d_pixelSize);
+    d_pixelSize = calculatePixelSize();
+
+    layoutLookNFeelChildWidgets();
+
+    const bool outer_changed = nonclient_sized_hint || d_pixelSize != old_size;
+    const bool inner_changed = client_sized_hint || isInnerRectSizeChanged();
+
+    d_outerRectClipperValid &= !outer_changed;
+    d_innerRectClipperValid &= !inner_changed;
+
+    if (d_windowRenderer)
+        d_windowRenderer->performChildWindowLayout();
+
+    notifyChildrenOfSizeChange(outer_changed, inner_changed);
+}
+
+//----------------------------------------------------------------------------//
+void Window::layoutLookNFeelChildWidgets()
 {
     if (d_lookName.empty())
         return;
 
-    // here we just grab the look and feel and get it to layout it's children
     CEGUI_TRY
     {
-        const WidgetLookFeel& wlf =
-            WidgetLookManager::getSingleton().getWidgetLook(d_lookName);
-        // get look'n'feel to layout any child windows it created.
-        wlf.layoutChildWidgets(*this);
+        WidgetLookManager::getSingleton().
+            getWidgetLook(d_lookName).layoutChildWidgets(*this);
     }
     CEGUI_CATCH (UnknownObjectException&)
     {
-        Logger::getSingleton().logEvent("Window::performChildWindowLayout: "
-            "assigned widget look was not found.", Errors);
+        Logger::getSingleton().logEvent(
+            "Window::layoutLookNFeelChildWidgets: "
+            "WidgetLook '" + d_lookName + "' was not found.", Errors);
     }
-
-    if (d_windowRenderer)
-        d_windowRenderer->performChildWindowLayout();
 }
 
 //----------------------------------------------------------------------------//
@@ -2151,21 +2169,29 @@ Window* Window::getActiveSibling()
 //----------------------------------------------------------------------------//
 void Window::onSized(ElementEventArgs& e)
 {
-    Element::onSized(e);
-    
+    /*
+     * Why are we not calling Element::onSized?  It's because that function
+     * always calls the onParentSized notification for all children - we really
+     * want that to be done via performChildWindowLayout instead and we
+     * definitely don't want it done twice.
+     *
+     * (The other option was to add an Element::performChildLayout function -
+     * maybe we should consider that).
+    */
+
     // resize the underlying RenderingWindow if we're using such a thing
     if (d_surface && d_surface->isRenderingWindow())
         static_cast<RenderingWindow*>(d_surface)->setSize(getPixelSize());
 
-    // we need to layout loonfeel based content first, in case anything is
-    // relying on that content for size or positioning info (i.e. some child
-    // is used to establish inner-rect position or size).
-    //
-    // TODO: The subsequent onParentSized notification for those windows cause
-    // additional - unneccessary - work; we should look to optimise that.
-    performChildWindowLayout();
+    // screen area changes when we're resized.
+    // NB: Called non-recursive since the performChildWindowLayout call should
+    // have dealt more selectively with child Window cases.
+    notifyScreenAreaChanged(false);
+    performChildWindowLayout(true, true);
 
     invalidate();
+
+    fireEvent(EventSized, e, EventNamespace);
 }
 
 //----------------------------------------------------------------------------//
@@ -2925,9 +2951,7 @@ bool Window::isPropertyAtDefault(const Property* property) const
 //----------------------------------------------------------------------------//
 void Window::notifyClippingChanged(void)
 {
-    d_outerRectClipperValid = false;
-    d_innerRectClipperValid = false;
-    d_hitTestRectValid = false;
+    markCachedWindowRectsInvalid();
 
     // inform children that their clipped screen areas must be updated
     const size_t num = d_children.size();
@@ -2939,10 +2963,7 @@ void Window::notifyClippingChanged(void)
 //----------------------------------------------------------------------------//
 void Window::notifyScreenAreaChanged(bool recursive /* = true */)
 {
-    d_outerRectClipperValid = false;
-    d_innerRectClipperValid = false;
-    d_hitTestRectValid = false;
-    
+    markCachedWindowRectsInvalid();
     Element::notifyScreenAreaChanged(recursive);
 
     updateGeometryRenderSettings();
