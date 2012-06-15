@@ -247,5 +247,18 @@ UVector2 LayoutContainer::getBoundingSizeForWindow(Window* window) const
            );
 }
 
+//----------------------------------------------------------------------------//
+void LayoutContainer::onParentSized(ElementEventArgs& e)
+{
+    // This is intentionally not Window::onParentSized.
+    Element::onParentSized(e);
+
+    // force update of child positioning.
+    notifyScreenAreaChanged(true);
+    performChildWindowLayout(true, true);
+}
+
+//----------------------------------------------------------------------------//
+//
 } // End of  CEGUI namespace section
 
