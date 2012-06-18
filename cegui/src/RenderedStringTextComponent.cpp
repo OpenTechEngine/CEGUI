@@ -31,6 +31,8 @@
 #include "CEGUI/System.h"
 #include "CEGUI/Exceptions.h"
 #include "CEGUI/TextUtils.h"
+#include "CEGUI/GUIContext.h"
+#include "CEGUI/Window.h"
 
 // Start of CEGUI namespace section
 namespace CEGUI
@@ -126,7 +128,8 @@ const ColourRect& RenderedStringTextComponent::getColours() const
 }
 
 //----------------------------------------------------------------------------//
-void RenderedStringTextComponent::setSelection(const float start, const float end)
+void RenderedStringTextComponent::setSelection(const Window* ref_wnd,
+                                               const float start, const float end)
 {
     if (start >= end)
     {
@@ -134,21 +137,34 @@ void RenderedStringTextComponent::setSelection(const float start, const float en
         return;
     }
 
-    const Font* fnt = d_font ? d_font : System::getSingleton().getDefaultFont();
+    const Font* fnt = getEffectiveFont(ref_wnd);
 
     d_selectionStart = fnt->getCharAtPixel(d_text, start);
     d_selectionLength = fnt->getCharAtPixel(d_text, end) - d_selectionStart + 1;
 }
 
 //----------------------------------------------------------------------------//
-void RenderedStringTextComponent::draw(GeometryBuffer& buffer,
+const Font* RenderedStringTextComponent::getEffectiveFont(
+                                                    const Window* window) const
+{
+    if (d_font)
+        return d_font;
+
+    return (window ? window->getGUIContext() :
+                     System::getSingleton().getDefaultGUIContext()).
+           getDefaultFont();
+}
+
+//----------------------------------------------------------------------------//
+void RenderedStringTextComponent::draw(const Window* ref_wnd,
+                                       GeometryBuffer& buffer,
                                        const Vector2f& position,
                                        const ColourRect* mod_colours,
                                        const Rectf* clip_rect,
                                        const float vertical_space,
                                        const float space_extra) const
 {
-    const Font* fnt = d_font ? d_font : System::getSingleton().getDefaultFont();
+    const Font* fnt = getEffectiveFont(ref_wnd); 
 
     if (!fnt)
         return;
@@ -160,15 +176,15 @@ void RenderedStringTextComponent::draw(GeometryBuffer& buffer,
     switch (d_verticalFormatting)
     {
     case VF_BOTTOM_ALIGNED:
-        final_pos.d_y += vertical_space - getPixelSize().d_height;
+        final_pos.d_y += vertical_space - getPixelSize(ref_wnd).d_height;
         break;
 
     case VF_CENTRE_ALIGNED:
-        final_pos.d_y += (vertical_space - getPixelSize().d_height) / 2 ;
+        final_pos.d_y += (vertical_space - getPixelSize(ref_wnd).d_height) / 2 ;
         break;
 
     case VF_STRETCHED:
-        y_scale = vertical_space / getPixelSize().d_height;
+        y_scale = vertical_space / getPixelSize(ref_wnd).d_height;
         break;
 
     case VF_TOP_ALIGNED:
@@ -212,9 +228,9 @@ void RenderedStringTextComponent::draw(GeometryBuffer& buffer,
 }
 
 //----------------------------------------------------------------------------//
-Sizef RenderedStringTextComponent::getPixelSize() const
+Sizef RenderedStringTextComponent::getPixelSize(const Window* ref_wnd) const
 {
-    const Font* fnt = d_font ? d_font : System::getSingleton().getDefaultFont();
+    const Font* fnt = getEffectiveFont(ref_wnd);
 
     Sizef psz(d_padding.d_min.d_x + d_padding.d_max.d_x,
                d_padding.d_min.d_y + d_padding.d_max.d_y);
@@ -236,9 +252,11 @@ bool RenderedStringTextComponent::canSplit() const
 
 //----------------------------------------------------------------------------//
 RenderedStringTextComponent* RenderedStringTextComponent::split(
-    float split_point, bool first_component)
+                                                        const Window* ref_wnd,
+                                                        float split_point,
+                                                        bool first_component)
 {
-    const Font* fnt = d_font ? d_font : System::getSingleton().getDefaultFont();
+    const Font* fnt = getEffectiveFont(ref_wnd);
 
     // This is checked, but should never fail, since if we had no font our
     // extent would be 0 and we would never cause a split to be needed here.
@@ -309,7 +327,7 @@ RenderedStringTextComponent* RenderedStringTextComponent::split(
             d_selectionLength -= rhs_start;
         }
         else
-            setSelection(0, 0);
+            setSelection(ref_wnd, 0, 0);
     }
 
     d_text = d_text.substr(rhs_start);

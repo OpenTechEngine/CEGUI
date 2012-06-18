@@ -50,7 +50,7 @@ bool TextDemo::initialise(CEGUI::GUIContext* guiContext)
 /*
     if(FontManager::getSingleton().isDefined("DejaVuSans-10"))
     {
-		System::getSingleton().setDefaultFont("DejaVuSans-10");
+		System::getSingleton().getDefaultGUIContext().setDefaultFont("DejaVuSans-10");
     }*/
 
 

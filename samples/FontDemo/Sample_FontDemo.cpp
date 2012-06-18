@@ -138,7 +138,7 @@ public:
 
         FontManager::getSingleton().createFreeTypeFont("DefaultFont", 10/*pt*/, true, "DejaVuSans.ttf");
         // Set it as the default
-        /*System::getSingleton().setDefaultFont("DefaultFont");*/
+        System::getSingleton().setDefaultFont("DefaultFont");
 
 
         // load all the fonts (if they are not loaded yet)
