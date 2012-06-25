@@ -122,8 +122,10 @@ String OgreRenderer_impl::d_rendererID(
 "CEGUI::OgreRenderer - Official OGRE based 2nd generation renderer module.");
 
 //----------------------------------------------------------------------------//
-OgreRenderer& OgreRenderer::bootstrapSystem()
+OgreRenderer& OgreRenderer::bootstrapSystem(const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     if (System::getSingletonPtr())
         CEGUI_THROW(InvalidRequestException(
             "CEGUI::System object is already initialised."));
@@ -137,8 +139,11 @@ OgreRenderer& OgreRenderer::bootstrapSystem()
 }
 
 //----------------------------------------------------------------------------//
-OgreRenderer& OgreRenderer::bootstrapSystem(Ogre::RenderTarget& target)
+OgreRenderer& OgreRenderer::bootstrapSystem(Ogre::RenderTarget& target,
+                                            const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     if (System::getSingletonPtr())
         CEGUI_THROW(InvalidRequestException(
             "CEGUI::System object is already initialised."));
@@ -172,14 +177,19 @@ void OgreRenderer::destroySystem()
 }
 
 //----------------------------------------------------------------------------//
-OgreRenderer& OgreRenderer::create()
+OgreRenderer& OgreRenderer::create(const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new OgreRenderer;
 }
 
 //----------------------------------------------------------------------------//
-OgreRenderer& OgreRenderer::create(Ogre::RenderTarget& target)
+OgreRenderer& OgreRenderer::create(Ogre::RenderTarget& target,
+                                   const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new OgreRenderer(target);
 }
 

@@ -32,6 +32,7 @@
 #include "CEGUI/TextureTarget.h"
 #include "CEGUI/Exceptions.h"
 #include "CEGUI/Logger.h"
+#include "CEGUI/System.h"
 
 #include <algorithm>
 
@@ -45,8 +46,11 @@ String DirectFBRenderer::d_rendererID(
 
 //----------------------------------------------------------------------------//
 DirectFBRenderer& DirectFBRenderer::create(IDirectFB& directfb,
-                                           IDirectFBSurface& surface)
+                                           IDirectFBSurface& surface,
+                                           const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new DirectFBRenderer(directfb, surface);
 }
 

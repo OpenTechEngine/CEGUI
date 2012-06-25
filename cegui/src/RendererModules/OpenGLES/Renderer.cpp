@@ -94,8 +94,11 @@ String OpenGLESRenderer::d_rendererID(
 
 //----------------------------------------------------------------------------//
 OpenGLESRenderer& OpenGLESRenderer::bootstrapSystem(
-                                        const TextureTargetType tt_type)
+                                        const TextureTargetType tt_type,
+                                        const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     if (System::getSingletonPtr())
         CEGUI_THROW(InvalidRequestException(
             "CEGUI::System object is already initialised."));
@@ -110,8 +113,11 @@ OpenGLESRenderer& OpenGLESRenderer::bootstrapSystem(
 //----------------------------------------------------------------------------//
 OpenGLESRenderer& OpenGLESRenderer::bootstrapSystem(
                                         const Sizef& display_size,
-                                        const TextureTargetType tt_type)
+                                        const TextureTargetType tt_type,
+                                        const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     if (System::getSingletonPtr())
         CEGUI_THROW(InvalidRequestException(
             "CEGUI::System object is already initialised."));
@@ -142,15 +148,21 @@ void OpenGLESRenderer::destroySystem()
 }
 
 //----------------------------------------------------------------------------//
-OpenGLESRenderer& OpenGLESRenderer::create(const TextureTargetType tt_type)
+OpenGLESRenderer& OpenGLESRenderer::create(const TextureTargetType tt_type,
+                                           const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new OpenGLESRenderer(tt_type);
 }
 
 //----------------------------------------------------------------------------//
 OpenGLESRenderer& OpenGLESRenderer::create(const Sizef& display_size,
-                                           const TextureTargetType tt_type)
+                                           const TextureTargetType tt_type,
+                                           const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new OpenGLESRenderer(display_size, tt_type);
 }
 

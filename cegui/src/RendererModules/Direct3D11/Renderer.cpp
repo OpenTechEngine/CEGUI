@@ -50,8 +50,11 @@ String Direct3D11Renderer::d_rendererID(
 //----------------------------------------------------------------------------//
 Direct3D11Renderer& Direct3D11Renderer::bootstrapSystem(
                                                    ID3D11Device* device,
-                                                   ID3D11DeviceContext* context)
+                                                   ID3D11DeviceContext* context,
+                                                   const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     if (System::getSingletonPtr())
         CEGUI_THROW(InvalidRequestException(
             "CEGUI::System object is already initialised."));
@@ -82,8 +85,12 @@ void Direct3D11Renderer::destroySystem()
 }
 
 //----------------------------------------------------------------------------//
-Direct3D11Renderer& Direct3D11Renderer::create(ID3D11Device* device,ID3D11DeviceContext *context)
+Direct3D11Renderer& Direct3D11Renderer::create(ID3D11Device* device,
+                                               ID3D11DeviceContext* context,
+                                               const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new Direct3D11Renderer(device,context);
 }
 

@@ -56,8 +56,11 @@ static const D3DMATRIX s_identityMatrix =
 };
 
 //----------------------------------------------------------------------------//
-Direct3D9Renderer& Direct3D9Renderer::bootstrapSystem(LPDIRECT3DDEVICE9 device)
+Direct3D9Renderer& Direct3D9Renderer::bootstrapSystem(LPDIRECT3DDEVICE9 device,
+                                                      const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     if (System::getSingletonPtr())
         CEGUI_THROW(InvalidRequestException(
             "CEGUI::System object is already initialised."));
@@ -88,8 +91,11 @@ void Direct3D9Renderer::destroySystem()
 }
 
 //----------------------------------------------------------------------------//
-Direct3D9Renderer& Direct3D9Renderer::create(LPDIRECT3DDEVICE9 device)
+Direct3D9Renderer& Direct3D9Renderer::create(LPDIRECT3DDEVICE9 device,
+                                             const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new Direct3D9Renderer(device);
 }
 

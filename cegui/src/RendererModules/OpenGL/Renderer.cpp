@@ -25,10 +25,6 @@
  *   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  *   OTHER DEALINGS IN THE SOFTWARE.
  ***************************************************************************/
-#ifdef HAVE_CONFIG_H
-#   include "config.h"
-#endif
-
 #include <GL/glew.h>
 
 #include "CEGUI/RendererModules/OpenGL/Renderer.h"
@@ -110,8 +106,11 @@ String OpenGLRenderer::d_rendererID(
 "CEGUI::OpenGLRenderer - Official OpenGL based 2nd generation renderer module.");
 
 //----------------------------------------------------------------------------//
-OpenGLRenderer& OpenGLRenderer::bootstrapSystem(const TextureTargetType tt_type)
+OpenGLRenderer& OpenGLRenderer::bootstrapSystem(const TextureTargetType tt_type,
+                                                const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     if (System::getSingletonPtr())
         CEGUI_THROW(InvalidRequestException(
             "CEGUI::System object is already initialised."));
@@ -125,8 +124,11 @@ OpenGLRenderer& OpenGLRenderer::bootstrapSystem(const TextureTargetType tt_type)
 
 //----------------------------------------------------------------------------//
 OpenGLRenderer& OpenGLRenderer::bootstrapSystem(const Sizef& display_size,
-                                                const TextureTargetType tt_type)
+                                                const TextureTargetType tt_type,
+                                                const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     if (System::getSingletonPtr())
         CEGUI_THROW(InvalidRequestException(
             "CEGUI::System object is already initialised."));
@@ -156,15 +158,21 @@ void OpenGLRenderer::destroySystem()
 }
 
 //----------------------------------------------------------------------------//
-OpenGLRenderer& OpenGLRenderer::create(const TextureTargetType tt_type)
+OpenGLRenderer& OpenGLRenderer::create(const TextureTargetType tt_type,
+                                       const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new OpenGLRenderer(tt_type);
 }
 
 //----------------------------------------------------------------------------//
 OpenGLRenderer& OpenGLRenderer::create(const Sizef& display_size,
-                                       const TextureTargetType tt_type)
+                                       const TextureTargetType tt_type,
+                                       const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new OpenGLRenderer(display_size, tt_type);
 }
 

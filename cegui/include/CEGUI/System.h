@@ -6,7 +6,7 @@
 	purpose:	Defines interface for main GUI system class
 *************************************************************************/
 /***************************************************************************
- *   Copyright (C) 2004 - 2011 Paul D Turner & The CEGUI Development Team
+ *   Copyright (C) 2004 - 2012 Paul D Turner & The CEGUI Development Team
  *
  *   Permission is hereby granted, free of charge, to any person obtaining
  *   a copy of this software and associated documentation files (the
@@ -117,6 +117,9 @@ public:
 
     \param logFile
         String object containing the name to use for the log file.
+
+    \param abi
+        This must be set to CEGUI_VERSION_ABI
     */
     static System& create(Renderer& renderer,
                           ResourceProvider* resourceProvider = 0,
@@ -124,7 +127,8 @@ public:
                           ImageCodec* imageCodec = 0,
                           ScriptModule* scriptModule = 0,
                           const String& configFile = "",
-                          const String& logFile = "CEGUI.log");
+                          const String& logFile = "CEGUI.log",
+                          const int abi = CEGUI_VERSION_ABI);
 
     //! Destroy the System object.
     static void destroy();
@@ -526,6 +530,10 @@ public:
 
     //! Return the system StringTranscoder object
     static const StringTranscoder& getStringTranscoder();
+
+    //! Internal CEGUI version validation function.
+    static void performVersionTest(const int expected, const int received,
+                                   const String& func);
 
 private:
     // unimplemented constructors / assignment

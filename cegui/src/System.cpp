@@ -6,7 +6,7 @@
 	purpose:	Implementation of main system object
 *************************************************************************/
 /***************************************************************************
- *   Copyright (C) 2004 - 2006 Paul D Turner & The CEGUI Development Team
+ *   Copyright (C) 2004 - 2012 Paul D Turner & The CEGUI Development Team
  *
  *   Permission is hereby granted, free of charge, to any person obtaining
  *   a copy of this software and associated documentation files (the
@@ -882,10 +882,27 @@ const String& System::getDefaultImageCodecName()
 System& System::create(Renderer& renderer, ResourceProvider* resourceProvider,
                        XMLParser* xmlParser, ImageCodec* imageCodec,
                        ScriptModule* scriptModule, const String& configFile,
-                       const String& logFile)
+                       const String& logFile, const int abi)
 {
+    performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *CEGUI_NEW_AO System(renderer, resourceProvider, xmlParser, imageCodec,
                        scriptModule, configFile, logFile);
+}
+
+//----------------------------------------------------------------------------//
+void System::performVersionTest(const int expected, const int received,
+                                const String& func)
+{
+    if (expected != received)
+        CEGUI_THROW(InvalidRequestException("Version mismatch detected! "
+            "Called from function: " + func +
+            " Expected abi: " + PropertyHelper<int>::toString(expected) +
+            " received abi: " + PropertyHelper<int>::toString(received) +
+            ". This means that the code calling the function was compiled "
+            "against a CEGUI version that is incompatible with the library "
+            "containing the function. Usually this means that you have "
+            "old binary library versions that have been used by mistake."));
 }
 
 //----------------------------------------------------------------------------//

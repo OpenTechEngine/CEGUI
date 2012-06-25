@@ -45,8 +45,10 @@ String NullRenderer::d_rendererID(
 		"CEGUI::NullRenderer - The null renderer.");
 
 //----------------------------------------------------------------------------//
-NullRenderer& NullRenderer::bootstrapSystem()
+NullRenderer& NullRenderer::bootstrapSystem(const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     if (System::getSingletonPtr())
         CEGUI_THROW(InvalidRequestException(
             "CEGUI::System object is already initialised."));
@@ -84,8 +86,10 @@ void NullRenderer::destroySystem()
 }
 
 //----------------------------------------------------------------------------//
-NullRenderer& NullRenderer::create()
+NullRenderer& NullRenderer::create(const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new NullRenderer;
 }
 

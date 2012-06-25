@@ -98,8 +98,10 @@ String OpenGL3Renderer::d_rendererID(
 "CEGUI::OpenGL3Renderer - Official OpenGL 3.2 core based renderer module.");
 
 //----------------------------------------------------------------------------//
-OpenGL3Renderer& OpenGL3Renderer::bootstrapSystem()
+OpenGL3Renderer& OpenGL3Renderer::bootstrapSystem(const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     if (System::getSingletonPtr())
         CEGUI_THROW(InvalidRequestException(
             "CEGUI::System object is already initialised."));
@@ -112,8 +114,11 @@ OpenGL3Renderer& OpenGL3Renderer::bootstrapSystem()
 }
 
 //----------------------------------------------------------------------------//
-OpenGL3Renderer& OpenGL3Renderer::bootstrapSystem(const Sizef& display_size)
+OpenGL3Renderer& OpenGL3Renderer::bootstrapSystem(const Sizef& display_size,
+                                                  const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     if (System::getSingletonPtr())
         CEGUI_THROW(InvalidRequestException(
             "CEGUI::System object is already initialised."));
@@ -143,14 +148,19 @@ void OpenGL3Renderer::destroySystem()
 }
 
 //----------------------------------------------------------------------------//
-OpenGL3Renderer& OpenGL3Renderer::create()
+OpenGL3Renderer& OpenGL3Renderer::create(const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new OpenGL3Renderer();
 }
 
 //----------------------------------------------------------------------------//
-OpenGL3Renderer& OpenGL3Renderer::create(const Sizef& display_size)
+OpenGL3Renderer& OpenGL3Renderer::create(const Sizef& display_size,
+                                         const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new OpenGL3Renderer(display_size);
 }
 

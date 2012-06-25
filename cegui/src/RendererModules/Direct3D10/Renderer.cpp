@@ -47,8 +47,11 @@ String Direct3D10Renderer::d_rendererID(
 " module.");
 
 //----------------------------------------------------------------------------//
-Direct3D10Renderer& Direct3D10Renderer::bootstrapSystem(ID3D10Device* device)
+Direct3D10Renderer& Direct3D10Renderer::bootstrapSystem(ID3D10Device* device,
+                                                        const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     if (System::getSingletonPtr())
         CEGUI_THROW(InvalidRequestException(
             "CEGUI::System object is already initialised."));
@@ -79,8 +82,11 @@ void Direct3D10Renderer::destroySystem()
 }
 
 //----------------------------------------------------------------------------//
-Direct3D10Renderer& Direct3D10Renderer::create(ID3D10Device* device)
+Direct3D10Renderer& Direct3D10Renderer::create(ID3D10Device* device,
+                                               const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new Direct3D10Renderer(device);
 }
 

@@ -45,8 +45,11 @@ String IrrlichtRenderer::d_rendererID("CEGUI::IrrlichtRenderer "
 "- Official Irrlicht based 2nd generation renderer module.");
 
 //----------------------------------------------------------------------------//
-IrrlichtRenderer& IrrlichtRenderer::bootstrapSystem(irr::IrrlichtDevice& device)
+IrrlichtRenderer& IrrlichtRenderer::bootstrapSystem(irr::IrrlichtDevice& device,
+                                                    const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     if (System::getSingletonPtr())
         CEGUI_THROW(InvalidRequestException(
             "CEGUI::System object is already initialised."));
@@ -82,8 +85,11 @@ void IrrlichtRenderer::destroySystem()
 }
 
 //----------------------------------------------------------------------------//
-IrrlichtRenderer& IrrlichtRenderer::create(irr::IrrlichtDevice& device)
+IrrlichtRenderer& IrrlichtRenderer::create(irr::IrrlichtDevice& device,
+                                           const int abi)
 {
+    System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
+
     return *new IrrlichtRenderer(device);
 }
 
