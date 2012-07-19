@@ -291,15 +291,23 @@ public:
                 std::stringstream pgname;
                 pgname << "Page" << num;
 
-                if (root->isChild("Frame/TabControl/" + pgname.str()))
+                if (root->isChild(String("Frame/TabControl/") + pgname.str().c_str()))
                     // Next
                     continue;
 
                 Window* pg = 0;
 
                 pg = WindowManager::getSingleton().loadLayoutFromFile("TabPage.layout");
-                pg->setName(String(pgname.str()));
-
+                CEGUI_TRY
+                {
+                    pg = WindowManager::getSingleton().loadLayoutFromFile("TabPage.layout");
+                    pg->setName(String(pgname.str().c_str()));
+                }
+                CEGUI_CATCH(CEGUI::Exception&)
+                {
+                    outputExceptionMessage("Some error occured while adding a tabpage. Please see the logfile.");
+                    break;
+                }
 
                 // This window has just been created while loading the layout
                 if (pg->isChild("Text"))
@@ -307,7 +315,7 @@ public:
                     Window* txt = pg->getChild("Text");
                     txt->setText(PageText [num - 3]);
 
-                    pg->setText(pgname.str());
+                    pg->setText(pgname.str().c_str());
                     tc->addTab(pg);
 
                     refreshPageList();
