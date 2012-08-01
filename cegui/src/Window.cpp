@@ -3285,7 +3285,7 @@ void Window::initialiseClippers(const RenderingContext& ctx)
 
         if (d_clippedByParent && d_parent)
             rendering_window->setClippingRegion(
-                getParent()->getInnerRectClipper());
+                getParent()->getClipRect(d_nonClient));
         else
             rendering_window->setClippingRegion(
                 Rectf(Vector2f(0, 0), getRootContainerSize()));
