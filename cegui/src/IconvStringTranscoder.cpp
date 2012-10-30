@@ -93,6 +93,14 @@ public:
 template<typename T>
 static T* iconvTranscode(IconvHelper& ich, const char* in_buf, size_t in_len)
 {
+    // Handle empty strings
+    if (in_len == 0)
+    {
+        T* ret_buff = CEGUI_NEW_ARRAY_PT(T, 1, CEGUI::BufferAllocator);
+        ret_buff[0] = 0;
+        return ret_buff;
+    }
+
     std::vector<T CEGUI_VECTOR_ALLOC(T)> out_vec;
     out_vec.resize(in_len);
     size_t out_count = 0;
@@ -163,14 +171,28 @@ static String_T iconvTranscode(IconvHelper& ich,
 }
 
 //----------------------------------------------------------------------------//
+// Helper to detect the platform endianess at run time.
+bool is_big_endian(void)
+{
+    union
+    {
+        uint32 i;
+        char c[4];
+    } bint = {0x01020304};
+
+    return bint.c[0] == 1;
+}
+
+//----------------------------------------------------------------------------//
 IconvStringTranscoder::IconvStringTranscoder()
 {
+    UTF16PE = is_big_endian() ? "UTF-16BE" : "UTF-16LE";
 }
 
 //----------------------------------------------------------------------------//
 uint16* IconvStringTranscoder::stringToUTF16(const String& input) const
 {
-    IconvHelper ich("UTF-16", "UTF-8");
+    IconvHelper ich(UTF16PE, "UTF-8");
     return iconvTranscode<uint16>(
         ich, input.c_str(), getStringLength(input.c_str()));
 }
@@ -187,12 +209,12 @@ std::wstring IconvStringTranscoder::stringToStdWString(const String& input) cons
 String IconvStringTranscoder::stringFromUTF16(const uint16* input) const
 {
 #if CEGUI_STRING_CLASS == CEGUI_STRING_CLASS_UNICODE
-    IconvHelper ich("UTF-8", "UTF-16");
+    IconvHelper ich("UTF-8", UTF16PE);
     return iconvTranscode<String, utf8>(
         ich, reinterpret_cast<const char*>(input),
         getStringLength(input) * sizeof(uint16));
 #else
-    IconvHelper ich("WCHAR_T", "UTF-16");
+    IconvHelper ich("WCHAR_T", UTF16PE);
     return stringFromStdWString(iconvTranscode<std::wstring, wchar_t>(
         ich, reinterpret_cast<const char*>(input), getStringLength(input)));
 #endif
