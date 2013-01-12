@@ -37,6 +37,7 @@
 #include "CEGUI/IteratorBase.h"
 #include "CEGUI/WindowFactory.h"
 #include "CEGUI/TplWindowFactory.h"
+#include "CEGUI/Exceptions.h"
 #include <map>
 #include <vector>
 
