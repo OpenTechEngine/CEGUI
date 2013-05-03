@@ -22,7 +22,7 @@ endif()
 ################################################################################
 # Start of main Project definitions
 ################################################################################
-project(CEGUI)
+project(cegui)
 
 ################################################################################
 # Set up version information
@@ -32,10 +32,28 @@ set( CEGUI_VERSION_MINOR 8)
 set( CEGUI_VERSION_PATCH 9999)
 set( CEGUI_VERSION ${CEGUI_VERSION_MAJOR}.${CEGUI_VERSION_MINOR}.${CEGUI_VERSION_PATCH} )
 
+#
+# This controls the binary versioning - which is different to release versions
+# defined above.
+#
+# The following describes what these components are and how they are intended to
+# be managed.
+# 
+#   - CURRENT: The binary interface version provided by the library.
+#   - REVISION: Revision of binary interface specified in CURRENT
+#   - AGE: Number of previous binary interfaces this library is compatible with.
+#
+# Prior to issuing a release, modify the values as follows:
+#   - If there were any changes in the source, increase REVISION.
+#   - If the interface changed at all, increase CURRENT and set REVISION to 0
+#   - If the interface had binary compabilbe additions only (so no ABI breaking
+#     changes) increase AGE, else set AGE to 0.
+#
 set( CEGUI_ABI_CURRENT 2)
 set( CEGUI_ABI_REVISION 0)
 set( CEGUI_ABI_AGE 0)
 set( CEGUI_ABI_VERSION ${CEGUI_ABI_CURRENT}.${CEGUI_ABI_REVISION}.${CEGUI_ABI_AGE} )
+MATH( EXPR CEGUI_SOVERSION ${CEGUI_ABI_CURRENT}-${CEGUI_ABI_AGE} )
 
 
 ################################################################################
@@ -205,6 +223,7 @@ endif()
 # regression and performance tests
 cmake_dependent_option( CEGUI_BUILD_TESTS "Specifies whether to build the regression and performance tests." FALSE "Boost_FOUND" FALSE )
 
+option( CEGUI_INSTALL_WITH_RPATH "Specifies whether to install with RPATH set to the install location (TRUE) or with no RPATH set (FALSE)." FALSE )
 
 ################################################################################
 # Define vars holding the names for all the libs we can build for CEGUI.
@@ -245,7 +264,7 @@ set( CEGUI_CORE_WR_LIBNAME CEGUICoreWindowRendererSet )
 
 # Scripting module names and related items.
 set( CEGUI_TOLUAPP_LIBNAME CEGUItoluapp )
-set( CEGUI_TOLUAPP_GENERATOR_EXENAME toluappcegui )
+set( CEGUI_TOLUAPP_GENERATOR_EXENAME toluappcegui-${CEGUI_VERSION_MAJOR}.${CEGUI_VERSION_MINOR} )
 set( CEGUI_LUA_SCRIPTMODULE_LIBNAME CEGUILuaScriptModule )
 
 set( CEGUI_PYCEGUI_CORE_LIBNAME PyCEGUI )
@@ -254,7 +273,7 @@ set( CEGUI_PYCEGUI_OGRE_RENDERER_LIBNAME PyCEGUIOgreRenderer )
 set( CEGUI_PYCEGUI_NULL_RENDERER_LIBNAME PyCEGUINullRenderer )
 
 # SampleFramework executable related names
-set( CEGUI_SAMPLEFRAMEWORK_EXENAME CEGUISampleFramework )
+set( CEGUI_SAMPLEFRAMEWORK_EXENAME CEGUISampleFramework-${CEGUI_VERSION_MAJOR}.${CEGUI_VERSION_MINOR})
 
 # Additional lib names
 set( CEGUI_COMMON_DIALOGS_LIBNAME CEGUICommonDialogs )
@@ -379,22 +398,14 @@ else()
     set( CEGUI_LIB_INSTALL_DIR lib )
 endif()
 
-option( CEGUI_SLOTTED_INSTALLATION "Specifies whether CEGUI should be installed into version specific sub-directories." TRUE )
-
-if (CEGUI_SLOTTED_INSTALLATION)
-    set( CEGUI_SLOT_VERSION "-${CEGUI_VERSION_MAJOR}.${CEGUI_VERSION_MINOR}" )
-    set( CEGUI_SLOT_INSTALL_SUBDIR "/${CMAKE_PROJECT_NAME}${CEGUI_SLOT_VERSION}" )
-
-    set( CEGUI_DATA_INSTALL_DIR "share${CEGUI_SLOT_INSTALL_SUBDIR}" )
-    set( CEGUI_DOC_INSTALL_DIR "share/doc${CEGUI_SLOT_INSTALL_SUBDIR}" )
-else()
-    set( CEGUI_DATA_INSTALL_DIR "share/${CMAKE_PROJECT_NAME}" )
-    set( CEGUI_DOC_INSTALL_DIR "share/doc/${CMAKE_PROJECT_NAME}" )
-endif()
+set( CEGUI_VER_INSTALL_SUBDIR "/${CMAKE_PROJECT_NAME}-${CEGUI_VERSION_MAJOR}" )
+set( CEGUI_DATA_INSTALL_DIR "share${CEGUI_VER_INSTALL_SUBDIR}" )
+set( CEGUI_DOC_INSTALL_DIR "share/doc${CEGUI_VER_INSTALL_SUBDIR}" )
 
 set( CEGUI_PKGCONFIG_INSTALL_DIR "${CEGUI_LIB_INSTALL_DIR}/pkgconfig" )
-set( CEGUI_LIB_INSTALL_DIR "${CEGUI_LIB_INSTALL_DIR}${CEGUI_SLOT_INSTALL_SUBDIR}" )
-set( CEGUI_INCLUDE_INSTALL_DIR "include${CEGUI_SLOT_INSTALL_SUBDIR}" )
+set( CEGUI_MODULE_INSTALL_DIR "${CEGUI_LIB_INSTALL_DIR}/${CMAKE_PROJECT_NAME}-${CEGUI_VERSION_MAJOR}.${CEGUI_VERSION_MINOR}" )
+set( CEGUI_SAMPLE_INSTALL_DIR "${CEGUI_MODULE_INSTALL_DIR}" ) # TODO: put into /samples subdir!
+set( CEGUI_INCLUDE_INSTALL_DIR "include${CEGUI_VER_INSTALL_SUBDIR}" )
 
 ################################################################################
 # Deal with files we generate from template files
@@ -405,24 +416,24 @@ configure_file( cegui/include/CEGUI/ModuleConfig.h.in cegui/include/CEGUI/Module
 configure_file( samples/common/include/CEGUISamplesConfig.h.in samples/common/include/CEGUISamplesConfig.h )
 
 if (UNIX AND NOT APPLE)
-    configure_file( cegui/CEGUI.pc.in cegui/CEGUI${CEGUI_SLOT_VERSION}.pc @ONLY )
-    install(FILES ${CMAKE_BINARY_DIR}/cegui/CEGUI${CEGUI_SLOT_VERSION}.pc DESTINATION ${CEGUI_PKGCONFIG_INSTALL_DIR})
+    configure_file( cegui/CEGUI.pc.in cegui/CEGUI-${CEGUI_VERSION_MAJOR}.pc @ONLY )
+    install(FILES ${CMAKE_BINARY_DIR}/cegui/CEGUI-${CEGUI_VERSION_MAJOR}.pc DESTINATION ${CEGUI_PKGCONFIG_INSTALL_DIR})
 
     if (CEGUI_BUILD_RENDERER_NULL)
-        configure_file( cegui/CEGUI-NULL.pc.in cegui/CEGUI-NULL${CEGUI_SLOT_VERSION}.pc @ONLY )
-        install(FILES ${CMAKE_BINARY_DIR}/cegui/CEGUI-NULL${CEGUI_SLOT_VERSION}.pc DESTINATION ${CEGUI_PKGCONFIG_INSTALL_DIR})
+        configure_file( cegui/CEGUI-NULL.pc.in cegui/CEGUI-${CEGUI_VERSION_MAJOR}-NULL.pc @ONLY )
+        install(FILES ${CMAKE_BINARY_DIR}/cegui/CEGUI-${CEGUI_VERSION_MAJOR}-NULL.pc DESTINATION ${CEGUI_PKGCONFIG_INSTALL_DIR})
     endif()
     if (CEGUI_BUILD_RENDERER_IRRLICHT)
-        configure_file( cegui/CEGUI-IRRLICHT.pc.in cegui/CEGUI-IRRLICHT${CEGUI_SLOT_VERSION}.pc @ONLY )
-        install(FILES ${CMAKE_BINARY_DIR}/cegui/CEGUI-IRRLICHT${CEGUI_SLOT_VERSION}.pc DESTINATION ${CEGUI_PKGCONFIG_INSTALL_DIR})
+        configure_file( cegui/CEGUI-IRRLICHT.pc.in cegui/CEGUI-${CEGUI_VERSION_MAJOR}-IRRLICHT.pc @ONLY )
+        install(FILES ${CMAKE_BINARY_DIR}/cegui/CEGUI-${CEGUI_VERSION_MAJOR}-IRRLICHT.pc DESTINATION ${CEGUI_PKGCONFIG_INSTALL_DIR})
     endif()
     if (CEGUI_BUILD_RENDERER_OGRE)
-        configure_file( cegui/CEGUI-OGRE.pc.in cegui/CEGUI-OGRE${CEGUI_SLOT_VERSION}.pc @ONLY )
-        install(FILES ${CMAKE_BINARY_DIR}/cegui/CEGUI-OGRE${CEGUI_SLOT_VERSION}.pc DESTINATION ${CEGUI_PKGCONFIG_INSTALL_DIR})
+        configure_file( cegui/CEGUI-OGRE.pc.in cegui/CEGUI-${CEGUI_VERSION_MAJOR}-OGRE.pc @ONLY )
+        install(FILES ${CMAKE_BINARY_DIR}/cegui/CEGUI-${CEGUI_VERSION_MAJOR}-OGRE.pc DESTINATION ${CEGUI_PKGCONFIG_INSTALL_DIR})
     endif()
     if (CEGUI_BUILD_RENDERER_OPENGL)
-        configure_file( cegui/CEGUI-OPENGL.pc.in cegui/CEGUI-OPENGL${CEGUI_SLOT_VERSION}.pc @ONLY )
-        install(FILES ${CMAKE_BINARY_DIR}/cegui/CEGUI-OPENGL${CEGUI_SLOT_VERSION}.pc DESTINATION ${CEGUI_PKGCONFIG_INSTALL_DIR})
+        configure_file( cegui/CEGUI-OPENGL.pc.in cegui/CEGUI-${CEGUI_VERSION_MAJOR}-OPENGL.pc @ONLY )
+        install(FILES ${CMAKE_BINARY_DIR}/cegui/CEGUI-${CEGUI_VERSION_MAJOR}-OPENGL.pc DESTINATION ${CEGUI_PKGCONFIG_INSTALL_DIR})
     endif()
 endif()
 
