@@ -70,6 +70,7 @@ endif()
 find_package(PCRE)
 find_package(Freetype)
 find_package(Minizip)
+find_package(Fribidi)
 if (NOT WIN32)
     find_package(Iconv REQUIRED)
 endif()
@@ -102,7 +103,7 @@ find_package(Lua51)
 find_package(TOLUAPP)
 find_package(PythonInterp)
 find_package(PythonLibs)
-find_package(Boost 1.36.0 COMPONENTS python)
+find_package(Boost 1.36.0 COMPONENTS python unit_test_framework)
 
 find_package(Doxygen)
 find_package(GTK2 COMPONENTS gtk)
@@ -166,15 +167,17 @@ option( CEGUI_BUILD_RENDERER_OPENGLES "Specifies whether to build the OpenGLES r
 cegui_dependent_option( CEGUI_BUILD_LUA_MODULE "Specifies whether to build the Lua based script module" "LUA51_FOUND;TOLUAPP_FOUND" )
 cegui_dependent_option( CEGUI_BUILD_LUA_GENERATOR "Specifies whether to build the custom tolua binding generator 'toluappcegui'" "LUA51_FOUND;TOLUAPP_FOUND" )
 
-cegui_dependent_option( CEGUI_BUILD_PYTHON_MODULES "Specifies whether to build the Python extension module(s)" "PYTHONINTERP_FOUND;PYTHONLIBS_FOUND;Boost_FOUND" )
+cegui_dependent_option( CEGUI_BUILD_PYTHON_MODULES "Specifies whether to build the Python extension module(s)" "PYTHONINTERP_FOUND;PYTHONLIBS_FOUND;Boost_PYTHON_FOUND" )
 
 option( CEGUI_OPTION_SAFE_LUA_MODULE "Specifies whether to enable extra validation in the Lua script module in non-debug builds" FALSE )
 
-set( CEGUI_BIDI_SUPPORT "0" CACHE STRING "Select whether bi-directional text is enabled and which library should be used:
-    0: Disabled.
-    1: Use integrated minibidi library.
-    2: Use external fribidi library."
-)
+cegui_dependent_option( CEGUI_USE_FRIBIDI "Specifies whether bi-directional text will be supported via the fribidi library." "FRIBIDI_FOUND" )
+cegui_dependent_option( CEGUI_USE_MINIBIDI "Specifies whether bi-directional text will be supported via the embedded minibidi." FALSE )
+
+# sanity check on bidi options
+if (CEGUI_USE_MINIBIDI AND CEGUI_USE_FRIBIDI)
+    message(SEND_ERROR "You may not enable both CEGUI_USE_FRIBIDI and CEGUI_USE_MINIBIDI. Please choose only one of these options.")
+endif()
 
 cegui_dependent_option( CEGUI_SAMPLES_USE_OPENGL "Specifies whether the sample applications will use the OpenGL renderer" "CEGUI_BUILD_RENDERER_OPENGL;GLFW_FOUND" )
 cegui_dependent_option( CEGUI_SAMPLES_USE_OPENGL3 "Specifies whether the sample applications will use the OpenGL 3 renderer" "CEGUI_BUILD_RENDERER_OPENGL3;GLFW_FOUND" )
@@ -197,8 +200,17 @@ if (UNIX AND NOT APPLE AND NOT WIN32)
     option( CEGUI_SAMPLES_USE_GTK2 "Specifies whether the sample applications will make use of the GTK2 UI for renderer selection." FALSE )
 endif()
 
-option( CEGUI_HAS_VERSION_SUFFIX "Specifies whether to append a version number to the name of output binaries." FALSE )
-set (CEGUI_VERSION_SUFFIX ${CEGUI_VERSION} CACHE STRING "Specifies the version suffix to be appended to the name of output binaries when CEGUI_HAS_VERSION_SUFFIX is enabled." )
+# Sanity check for samples vs renderers options
+if (CEGUI_SAMPLES_ENABLED)
+    cegui_sample_renderer_sanity_test(CEGUI_BUILD_RENDERER_OPENGL CEGUI_SAMPLES_USE_OPENGL)
+    cegui_sample_renderer_sanity_test(CEGUI_BUILD_RENDERER_OPENGL3 CEGUI_SAMPLES_USE_OPENGL3)
+    cegui_sample_renderer_sanity_test(CEGUI_BUILD_RENDERER_OGRE CEGUI_SAMPLES_USE_OGRE)
+    cegui_sample_renderer_sanity_test(CEGUI_BUILD_RENDERER_IRRLICHT CEGUI_SAMPLES_USE_IRRLICHT)
+    cegui_sample_renderer_sanity_test(CEGUI_BUILD_RENDERER_DIRECTFB CEGUI_SAMPLES_USE_DIRECTFB)
+    cegui_sample_renderer_sanity_test(CEGUI_BUILD_RENDERER_DIRECT3D9 CEGUI_SAMPLES_USE_DIRECT3D9)
+    cegui_sample_renderer_sanity_test(CEGUI_BUILD_RENDERER_DIRECT3D10 CEGUI_SAMPLES_USE_DIRECT3D10)
+    cegui_sample_renderer_sanity_test(CEGUI_BUILD_RENDERER_DIRECT3D11 CEGUI_SAMPLES_USE_DIRECT3D11)
+endif()
 
 if (WIN32 OR APPLE)
     set (CEGUI_BUILD_SUFFIX "_d" CACHE STRING "String holding a suffix appended to the name of output binaries (under CMake build, only used for debug).")
@@ -221,7 +233,7 @@ if (APPLE)
 endif()
 
 # regression and performance tests
-cmake_dependent_option( CEGUI_BUILD_TESTS "Specifies whether to build the regression and performance tests." FALSE "Boost_FOUND" FALSE )
+cmake_dependent_option( CEGUI_BUILD_TESTS "Specifies whether to build the regression and performance tests." FALSE "Boost_UNIT_TEST_FRAMEWORK_FOUND" FALSE )
 
 option( CEGUI_INSTALL_WITH_RPATH "Specifies whether to install with RPATH set to the install location (TRUE) or with no RPATH set (FALSE)." FALSE )
 
@@ -229,43 +241,42 @@ option( CEGUI_INSTALL_WITH_RPATH "Specifies whether to install with RPATH set to
 # Define vars holding the names for all the libs we can build for CEGUI.
 ################################################################################
 # Core lib name
-set( CEGUI_BASE_LIBNAME CEGUIBase )
+cegui_set_library_name( CEGUI_BASE_LIBNAME CEGUIBase )
 
 # Renderer module names.
-set( CEGUI_OPENGL_RENDERER_LIBNAME CEGUIOpenGLRenderer )
-set( CEGUI_OPENGL3_RENDERER_LIBNAME CEGUIOpenGL3Renderer )
-set( CEGUI_OGRE_RENDERER_LIBNAME CEGUIOgreRenderer)
-set( CEGUI_IRRLICHT_RENDERER_LIBNAME CEGUIIrrlichtRenderer )
-set( CEGUI_DIRECT3D9_RENDERER_LIBNAME CEGUIDirect3D9Renderer )
-set( CEGUI_DIRECT3D10_RENDERER_LIBNAME CEGUIDirect3D10Renderer )
-set( CEGUI_DIRECT3D11_RENDERER_LIBNAME CEGUIDirect3D11Renderer )
-set( CEGUI_NULL_RENDERER_LIBNAME CEGUINullRenderer )
-set( CEGUI_OPENGLES_RENDERER_LIBNAME CEGUIOpenGLESRenderer )
-set( CEGUI_DIRECTFB_RENDERER_LIBNAME CEGUIDirectFBRenderer )
+cegui_set_library_name( CEGUI_OPENGL_RENDERER_LIBNAME CEGUIOpenGLRenderer )
+cegui_set_library_name( CEGUI_OPENGL3_RENDERER_LIBNAME CEGUIOpenGL3Renderer )
+cegui_set_library_name( CEGUI_OGRE_RENDERER_LIBNAME CEGUIOgreRenderer)
+cegui_set_library_name( CEGUI_IRRLICHT_RENDERER_LIBNAME CEGUIIrrlichtRenderer )
+cegui_set_library_name( CEGUI_DIRECT3D9_RENDERER_LIBNAME CEGUIDirect3D9Renderer )
+cegui_set_library_name( CEGUI_DIRECT3D10_RENDERER_LIBNAME CEGUIDirect3D10Renderer )
+cegui_set_library_name( CEGUI_DIRECT3D11_RENDERER_LIBNAME CEGUIDirect3D11Renderer )
+cegui_set_library_name( CEGUI_NULL_RENDERER_LIBNAME CEGUINullRenderer )
+cegui_set_library_name( CEGUI_OPENGLES_RENDERER_LIBNAME CEGUIOpenGLESRenderer )
+cegui_set_library_name( CEGUI_DIRECTFB_RENDERER_LIBNAME CEGUIDirectFBRenderer )
 
 # XML parser module names
-set( CEGUI_EXPAT_PARSER_LIBNAME CEGUIExpatParser )
-set( CEGUI_TINYXML_PARSER_LIBNAME CEGUITinyXMLParser )
-set( CEGUI_XERCES_PARSER_LIBNAME CEGUIXercesParser )
-set( CEGUI_RAPIDXML_PARSER_LIBNAME CEGUIRapidXMLParser )
-set( CEGUI_LIBXML2_PARSER_LIBNAME CEGUILibXMLParser )
+cegui_set_module_name( CEGUI_EXPAT_PARSER_LIBNAME CEGUIExpatParser )
+cegui_set_module_name( CEGUI_TINYXML_PARSER_LIBNAME CEGUITinyXMLParser )
+cegui_set_module_name( CEGUI_XERCES_PARSER_LIBNAME CEGUIXercesParser )
+cegui_set_module_name( CEGUI_RAPIDXML_PARSER_LIBNAME CEGUIRapidXMLParser )
+cegui_set_module_name( CEGUI_LIBXML2_PARSER_LIBNAME CEGUILibXMLParser )
 
 # ImageCodec module names
-set( CEGUI_SILLY_IMAGECODEC_LIBNAME CEGUISILLYImageCodec )
-set( CEGUI_DEVIL_IMAGECODEC_LIBNAME CEGUIDevILImageCodec )
-set( CEGUI_FREEIMAGE_IMAGECODEC_LIBNAME CEGUIFreeImageImageCodec )
-set( CEGUI_CORONA_IMAGECODEC_LIBNAME CEGUICoronaImageCodec )
-set( CEGUI_TGA_IMAGECODEC_LIBNAME CEGUITGAImageCodec )
-set( CEGUI_STB_IMAGECODEC_LIBNAME CEGUISTBImageCodec )
-set( CEGUI_PVR_IMAGECODEC_LIBNAME CEGUIPVRImageCodec )
+cegui_set_module_name( CEGUI_SILLY_IMAGECODEC_LIBNAME CEGUISILLYImageCodec )
+cegui_set_module_name( CEGUI_DEVIL_IMAGECODEC_LIBNAME CEGUIDevILImageCodec )
+cegui_set_module_name( CEGUI_FREEIMAGE_IMAGECODEC_LIBNAME CEGUIFreeImageImageCodec )
+cegui_set_module_name( CEGUI_CORONA_IMAGECODEC_LIBNAME CEGUICoronaImageCodec )
+cegui_set_module_name( CEGUI_TGA_IMAGECODEC_LIBNAME CEGUITGAImageCodec )
+cegui_set_module_name( CEGUI_STB_IMAGECODEC_LIBNAME CEGUISTBImageCodec )
+cegui_set_module_name( CEGUI_PVR_IMAGECODEC_LIBNAME CEGUIPVRImageCodec )
 
 # WindowRenderer set module names
-set( CEGUI_CORE_WR_LIBNAME CEGUICoreWindowRendererSet )
+cegui_set_module_name( CEGUI_CORE_WR_LIBNAME CEGUICoreWindowRendererSet )
 
 # Scripting module names and related items.
-set( CEGUI_TOLUAPP_LIBNAME CEGUItoluapp )
-set( CEGUI_TOLUAPP_GENERATOR_EXENAME toluappcegui-${CEGUI_VERSION_MAJOR}.${CEGUI_VERSION_MINOR} )
-set( CEGUI_LUA_SCRIPTMODULE_LIBNAME CEGUILuaScriptModule )
+cegui_set_executable_name( CEGUI_TOLUAPP_GENERATOR_EXENAME toluappcegui )
+cegui_set_library_name( CEGUI_LUA_SCRIPTMODULE_LIBNAME CEGUILuaScriptModule )
 
 set( CEGUI_PYCEGUI_CORE_LIBNAME PyCEGUI )
 set( CEGUI_PYCEGUI_OPENGL_RENDERER_LIBNAME PyCEGUIOpenGLRenderer )
@@ -273,10 +284,10 @@ set( CEGUI_PYCEGUI_OGRE_RENDERER_LIBNAME PyCEGUIOgreRenderer )
 set( CEGUI_PYCEGUI_NULL_RENDERER_LIBNAME PyCEGUINullRenderer )
 
 # SampleFramework executable related names
-set( CEGUI_SAMPLEFRAMEWORK_EXENAME CEGUISampleFramework-${CEGUI_VERSION_MAJOR}.${CEGUI_VERSION_MINOR})
+cegui_set_executable_name( CEGUI_SAMPLEFRAMEWORK_EXENAME CEGUISampleFramework )
 
 # Additional lib names
-set( CEGUI_COMMON_DIALOGS_LIBNAME CEGUICommonDialogs )
+cegui_set_library_name( CEGUI_COMMON_DIALOGS_LIBNAME CEGUICommonDialogs )
 
 ################################################################################
 # Select one of the XML parser modules to be the default, warning if none are
@@ -303,6 +314,19 @@ You should ensure that CEGUI_OPTION_DEFAULT_XMLPARSER is set to something
 appropriate.")
 endif()
 
+cegui_defaultmodule_sanity_test(CEGUI_OPTION_DEFAULT_XMLPARSER "ExpatParser" CEGUI_BUILD_XMLPARSER_EXPAT)
+cegui_defaultmodule_sanity_test(CEGUI_OPTION_DEFAULT_XMLPARSER "XercesParser" CEGUI_BUILD_XMLPARSER_XERCES)
+cegui_defaultmodule_sanity_test(CEGUI_OPTION_DEFAULT_XMLPARSER "LibXMLParser" CEGUI_BUILD_XMLPARSER_LIBXML2)
+cegui_defaultmodule_sanity_test(CEGUI_OPTION_DEFAULT_XMLPARSER "RapidXMLParser" CEGUI_BUILD_XMLPARSER_RAPIDXML)
+cegui_defaultmodule_sanity_test(CEGUI_OPTION_DEFAULT_XMLPARSER "TinyXMLParser" CEGUI_BUILD_XMLPARSER_TINYXML)
+
+if (CEGUI_BUILD_STATIC_CONFIGURATION)
+    cegui_defaultmodule_sanity_test(CEGUI_STATIC_XMLPARSER_MODULE ${CEGUI_EXPAT_PARSER_LIBNAME} CEGUI_BUILD_XMLPARSER_EXPAT)
+    cegui_defaultmodule_sanity_test(CEGUI_STATIC_XMLPARSER_MODULE ${CEGUI_XERCES_PARSER_LIBNAME} CEGUI_BUILD_XMLPARSER_XERCES)
+    cegui_defaultmodule_sanity_test(CEGUI_STATIC_XMLPARSER_MODULE ${CEGUI_LIBXML2_PARSER_LIBNAME} CEGUI_BUILD_XMLPARSER_LIBXML2)
+    cegui_defaultmodule_sanity_test(CEGUI_STATIC_XMLPARSER_MODULE ${CEGUI_RAPIDXML_PARSER_LIBNAME} CEGUI_BUILD_XMLPARSER_RAPIDXML)
+    cegui_defaultmodule_sanity_test(CEGUI_STATIC_XMLPARSER_MODULE ${CEGUI_TINYXML_PARSER_LIBNAME} CEGUI_BUILD_XMLPARSER_TINYXML)
+endif()
 
 ################################################################################
 # Select one of the image codec modules to be the default, warning if none are
@@ -332,6 +356,21 @@ You should ensure that CEGUI_OPTION_DEFAULT_IMAGECODEC is set to something
 appropriate.")
 endif()
 
+cegui_defaultmodule_sanity_test(CEGUI_OPTION_DEFAULT_IMAGECODEC "SILLYImageCodec" CEGUI_BUILD_IMAGECODEC_SILLY)
+cegui_defaultmodule_sanity_test(CEGUI_OPTION_DEFAULT_IMAGECODEC "DevILImageCodec" CEGUI_BUILD_IMAGECODEC_DEVIL)
+cegui_defaultmodule_sanity_test(CEGUI_OPTION_DEFAULT_IMAGECODEC "FreeImageImageCodec" CEGUI_BUILD_IMAGECODEC_FREEIMAGE)
+cegui_defaultmodule_sanity_test(CEGUI_OPTION_DEFAULT_IMAGECODEC "STBImageCodec" CEGUI_BUILD_IMAGECODEC_STB)
+cegui_defaultmodule_sanity_test(CEGUI_OPTION_DEFAULT_IMAGECODEC "CoronaImageCodec" CEGUI_BUILD_IMAGECODEC_CORONA)
+cegui_defaultmodule_sanity_test(CEGUI_OPTION_DEFAULT_IMAGECODEC "TGAImageCodec" CEGUI_BUILD_IMAGECODEC_TGA)
+
+if (CEGUI_BUILD_STATIC_CONFIGURATION)
+    cegui_defaultmodule_sanity_test(CEGUI_STATIC_IMAGECODEC_MODULE ${CEGUI_SILLY_IMAGECODEC_LIBNAME} CEGUI_BUILD_IMAGECODEC_SILLY)
+    cegui_defaultmodule_sanity_test(CEGUI_STATIC_IMAGECODEC_MODULE ${CEGUI_DEVIL_IMAGECODEC_LIBNAME} CEGUI_BUILD_IMAGECODEC_DEVIL)
+    cegui_defaultmodule_sanity_test(CEGUI_STATIC_IMAGECODEC_MODULE ${CEGUI_FREEIMAGE_IMAGECODEC_LIBNAME} CEGUI_BUILD_IMAGECODEC_FREEIMAGE)
+    cegui_defaultmodule_sanity_test(CEGUI_STATIC_IMAGECODEC_MODULE ${CEGUI_STB_IMAGECODEC_LIBNAME} CEGUI_BUILD_IMAGECODEC_STB)
+    cegui_defaultmodule_sanity_test(CEGUI_STATIC_IMAGECODEC_MODULE ${CEGUI_CORONA_IMAGECODEC_LIBNAME} CEGUI_BUILD_IMAGECODEC_CORONA)
+    cegui_defaultmodule_sanity_test(CEGUI_STATIC_IMAGECODEC_MODULE ${CEGUI_TGA_IMAGECODEC_LIBNAME} CEGUI_BUILD_IMAGECODEC_TGA)
+endif()
 
 ################################################################################
 # Add main header locations (for everything we build)
@@ -376,18 +415,6 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-# Set up Bidi variables based on option selected
-if ( CEGUI_BIDI_SUPPORT EQUAL 1 )
-    set( CEGUI_USE_MINIBIDI TRUE)
-    set( CEGUI_USE_FRIBIDI FALSE)
-elseif ( CEGUI_BIDI_SUPPORT EQUAL 2 )
-    set( CEGUI_USE_MINIBIDI FALSE)
-    set( CEGUI_USE_FRIBIDI TRUE)
-else ()
-    set( CEGUI_USE_MINIBIDI FALSE)
-    set( CEGUI_USE_FRIBIDI FALSE)
-endif ()
 
 # set up install sub-directories
 if (CMAKE_SIZEOF_VOID_P EQUAL 8 AND EXISTS "${CMAKE_INSTALL_PREFIX}/lib64")
