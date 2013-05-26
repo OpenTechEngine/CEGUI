@@ -175,7 +175,7 @@ public:
     \return
         The view projection matrix.
     */
-    const mat4Pimpl* getViewProjectionMatrix();
+    virtual const mat4Pimpl* getViewProjectionMatrix();
 
     /*!
     \brief
@@ -184,7 +184,7 @@ public:
     \param viewProjectionMatrix
         The view projection matrix.
     */
-    void setViewProjectionMatrix(const mat4Pimpl* viewProjectionMatrix);
+    virtual void setViewProjectionMatrix(const mat4Pimpl* viewProjectionMatrix);
 
     /*!
     \brief
@@ -285,7 +285,8 @@ protected:
     TextureTarget based on what the host system can provide - or use the
     default 'null' factory if no suitable TextureTargets are available.
 */
-class OGLTextureTargetFactory
+class OGLTextureTargetFactory :
+    public AllocatedObject<OGLTextureTargetFactory>
 {
 public:
     OGLTextureTargetFactory() {}

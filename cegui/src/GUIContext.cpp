@@ -46,7 +46,8 @@ namespace CEGUI
     Implementation structure used in tracking up & down mouse button inputs in
     order to generate click, double-click, and triple-click events.
 */
-struct MouseClickTracker
+struct MouseClickTracker :
+    public AllocatedObject<MouseClickTracker>
 {
     MouseClickTracker() :
         d_click_count(0),
@@ -102,11 +103,11 @@ GUIContext::GUIContext(RenderTarget& target) :
             WindowManager::EventWindowDestroyed,
             Event::Subscriber(&GUIContext::windowDestroyedHandler, this)))
 {
-    resetWindowConatiningMouse();
+    resetWindowContainingMouse();
 }
 
 //----------------------------------------------------------------------------//
-void GUIContext::resetWindowConatiningMouse()
+void GUIContext::resetWindowContainingMouse()
 {
     d_windowContainingMouse = 0;
     d_windowContainingMouseIsUpToDate = true;
@@ -425,7 +426,7 @@ bool GUIContext::windowDestroyedHandler(const EventArgs& args)
         d_rootWindow = 0;
 
     if (window == getWindowContainingMouse())
-        resetWindowConatiningMouse();
+        resetWindowContainingMouse();
 
     if (window == d_modalWindow)
         d_modalWindow = 0;
@@ -688,7 +689,7 @@ bool GUIContext::injectMouseLeaves(void)
     ma.clickCount = 0;
 
     getWindowContainingMouse()->onMouseLeaves(ma);
-    resetWindowConatiningMouse();
+    resetWindowContainingMouse();
 
     return ma.handled != 0;
 }
