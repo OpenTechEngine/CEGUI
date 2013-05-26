@@ -42,6 +42,9 @@
 #include "CEGUI/DefaultResourceProvider.h"
 #include "CEGUI/Logger.h"
 
+#include "CEGUI/RendererModules/OpenGL/GlmPimpl.h"
+#include "glm/gtc/type_ptr.hpp"
+
 #include <sstream>
 #include <algorithm>
 
@@ -80,7 +83,7 @@ template<typename T>
 class OGLTemplateTargetFactory : public OGLTextureTargetFactory
 {
     virtual TextureTarget* create(OpenGLRendererBase& r) const
-        { return new T(r); }
+        { return CEGUI_NEW_AO T(r); }
 };
 
 //----------------------------------------------------------------------------//
@@ -94,7 +97,7 @@ OpenGLRenderer& OpenGLRenderer::bootstrapSystem(const TextureTargetType tt_type,
             "CEGUI::System object is already initialised."));
 
     OpenGLRenderer& renderer(create(tt_type));
-    DefaultResourceProvider* rp = new CEGUI::DefaultResourceProvider();
+    DefaultResourceProvider* rp = CEGUI_NEW_AO CEGUI::DefaultResourceProvider();
     System::create(renderer, rp);
 
     return renderer;
@@ -112,7 +115,7 @@ OpenGLRenderer& OpenGLRenderer::bootstrapSystem(const Sizef& display_size,
             "CEGUI::System object is already initialised."));
 
     OpenGLRenderer& renderer(create(display_size, tt_type));
-    DefaultResourceProvider* rp = new CEGUI::DefaultResourceProvider();
+    DefaultResourceProvider* rp = CEGUI_NEW_AO CEGUI::DefaultResourceProvider();
     System::create(renderer, rp);
 
     return renderer;
@@ -131,7 +134,7 @@ void OpenGLRenderer::destroySystem()
         static_cast<DefaultResourceProvider*>(sys->getResourceProvider());
 
     System::destroy();
-    delete rp;
+    CEGUI_DELETE_AO rp;
     destroy(*renderer);
 }
 
@@ -141,7 +144,7 @@ OpenGLRenderer& OpenGLRenderer::create(const TextureTargetType tt_type,
 {
     System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
 
-    return *new OpenGLRenderer(tt_type);
+    return *CEGUI_NEW_AO OpenGLRenderer(tt_type);
 }
 
 //----------------------------------------------------------------------------//
@@ -151,13 +154,13 @@ OpenGLRenderer& OpenGLRenderer::create(const Sizef& display_size,
 {
     System::performVersionTest(CEGUI_VERSION_ABI, abi, CEGUI_FUNCTION_NAME);
 
-    return *new OpenGLRenderer(display_size, tt_type);
+    return *CEGUI_NEW_AO OpenGLRenderer(display_size, tt_type);
 }
 
 //----------------------------------------------------------------------------//
 void OpenGLRenderer::destroy(OpenGLRenderer& renderer)
 {
-    delete &renderer;
+    CEGUI_DELETE_AO &renderer;
 }
 
 //----------------------------------------------------------------------------//
@@ -193,7 +196,7 @@ OpenGLRenderer::OpenGLRenderer(const Sizef& display_size,
 //----------------------------------------------------------------------------//
 OpenGLRenderer::~OpenGLRenderer()
 {
-    delete d_textureTargetFactory;
+    CEGUI_DELETE_AO d_textureTargetFactory;
 }
 
 //----------------------------------------------------------------------------//
@@ -207,7 +210,7 @@ void OpenGLRenderer::initialiseRendererIDString()
 //----------------------------------------------------------------------------//
 OpenGLGeometryBufferBase* OpenGLRenderer::createGeometryBuffer_impl()
 {
-    return new OpenGLGeometryBuffer(*this);
+    return CEGUI_NEW_AO OpenGLGeometryBuffer(*this);
 }
 
 //----------------------------------------------------------------------------//
@@ -314,7 +317,7 @@ void OpenGLRenderer::initialiseTextureTargetFactory(
     {
         d_rendererID += "  TextureTarget support enabled via FBO extension.";
         d_textureTargetFactory =
-            new OGLTemplateTargetFactory<OpenGLFBOTextureTarget>;
+            CEGUI_NEW_AO OGLTemplateTargetFactory<OpenGLFBOTextureTarget>;
     }
 
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
@@ -324,7 +327,7 @@ void OpenGLRenderer::initialiseTextureTargetFactory(
     {
         d_rendererID += "  TextureTarget support enabled via GLX pbuffers.";
         d_textureTargetFactory =
-            new OGLTemplateTargetFactory<OpenGLGLXPBTextureTarget>;
+            CEGUI_NEW_AO OGLTemplateTargetFactory<OpenGLGLXPBTextureTarget>;
     }
 #elif defined(_WIN32) || defined(__WIN32__)
     // on Windows, we can try for WGL based pbuffer support
@@ -333,7 +336,7 @@ void OpenGLRenderer::initialiseTextureTargetFactory(
     {
         d_rendererID += "  TextureTarget support enabled via WGL_ARB_pbuffer.";
         d_textureTargetFactory =
-            new OGLTemplateTargetFactory<OpenGLWGLPBTextureTarget>;
+            CEGUI_NEW_AO OGLTemplateTargetFactory<OpenGLWGLPBTextureTarget>;
     }
 #elif defined(__APPLE__)
     // on Apple Mac, we can try for Apple's pbuffer support
@@ -343,14 +346,14 @@ void OpenGLRenderer::initialiseTextureTargetFactory(
         d_rendererID += "  TextureTarget support enabled via "
                         "GL_APPLE_pixel_buffer.";
         d_textureTargetFactory =
-            new OGLTemplateTargetFactory<OpenGLApplePBTextureTarget>;
+            CEGUI_NEW_AO OGLTemplateTargetFactory<OpenGLApplePBTextureTarget>;
     }
 #endif
     // Nothing suitable available, try to carry on without TextureTargets
     else
     {
         d_rendererID += "  TextureTarget support is not available :(";
-        d_textureTargetFactory = new OGLTextureTargetFactory;
+        d_textureTargetFactory = CEGUI_NEW_AO OGLTextureTargetFactory;
     }
 }
 
@@ -419,6 +422,15 @@ void OpenGLRenderer::initialiseGLExtensions()
 bool OpenGLRenderer::isS3TCSupported() const
 {
     return GLEW_EXT_texture_compression_s3tc;
+}
+
+//----------------------------------------------------------------------------//
+void OpenGLRenderer::setViewProjectionMatrix(const mat4Pimpl* viewProjectionMatrix)
+{
+    OpenGLRendererBase::setViewProjectionMatrix(viewProjectionMatrix);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrixf(glm::value_ptr(d_viewProjectionMatrix->d_matrix));
 }
 
 //----------------------------------------------------------------------------//
