@@ -397,6 +397,11 @@ public:
      * values active when the character input was received.
      */
     static const String EventCharacterKey;
+    /** Event fired when the Window receives a semantic input event.
+     * Handler are passed a const SemanticEventArgs reference with the details
+     * of what semantic event was received
+     */
+    static const String EventSemanticEvent;
 
     /*************************************************************************
         Child Widget name suffix constants
@@ -2253,6 +2258,24 @@ public:
         true if the paste was successful and allowed, false otherwise
      */
     virtual bool performPaste(Clipboard& clipboard);
+
+    /*!
+    \brief
+        Asks the widget to perform a undo operation
+
+    \return
+        true if the undo was successful and allowed, false otherwise
+     */
+    virtual bool performUndo();
+
+    /*!
+    \brief
+        Asks the widget to perform a redo operation
+
+    \return
+        true if the redo was successful and allowed, false otherwise
+     */
+    virtual bool performRedo();
 
     /*!
     \brief

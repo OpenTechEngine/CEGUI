@@ -35,18 +35,6 @@
 #include <Ogre.h>
 #include <OIS.h>
 
-#if defined(_MSC_VER)
-#  if defined(_DEBUG)
-#      pragma comment(lib, "CEGUIOgreRenderer_d.lib")
-#      pragma comment(lib, "OgreMain_d.lib")
-#      pragma comment(lib, "OIS_d.lib")
-#  else
-#      pragma comment(lib, "CEGUIOgreRenderer.lib")
-#      pragma comment(lib, "OgreMain.lib")
-#      pragma comment(lib, "OIS.lib")
-#  endif
-#endif
-
 // Frame listener forward ref (see class below)
 class CEGuiDemoFrameListener;
 // Window event listener forward ref (see class below)
@@ -123,7 +111,6 @@ protected:
     /*************************************************************************
         Data Fields
     *************************************************************************/
-    Ogre::Overlay* d_statsOverlay;
     OIS::InputManager* d_inputManager;
     OIS::Keyboard* d_keyboard;
     OIS::Mouse* d_mouse;

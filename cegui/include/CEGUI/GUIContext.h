@@ -208,6 +208,9 @@ public:
     // Implementation of InputEventReceiver interface
     bool injectInputEvent(const InputEvent& event);
 
+    bool injectUndoRequest();
+    bool injectRedoRequest();
+
     // public overrides
     void draw();
 

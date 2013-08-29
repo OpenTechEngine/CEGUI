@@ -107,6 +107,7 @@ const String Window::EventScroll("Scroll");
 const String Window::EventPointerPressHold("PointerPressHold");
 const String Window::EventPointerActivate("PointerActivate");
 const String Window::EventCharacterKey("CharacterKey");
+const String Window::EventSemanticEvent("SemanticEvent");
 
 //----------------------------------------------------------------------------//
 // XML element and attribute names that relate to Window.
@@ -1608,6 +1609,20 @@ bool Window::performPaste(Clipboard& /*clipboard*/)
 }
 
 //----------------------------------------------------------------------------//
+bool Window::performUndo()
+{
+    // deny undo by default
+    return false;
+}
+
+//----------------------------------------------------------------------------//
+bool Window::performRedo()
+{
+    // deny redo by default
+    return false;
+}
+
+//----------------------------------------------------------------------------//
 bool Window::distributesCapturedInputs(void) const
 {
     return d_distCapturedInputs;
@@ -2627,6 +2642,8 @@ void Window::onCharacter(TextEventArgs& e)
 //----------------------------------------------------------------------------//
 void Window::onSemanticInputEvent(SemanticEventArgs& e)
 {
+    fireEvent(EventSemanticEvent, e, EventNamespace);
+
     // optionally propagate to parent
     if (!e.handled && d_parent && this != getGUIContext().getModalWindow())
     {
