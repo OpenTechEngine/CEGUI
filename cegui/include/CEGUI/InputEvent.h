@@ -396,7 +396,7 @@ class CEGUIEXPORT DragDropEventArgs : public WindowEventArgs
 {
 public:
 	DragDropEventArgs(Window* wnd) : WindowEventArgs(wnd) {}
-	DragContainer*	dragDropItem; //<! pointer to the DragContainer window being dragged / dropped.
+	DragContainer*	dragDropItem; //!< pointer to the DragContainer window being dragged / dropped.
 };
 
 /*!
