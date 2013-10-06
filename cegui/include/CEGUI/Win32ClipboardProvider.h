@@ -1,10 +1,12 @@
 /***********************************************************************
-    filename:   SimpleTimer.cpp
-    created:    Sat Feb 18 2012
-    author:     Paul D Turner <paul@cegui.org.uk>
+    filename:   Win32ClipboardProvider.h
+    created:    19/09/2013
+    author:     Alexander Gladis
+
+    purpose:    Implement a clipboard provider for Windows
 *************************************************************************/
 /***************************************************************************
- *   Copyright (C) 2004 - 2012 Paul D Turner & The CEGUI Development Team
+ *   Copyright (C) 2004 - 2013 Paul D Turner & The CEGUI Development Team
  *
  *   Permission is hereby granted, free of charge, to any person obtaining
  *   a copy of this software and associated documentation files (the
@@ -25,23 +27,32 @@
  *   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  *   OTHER DEALINGS IN THE SOFTWARE.
  ***************************************************************************/
-#include "CEGUI/SimpleTimer.h"
+#ifndef _CEGUIWin32ClipboardProvider_h_
+#define _CEGUIWin32ClipboardProvider_h_
 
-#if defined(__WIN32__) || defined(_WIN32)
-#include <windows.h>
-double CEGUI::SimpleTimer::currentTime()
+#include "CEGUI/Clipboard.h"
+
+namespace CEGUI
 {
-    return timeGetTime() / 1000.0;
+
+class Win32ClipboardProvider : public NativeClipboardProvider
+{
+public:
+    Win32ClipboardProvider();
+    ~Win32ClipboardProvider();
+
+    // NativeClipboardProvider implementation
+    void sendToClipboard(const String& mime_type, void* buffer, size_t size);
+    void retrieveFromClipboard(String& mime_type, void*& buffer, size_t& size);
+
+private:
+   char* d_buffer;
+   size_t d_bufferSize;
+
+   void allocateBuffer(size_t size);
+   void deallocateBuffer();
+};
+
 }
 
-#elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)  || defined(__HAIKU__) || defined(__CYGWIN__)
-#include <sys/time.h>
-double CEGUI::SimpleTimer::currentTime()
-{
-    timeval timeStructure;
-    gettimeofday(&timeStructure, 0);
-    return timeStructure.tv_sec + timeStructure.tv_usec / 1000000.0;
-}
-#else
-#error "SimpleTimer not available for this platform, please implement it"
 #endif
