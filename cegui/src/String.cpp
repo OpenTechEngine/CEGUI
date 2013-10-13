@@ -1,5 +1,5 @@
 /***********************************************************************
-	filename: 	CString.cpp
+	filename: 	String.cpp
 	created:	26/2/2004
 	author:		Paul D Turner
 	
