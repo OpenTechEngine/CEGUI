@@ -1184,12 +1184,12 @@ public:
 
     /*!
     \brief
-        Return the GeometryBuffer object for this Window.
+        Return the list of GeometryBuffer objects for this Window.
 
     \return
-        Reference to the GeometryBuffer object for this Window.
+        Reference to the list of GeometryBuffer objects for this Window.
     */
-    GeometryBuffer& getGeometryBuffer();
+    std::vector<GeometryBuffer*>& getGeometryBuffers();
 
     /*!
     \brief
@@ -3218,6 +3218,12 @@ protected:
 
     /*!
     \brief
+        Destroys the geometry buffers of this Window.
+    */
+    void destroyGeometryBuffers();
+
+    /*!
+    \brief
         Update the rendering cache.
 
         Populates the Window's GeometryBuffer ready for rendering.
@@ -3240,6 +3246,13 @@ protected:
     /*!
     \brief
         Fires off a repeated pointer press event for this window.
+        Update position and clip region on this Windows geometry / rendering
+        surface.
+    */
+    void updateGeometryBuffersTranslationAndClipping();
+
+    /*!
+    \brief
     */
     void generateAutoRepeatEvent(PointerSource source);
 
@@ -3506,8 +3519,8 @@ protected:
     String d_lookName;
     //! The WindowRenderer module that implements the Look'N'Feel specification
     WindowRenderer* d_windowRenderer;
-    //! Object which acts as a cache of geometry drawn by this Window.
-    GeometryBuffer* d_geometry;
+    //! List of geometry buffers that cache the geometry drawn by this Window.
+    std::vector<GeometryBuffer*> d_geometryBuffers;
     //! RenderingSurface owned by this window (may be 0)
     RenderingSurface* d_surface;
     //! true if window geometry cache needs to be regenerated.
@@ -3623,8 +3636,13 @@ protected:
     //! true when pointer is contained within this Window's area.
     bool d_containsPointer;
 
+    //! The translation which was set for this window.
+    CEGUI::Vector3f d_translation;
     //! true when this window is focused.
     bool d_isFocused;
+
+    //! The clipping region which was set for this window.
+    CEGUI::Rectf d_clippingRegion;
 
 private:
     /*************************************************************************

@@ -62,15 +62,12 @@ PointerIndicator::PointerIndicator(void) :
     d_defaultIndicatorImage(0),
     d_position(0.0f, 0.0f),
     d_visible(true),
-    d_geometry(&System::getSingleton().getRenderer()->createGeometryBuffer()),
     d_customSize(0.0f, 0.0f),
     d_customOffset(0.0f, 0.0f),
     d_cachedGeometryValid(false)
 {
     const Rectf screenArea(Vector2f(0, 0),
-                            System::getSingleton().getRenderer()->getDisplaySize());
-    d_geometry->setClippingRegion(screenArea);
-
+                           System::getSingleton().getRenderer()->getDisplaySize());
 	// default constraint is to whole screen
 	setConstraintArea(&screenArea);
 
@@ -88,7 +85,7 @@ PointerIndicator::PointerIndicator(void) :
 *************************************************************************/
 PointerIndicator::~PointerIndicator(void)
 {
-    System::getSingleton().getRenderer()->destroyGeometryBuffer(*d_geometry);
+    destroyGeometryBuffers();
 }
 
 
@@ -146,7 +143,7 @@ const Image* PointerIndicator::getDefaultImage() const
 /*************************************************************************
 	Draw the pointer indicator
 *************************************************************************/
-void PointerIndicator::draw(void) const
+void PointerIndicator::draw()
 {
     if (!d_visible || !d_indicatorImage)
         return;
@@ -154,7 +151,9 @@ void PointerIndicator::draw(void) const
     if (!d_cachedGeometryValid)
         cacheGeometry();
 
-    d_geometry->draw();
+    const size_t geom_buffer_count = d_geometryBuffers.size();
+    for (size_t i = 0; i < geom_buffer_count; ++i)
+        d_geometryBuffers[i]->draw();
 }
 
 
@@ -166,7 +165,7 @@ void PointerIndicator::setPosition(const Vector2f& position)
     d_position = position;
 	constrainPosition();
 
-    d_geometry->setTranslation(Vector3f(d_position.d_x, d_position.d_y, 0));
+    updateGeometryBuffersTranslation();
 }
 
 
@@ -179,7 +178,7 @@ void PointerIndicator::offsetPosition(const Vector2f& offset)
 	d_position.d_y += offset.d_y;
 	constrainPosition();
 
-    d_geometry->setTranslation(Vector3f(d_position.d_x, d_position.d_y, 0));
+    updateGeometryBuffersTranslation();
 }
 
 
@@ -287,8 +286,7 @@ Vector2f PointerIndicator::getDisplayIndependantPosition(void) const
 //----------------------------------------------------------------------------//
 void PointerIndicator::notifyDisplaySizeChanged(const Sizef& new_size)
 {
-    const Rectf screenArea(Vector2f(0, 0), new_size);
-    d_geometry->setClippingRegion(screenArea);
+    updateGeometryBuffersClipping(Rectf(Vector2f(0.0f, 0.0f), new_size));
 
     // invalidate to regenerate geometry at (maybe) new size
     d_cachedGeometryValid = false;
@@ -308,10 +306,10 @@ const Sizef& PointerIndicator::getExplicitRenderSize() const
 }
 
 //----------------------------------------------------------------------------//
-void PointerIndicator::cacheGeometry() const
+void PointerIndicator::cacheGeometry()
 {
     d_cachedGeometryValid = true;
-    d_geometry->reset();
+    destroyGeometryBuffers();
 
     // if no image, nothing more to do.
     if (!d_indicatorImage)
@@ -320,12 +318,17 @@ void PointerIndicator::cacheGeometry() const
     if (d_customSize.d_width != 0.0f || d_customSize.d_height != 0.0f)
     {
         calculateCustomOffset();
-        d_indicatorImage->render(*d_geometry, d_customOffset, d_customSize);
+        d_indicatorImage->render(d_geometryBuffers, d_customOffset, d_customSize);
     }
     else
     {
-        d_indicatorImage->render(*d_geometry, Vector2f(0, 0));
+        d_indicatorImage->render(d_geometryBuffers, Vector2f(0, 0));
     }
+
+    const Rectf clipping_area(Vector2f(0, 0),
+        System::getSingleton().getRenderer()->getDisplaySize());
+    updateGeometryBuffersClipping(clipping_area);
+    updateGeometryBuffersTranslation();
 }
 
 //----------------------------------------------------------------------------//
@@ -363,6 +366,38 @@ void PointerIndicator::onImageChanged(PointerIndicatorEventArgs& e)
 void PointerIndicator::onDefaultImageChanged(PointerIndicatorEventArgs& e)
 {
     fireEvent(EventDefaultImageChanged, e, EventNamespace);
+}
+
+//----------------------------------------------------------------------------//
+void PointerIndicator::destroyGeometryBuffers()
+{
+    const size_t geom_buffer_count = d_geometryBuffers.size();
+    for (size_t i = 0; i < geom_buffer_count; ++i)
+        System::getSingleton().getRenderer()->destroyGeometryBuffer(*d_geometryBuffers.at(i));
+
+    d_geometryBuffers.clear();
+}
+
+//----------------------------------------------------------------------------//
+void PointerIndicator::updateGeometryBuffersTranslation()
+{
+    const size_t geom_buffer_count = d_geometryBuffers.size();
+    for (size_t i = 0; i < geom_buffer_count; ++i)
+    {
+        CEGUI::GeometryBuffer*& currentBuffer = d_geometryBuffers[i];
+        currentBuffer->setTranslation(Vector3f(d_position.d_x, d_position.d_y, 0));
+    }
+}
+
+//----------------------------------------------------------------------------//
+void PointerIndicator::updateGeometryBuffersClipping(const Rectf& clipping_area)
+{
+    const size_t geom_buffer_count = d_geometryBuffers.size();
+    for (size_t i = 0; i < geom_buffer_count; ++i)
+    {
+        CEGUI::GeometryBuffer*& currentBuffer = d_geometryBuffers[i];
+        currentBuffer->setClippingRegion(clipping_area);
+    }
 }
 
 //----------------------------------------------------------------------------//

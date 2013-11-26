@@ -64,7 +64,7 @@ bool SimpleGameMenu::initialise(CEGUI::GUIContext* gui_context)
     WindowManager& win_mgr = WindowManager::getSingleton();
 
     if(!ImageManager::getSingleton().isDefined("SpaceBackgroundImage"))
-        ImageManager::getSingleton().addFromImageFile("SpaceBackgroundImage", "SpaceBackground.jpg");
+        ImageManager::getSingleton().addBitmapImageFromFile("SpaceBackgroundImage", "SpaceBackground.jpg");
 
     // here we will use a StaticImage as the root, then we can use it to place a background image
     d_root = win_mgr.createWindow("TaharezLook/StaticImage", "root_wnd");

@@ -38,6 +38,7 @@
 #include "CEGUI/InputEvent.h"
 #include "CEGUI/UDim.h"
 
+#include <vector>
 
 #if defined(_MSC_VER)
 #	pragma warning(push)
@@ -86,7 +87,6 @@ public:
         Destructor for PointerIndicator objects
 	*/
 	~PointerIndicator(void);
-
 
 	/*!
 	\brief
@@ -156,10 +156,8 @@ public:
 	\brief
         Makes the indicator draw itself
 
-	\return
-		Nothing
 	*/
-	void	draw(void) const;
+	void draw(void);
 
 
 	/*!
@@ -170,7 +168,7 @@ public:
         Point object describing the new location for the pointer. This will
         be clipped to within the renderer screen area.
 	*/
-	void	setPosition(const Vector2f& position);
+	void setPosition(const Vector2f& position);
 
 
 	/*!
@@ -377,7 +375,6 @@ protected:
     //! Event triggered internally when pointer indicator default image is changed.
     virtual void onDefaultImageChanged(PointerIndicatorEventArgs& e);
 
-
 private:
 	/*************************************************************************
 		Implementation Methods
@@ -387,13 +384,35 @@ private:
         Checks the pointer indicator position is within the current 'constrain'
         Rect and adjusts as required.
 	*/
-	void	constrainPosition(void);
+	void constrainPosition(void);
 
     //! updates the cached geometry.
-    void cacheGeometry() const;
+    void cacheGeometry();
 
     //! calculate offset for custom image size so 'hot spot' is maintained.
     void calculateCustomOffset() const;
+
+    /*!
+    \brief
+        Destroys the geometry buffers of this MouseCursor.
+    */
+    void destroyGeometryBuffers();
+
+    /*!
+    \brief
+        Updates the translation of the geometry buffers of this MouseCursor.
+    */
+    void updateGeometryBuffersTranslation();
+
+    /*!
+    \brief
+        Updates the clipping area of the geometry buffers of this MouseCursor.
+        
+    \param clipping_area
+        The clipping area that will be applied to the geometry buffers of this MouseCursor.
+    */
+    void updateGeometryBuffersClipping(const Rectf& clipping_area);
+
 
 	/*************************************************************************
 		Implementation Data
@@ -409,7 +428,7 @@ private:
     //! Specifies the area (in screen pixels) that the indicator can move around in.
     URect   d_constraints;
     //! buffer to hold geometry for pointer indicator imagery.
-    GeometryBuffer* d_geometry;
+    std::vector<GeometryBuffer*> d_geometryBuffers;
     //! custom explicit size to render the indicator image at
     Sizef d_customSize;
     //! correctly scaled offset used when using custom image size.
