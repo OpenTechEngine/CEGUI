@@ -50,8 +50,8 @@ set( CEGUI_VERSION ${CEGUI_VERSION_MAJOR}.${CEGUI_VERSION_MINOR}.${CEGUI_VERSION
 #     changes) increase AGE, else set AGE to 0.
 #
 set( CEGUI_ABI_CURRENT 4)
-set( CEGUI_ABI_REVISION 1)
-set( CEGUI_ABI_AGE 1)
+set( CEGUI_ABI_REVISION 2)
+set( CEGUI_ABI_AGE 2)
 MATH( EXPR CEGUI_SOVERSION ${CEGUI_ABI_CURRENT}-${CEGUI_ABI_AGE} )
 set( CEGUI_ABI_VERSION ${CEGUI_SOVERSION}.${CEGUI_ABI_AGE}.${CEGUI_ABI_REVISION} )
 
@@ -190,7 +190,7 @@ cegui_dependent_option( CEGUI_SAMPLES_USE_OPENGL3 "Specifies whether the sample 
 # This vile construct is needed because of things that changed in boost and the
 # total fail that is Ogre forcing its boost dependency onto its clients.
 if (CEGUI_BUILD_RENDERER_OGRE AND OIS_FOUND)
-    if (NOT Boost_VERSION LESS 105000)
+    if (NOT Boost_VERSION LESS 105000 AND "${OGRE_THREAD_PROVIDER}" STREQUAL "1") #Check additionally if we use boost as thread provider at all
         if (Boost_SYSTEM_FOUND)
             set (CEGUI_OGRE_SAMPLES_EXTRALIBS ${Boost_SYSTEM_LIBRARY})
             set (CEGUI_OGRE_SAMPLES_AVAILABLE TRUE)
