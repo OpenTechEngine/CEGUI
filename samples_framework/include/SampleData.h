@@ -116,7 +116,6 @@ public:
     virtual void update(float timeSinceLastUpdate);
 
 private:
-
     CEGUI::DynamicModule*   d_dynamicModule;
     Sample*                 d_sample;
 };
