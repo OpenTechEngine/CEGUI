@@ -196,10 +196,9 @@ if (CEGUI_BUILD_STATIC_CONFIGURATION)
     )
 endif()
 
-##
-
-
-##
+###########################################################################
+#  BUILD DEPENDENCIES FOR THE SHARED LIBRARIES USED BY THE SAMPLEBROWSER
+###########################################################################
 
 add_dependencies(${CEGUI_TARGET_NAME} ${CEGUI_CORE_WR_LIBNAME}
                                       CEGUI${CEGUI_OPTION_DEFAULT_XMLPARSER}
@@ -208,6 +207,7 @@ add_dependencies(${CEGUI_TARGET_NAME} ${CEGUI_CORE_WR_LIBNAME}
 if (CEGUI_SAMPLES_ENABLE_COMMON_DIALOGS)
     add_dependencies(${CEGUI_TARGET_NAME} ${CEGUI_COMMON_DIALOGS_LIBNAME})
 endif()
+
 ###########################################################################
 #                           INSTALLATION
 ###########################################################################
