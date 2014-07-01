@@ -989,7 +989,15 @@ void Window::setRestoreOldCapture(bool setting)
 void Window::setAlpha(const float alpha)
 {
     // clamp this to the valid range [0.0, 1.0]
-    d_alpha = ceguimax(ceguimin(alpha, 1.0f), 0.0f);
+    float clampedAlpha = ceguimax(ceguimin(alpha, 1.0f), 0.0f);
+
+    // Ensure that the new alpha value is actually different from the currently set one
+    // to avoid unnecessary invalidating and re-caching of textures and children
+    if (d_alpha == clampedAlpha)
+        return;
+
+    d_alpha = clampedAlpha;
+
     WindowEventArgs args(this);
     onAlphaChanged(args);
 }
