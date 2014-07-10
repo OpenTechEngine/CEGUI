@@ -29,7 +29,15 @@
 
 #include "CEGUI/Base.h"
 
+#include "CEGUI/ModuleConfig.h"
 #include "glm/glm.hpp"
+
+#ifdef CEGUI_BUILD_RENDERER_OGRE
+namespace Ogre
+{
+    class Matrix4;
+}
+#endif
 
 #include <map>
 #include <string>
@@ -38,7 +46,6 @@
 #   pragma warning(push)
 #   pragma warning(disable : 4251)
 #endif
-
 
 namespace CEGUI
 {
@@ -201,9 +208,15 @@ public:
 class ShaderParameterMatrix : public ShaderParameter
 {
 public:
+#ifdef CEGUI_BUILD_RENDERER_OGRE
+    ShaderParameterMatrix(const Ogre::Matrix4* parameterValue)
+        : d_parameterValue(parameterValue)
+    {}
+#else
     ShaderParameterMatrix(const glm::mat4& parameterValue)
         : d_parameterValue(parameterValue)
     {}
+#endif //CEGUI_BUILD_RENDERER_OGRE
 
     //! Implementation of the shader_parameter interface
     virtual ShaderParamType getType() const
@@ -213,8 +226,11 @@ public:
     bool equal(const ShaderParameter* other_parameter) const;
     void takeOverParameterValue(const ShaderParameter* other_parameter);
 
-    //! The float parameter value
+#ifdef CEGUI_BUILD_RENDERER_OGRE
+    const Ogre::Matrix4* d_parameterValue;
+#else
     glm::mat4 d_parameterValue;
+#endif //CEGUI_BUILD_RENDERER_OGRE
 };
 
 /*!
@@ -229,7 +245,6 @@ public:
     ShaderParameterBindings();
     ~ShaderParameterBindings();
 
-
     /*!
     \brief
         Adds a matrix shader parameter to the parameter bindings
@@ -240,7 +255,13 @@ public:
     \param matrix
         The pointer to the matrix
     */
-    void setParameter(const std::string& parameter_name, const glm::mat4& matrix);
+#ifdef CEGUI_BUILD_RENDERER_OGRE
+    void setParameter(const std::string& parameter_name, 
+        const Ogre::Matrix4* matrix);
+#else
+    void setParameter(const std::string& parameter_name, 
+        const glm::mat4& matrix);
+#endif //CEGUI_BUILD_RENDERER_OGRE
 
     /*!
     \brief
@@ -252,9 +273,8 @@ public:
     \param texture
         The pointer to the CEGUI::Texture
     */
-    void setParameter(const std::string& parameter_name, const CEGUI::Texture* texture);
-
-
+    void setParameter(const std::string& parameter_name, 
+        const CEGUI::Texture* texture);
 
     /*!
     \brief
@@ -304,6 +324,5 @@ protected:
 #if defined(_MSC_VER)
 #   pragma warning(pop)
 #endif
-
 
 #endif

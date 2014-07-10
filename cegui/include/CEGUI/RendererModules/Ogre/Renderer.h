@@ -1,6 +1,6 @@
 /***********************************************************************
     created:    Tue Feb 17 2009
-    author:     Paul D Turner
+    author:     Paul D Turner, Henri I Hyyryläinen
 *************************************************************************/
 /***************************************************************************
  *   Copyright (C) 2004 - 2013 Paul D Turner & The CEGUI Development Team
@@ -54,6 +54,7 @@ namespace Ogre
 class Root;
 class RenderSystem;
 class RenderTarget;
+class SceneManager;
 #if (CEGUI_OGRE_VERSION < ((1 << 16) | (9 << 8) | 0))
 class TexturePtr;
 #else
@@ -63,6 +64,12 @@ typedef SharedPtr<Texture> TexturePtr;
 #endif
 class Matrix4;
 }
+
+#if (CEGUI_OGRE_VERSION >= (2 << 16))
+// The new Ogre Compositor2 system has to be used since ViewPorts
+// no longer have the required functionality
+#define CEGUI_USE_OGRE_COMPOSITOR2
+#endif
 
 // Start of CEGUI namespace section
 namespace CEGUI
@@ -170,7 +177,7 @@ public:
     static OgreRenderer& create(Ogre::RenderTarget& target,
                                 const int abi = CEGUI_VERSION_ABI);
 
-    //! destory an OgreRenderer object.
+    //! destroy an OgreRenderer object.
     static void destroy(OgreRenderer& renderer);
 
     //! function to create a CEGUI::OgreResourceProvider object
@@ -185,6 +192,15 @@ public:
     //! function to destroy a CEGUI::OgreImageCodec object.
     static void destroyOgreImageCodec(OgreImageCodec& ic);
 
+#ifdef CEGUI_USE_OGRE_COMPOSITOR2
+    //! Function to initialize required Ogre::Compositor2 workspaces
+    static void createOgreCompositorResources();
+
+    //! Function to update the workspace render target
+    void updateWorkspaceRenderTarget(Ogre::RenderTarget& target);
+
+#endif // CEGUI_USE_OGRE_COMPOSITOR2
+
     //! set whether CEGUI rendering will occur
     void setRenderingEnabled(const bool enabled);
 
@@ -196,7 +212,7 @@ public:
         Create a CEGUI::Texture that wraps an existing Ogre texture.
 
     \param name
-        The name for tne new texture being created.
+        The name for the new texture being created.
 
     \param tex
         Ogre::TexturePtr for the texture that will be used by the created
@@ -274,57 +290,6 @@ public:
     */
     void setDefaultRootRenderTarget(Ogre::RenderTarget& target);
 
-    /*!
-    \brief
-        Returns whether the OgreRenderer is currently set to use shaders when
-        doing its rendering operations.
-
-    \return
-        - true if rendering is being done using shaders.
-        - false if rendering is being done using the fixed function pipeline
-    */
-    bool isUsingShaders() const;
-
-    /*!
-    \brief
-        Set whether the OgreRenderer shound use shaders when performing its
-        rendering operations.
-
-    \param use_shaders
-        - true if rendering shaders should be used to perform rendering.
-        - false if the fixed function pipeline should be used to perform
-          rendering.
-
-    \note
-        When compiled against Ogre 1.8 or later, shaders will automatically
-        be enabled if the render sytem does not support the fixed function
-        pipeline (such as with Direct3D 11). If you are compiling against
-        earlier releases of Ogre, you must explicity enable the use of
-        shaders by calling this function - if you are unsure what you'll be
-        compiling against, it is safe to call this function anyway.
-    */
-    void setUsingShaders(const bool use_shaders);
-
-    /*!
-    \brief
-        Perform required operations to bind shaders (or unbind them) depending
-        on whether shader based rendering is currently enabled.
-
-        Normally you would not need to call this function directly, although
-        that might be required if you are using RenderEffect objects that
-        also use shaders.
-    */
-    void bindShaders();
-
-    /*!
-    \brief
-        Updates the shader constant parameters (i.e. uniforms).
-
-        You do not normally need to call this function directly. Some may need
-        to call this function if you're doing non-standard or advanced things.
-    */
-    void updateShaderParams() const;
-
     //! Set the current world matrix to the given matrix.
     void setWorldMatrix(const Ogre::Matrix4& m);
     //! Set the current view matrix to the given matrix.
@@ -350,26 +315,42 @@ public:
     */
     const Ogre::Matrix4& getWorldViewProjMatrix() const;
 
+    //! \brief Sets the correct BlendMode for rendering a GeometryBuffer
+    void bindBlendMode(BlendMode blend);
+
     // implement CEGUI::Renderer interface
     RenderTarget& getDefaultRenderTarget();
-    GeometryBuffer& createGeometryBuffer();
+
+    RefCounted<RenderMaterial> createRenderMaterial(
+        const DefaultShaderType shaderType) const;
+    GeometryBuffer& createGeometryBufferColoured(
+        CEGUI::RefCounted<RenderMaterial> renderMaterial);
+    GeometryBuffer& createGeometryBufferTextured(
+        CEGUI::RefCounted<RenderMaterial> renderMaterial);
+
     void destroyGeometryBuffer(const GeometryBuffer& buffer);
     void destroyAllGeometryBuffers();
     TextureTarget* createTextureTarget();
     void destroyTextureTarget(TextureTarget* target);
     void destroyAllTextureTargets();
+
     Texture& createTexture(const String& name);
-    Texture& createTexture(const String& name,
-                           const String& filename,
-                           const String& resourceGroup);
+    Texture& createTexture(const String& name, const String& filename,
+        const String& resourceGroup);
     Texture& createTexture(const String& name, const Sizef& size);
+
+    Ogre::SceneManager& getDummyScene() const;
+
     void destroyTexture(Texture& texture);
     void destroyTexture(const String& name);
     void destroyAllTextures();
+
     Texture& getTexture(const String& name) const;
     bool isTextureDefined(const String& name) const;
+
     void beginRendering();
     void endRendering();
+
     void setDisplaySize(const Sizef& sz);
     const Sizef& getDisplaySize() const;
     const Vector2f& getDisplayDPI() const;
@@ -403,7 +384,6 @@ protected:
     //! Pointer to the hidden implementation data
     OgreRenderer_impl* d_pimpl;
 };
-
 
 } // End of  CEGUI namespace section
 
