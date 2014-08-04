@@ -77,7 +77,7 @@ public:
     \exception UnknownObjectException
         Thrown if a StateImagery with the given name could not be found.
     */
-    const StateImagery& getStateImagery(const CEGUI::String& stateName, bool includeInheritedLook = false) const;
+    const StateImagery& getStateImagery(const CEGUI::String& stateName, bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -93,7 +93,7 @@ public:
     \exception UnknownObjectException
         Thrown if a ImagerySection with the given name could not be found.
     */
-    const ImagerySection& getImagerySection(const CEGUI::String& sectionName, bool includeInheritedLook = false) const;
+    const ImagerySection& getImagerySection(const CEGUI::String& sectionName, bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -108,7 +108,7 @@ public:
     \exception UnknownObjectException
         Thrown if a NamedArea with the given name could not be found.
     */
-    const NamedArea& getNamedArea(const String& name, bool includeInheritedLook = false) const;
+    const NamedArea& getNamedArea(const String& name, bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -123,7 +123,7 @@ public:
     \exception UnknownObjectException
         Thrown if a PropertyInitialiser with the given name could not be found.
     */
-    const PropertyInitialiser& getPropertyInitialiser(const String& name, bool includeInheritedLook = false) const;
+    const PropertyInitialiser& getPropertyInitialiser(const String& name, bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -138,7 +138,7 @@ public:
     \exception UnknownObjectException
         Thrown if a PropertyDefinition with the given name could not be found.
     */
-    const PropertyDefinitionBase& getPropertyDefinition(const String& name, bool includeInheritedLook = false) const;
+    const PropertyDefinitionBase& getPropertyDefinition(const String& name, bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -153,7 +153,7 @@ public:
     \exception UnknownObjectException
         Thrown if a PropertyLinkDefinition with the given name could not be found.
     */
-    const PropertyDefinitionBase& getPropertyLinkDefinition(const String& name, bool includeInheritedLook = false) const;
+    const PropertyDefinitionBase& getPropertyLinkDefinition(const String& name, bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -168,7 +168,7 @@ public:
     \exception UnknownObjectException
         Thrown if a WidgetComponent with the given name could not be found.
     */
-    const WidgetComponent& getWidgetComponent(const String& name, bool includeInheritedLook = false) const;
+    const WidgetComponent& getWidgetComponent(const String& name, bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -183,7 +183,7 @@ public:
     \exception UnknownObjectException
         Thrown if a EventLinkDefinition with the given name could not be found.
     */
-    const EventLinkDefinition& getEventLinkDefinition(const String& name, bool includeInheritedLook = false) const;
+    const EventLinkDefinition& getEventLinkDefinition(const String& name, bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -291,19 +291,131 @@ public:
 
     /*!
     \brief
-        Return whether imagery is defined for the given state.
+        Returns if a StateImagery with the given name is present in this look.
 
-    \param state
-        String object containing name of state to look for.
+    \param name
+        The name of the StateImagery to look for.
+
+    \param includeInheritedLook
+       If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
 
     \return
-        - true if imagery exists for the specified state,
-        - false if no imagery exists for the specified state.
-
-    \deprecated This function is deprecated because it does not consider WidgetLook inheritance. It will be removed in the next major version.
-                The getStateImageryNames function should be used instead to subsequently check for the name.
+        - true, if the element with the given name is present,
+        - false, if no such element is present.
     */
-    bool isStateImageryPresent(const String& state) const;
+    bool isStateImageryPresent(const String& name, bool includeInheritedLook = true) const;
+
+    /*!
+    \brief
+        Returns if a ImagerySection with the given name is present in this look.
+
+    \param name
+        The name of the ImagerySection to look for.
+
+    \param includeInheritedLook
+       If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
+
+    \return
+        - true, if the element with the given name is present,
+        - false, if no such element is present.
+    */
+    bool isImagerySectionPresent(const String& name, bool includeInheritedLook = true) const;
+
+    /*!
+    \brief
+        Returns if a NamedArea with the given name is present in this look.
+
+    \param name
+        The name of the NamedArea to look for.
+
+    \param includeInheritedLook
+       If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
+
+    \return
+        - true, if the element with the given name is present,
+        - false, if no such element is present.
+    */
+    bool isNamedAreaPresent(const String& name, bool includeInheritedLook = true) const;
+
+    /*!
+    \brief
+        Returns if a WidgetComponent with the given name is present in this look.
+
+    \param name
+        The name of the WidgetComponent to look for.
+
+    \param includeInheritedLook
+       If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
+
+    \return
+        - true, if the element with the given name is present,
+        - false, if no such element is present.
+    */
+    bool isWidgetComponentPresent(const String& name, bool includeInheritedLook = true) const;
+
+    /*!
+    \brief
+        Returns if a PropertyInitialiser with the given name is present in this look.
+
+    \param name
+        The name of the PropertyInitialiser to look for.
+
+    \param includeInheritedLook
+       If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
+
+    \return
+        - true, if the element with the given name is present,
+        - false, if no such element is present.
+    */
+    bool isPropertyInitialiserPresent(const String& name, bool includeInheritedLook = true) const;
+
+    /*!
+    \brief
+        Returns if a PropertyDefinition with the given name is present in this look.
+
+    \param name
+        The name of the PropertyDefinition to look for.
+
+    \param includeInheritedLook
+       If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
+
+    \return
+        - true, if the element with the given name is present,
+        - false, if no such element is present.
+    */
+    bool isPropertyDefinitionPresent(const String& name, bool includeInheritedLook = true) const;
+
+    /*!
+    \brief
+        Returns if a PropertyLinkDefinition with the given name is present in this look.
+
+    \param name
+        The name of the PropertyLinkDefinition to look for.
+
+    \param includeInheritedLook
+       If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
+
+    \return
+        - true, if the element with the given name is present,
+        - false, if no such element is present.
+    */
+    bool isPropertyLinkDefinitionPresent(const String& name, bool includeInheritedLook = true) const;
+
+    /*!
+    \brief
+        Returns if a EventLinkDefinition with the given name is present in this look.
+
+    \param name
+        The name of the EventLinkDefinition to look for.
+
+    \param includeInheritedLook
+       If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
+
+    \return
+        - true, if the element with the given name is present,
+        - false, if no such element is present.
+    */
+    bool isEventLinkDefinitionPresent(const String& name, bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -322,24 +434,6 @@ public:
 
     //! \deprecated This function is to be replaced by a new renameNamedArea function in the new version, which considers inheritance and accepts more appropriate parameters.
     void renameNamedArea(const String& oldName, const String& newName);
-
-    /*!
-    \brief
-        Returns whether a NamedArea object with the specified name exists for
-        this WidgetLookFeel.
-
-    \param name
-        String holding the name of the NamedArea to check for.
-
-    \return
-        - true if a named area with the requested name is defined for this
-        WidgetLookFeel.
-        - false if no such named area is defined for this WidgetLookFeel.
-
-    \deprecated This function is deprecated because it does not consider WidgetLook inheritance. It will be removed in the next major version.
-                The getNamedAreaNames function should be used instead to subsequently check for the name.
-    */
-    bool isNamedAreaDefined(const String& name) const;
 
     /*!
     \brief
@@ -406,8 +500,8 @@ public:
     */
     const PropertyInitialiser* findPropertyInitialiser(const String& propertyName) const;
 
-    typedef std::set<String, StringFastLessCompare
-        CEGUI_SET_ALLOC(String)> StringSet;
+    //! A typedef defining a set of String objects
+    typedef std::set<String, StringFastLessCompare CEGUI_SET_ALLOC(String)> StringSet;
 
     /** Typedefs for maps of Falagard elements this WidgetLookFeel owns. */
     //! Map of Strings to StateImagery pointers
@@ -447,97 +541,97 @@ public:
     \brief
         Returns a map of names to pointers for all StateImagery elements this WidgetLookFeel owns.
 
-    \param includeInheritedElements
+    \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
 
     \return
         A map of names to StateImagery pointers.
     */
-    StateImageryPointerMap getStateImageryMap(bool includeInheritedElements = false);
+    StateImageryPointerMap getStateImageryMap(bool includeInheritedLook = true);
     
     /*!
     \brief
         Returns a map of names to pointers for all ImagerySection elements this WidgetLookFeel owns.
 
-    \param includeInheritedElements
+    \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
 
     \return
         A map of names to ImagerySection pointers.
     */
-    ImagerySectionPointerMap getImagerySectionMap(bool includeInheritedElements = false);
+    ImagerySectionPointerMap getImagerySectionMap(bool includeInheritedLook = true);
 
     /*!
     \brief
         Returns a map of names to pointers for all NamedArea elements this WidgetLookFeel owns.
 
-    \param includeInheritedElements
+    \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
 
     \return
         A map of names to NamedArea pointers.
     */
-    NamedAreaPointerMap getNamedAreaMap(bool includeInheritedElements = false);
+    NamedAreaPointerMap getNamedAreaMap(bool includeInheritedLook = true);
 
     /*!
     \brief
         Returns a map of names to pointers for all WidgetComponent elements this WidgetLookFeel owns.
 
-    \param includeInheritedElements
+    \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
 
     \return
         A map of names to WidgetComponent pointers.
     */
-    WidgetComponentPointerMap getWidgetComponentMap(bool includeInheritedElements = false);
+    WidgetComponentPointerMap getWidgetComponentMap(bool includeInheritedLook = true);
   
     /*!
     \brief
         Returns a map of names to pointers for all PropertyInitialiser elements this WidgetLookFeel owns.
 
-    \param includeInheritedElements
+    \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
 
     \return
         A map of names to PropertyInitialiser pointers.
     */
-    PropertyInitialiserPointerMap getPropertyInitialiserMap(bool includeInheritedElements = false);
+    PropertyInitialiserPointerMap getPropertyInitialiserMap(bool includeInheritedLook = true);
 
     /*!
     \brief
         Returns a map of names to pointers for all PropertyDefinition elements this WidgetLookFeel owns.
 
-    \param includeInheritedElements
+    \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
 
     \return
         A map of names to PropertyDefinition pointers.
     */
-    PropertyDefinitionBasePointerMap getPropertyDefinitionMap(bool includeInheritedElements = false);
+    PropertyDefinitionBasePointerMap getPropertyDefinitionMap(bool includeInheritedLook = true);
 
     /*!
     \brief
         Returns a map of names to pointers for all PropertyLinkDefinition elements this WidgetLookFeel owns.
 
-    \param includeInheritedElements
+    \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
 
     \return
         A map of names to PropertyLinkDefinition pointers.
     */
-    PropertyDefinitionBasePointerMap getPropertyLinkDefinitionMap(bool includeInheritedElements = false);
+    PropertyDefinitionBasePointerMap getPropertyLinkDefinitionMap(bool includeInheritedLook = true);
 
     /*!
     \brief
         Returns a map of names to pointers for all EventLinkDefinition elements this WidgetLookFeel owns.
 
-    \param includeInheritedElements
+    \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
 
     \return
         A map of names to EventLinkDefinition pointers.
     */
-    EventLinkDefinitionPointerMap getEventLinkDefinitionMap(bool includeInheritedElements = false);
+    EventLinkDefinitionPointerMap getEventLinkDefinitionMap(bool includeInheritedLook = true);
 
     /*!
     \brief
@@ -558,7 +652,7 @@ public:
     \return
         A StringSet containing the StateImagery names.
     */
-    StringSet getStateImageryNames(bool includeInheritedLook = false) const;
+    StringSet getStateImageryNames(bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -570,7 +664,7 @@ public:
     \return
         A StringSet containing the ImagerySection names.
     */
-    StringSet getImagerySectionNames(bool includeInheritedLook = false) const;
+    StringSet getImagerySectionNames(bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -582,7 +676,7 @@ public:
     \return
         A StringSet containing the NamedArea names.
     */
-    StringSet getNamedAreaNames(bool includeInheritedLook = false) const;
+    StringSet getNamedAreaNames(bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -594,7 +688,7 @@ public:
     \return
         A StringSet containing the WidgetComponent (Child Widget) names.
     */
-    StringSet getWidgetComponentNames(bool includeInheritedLook = false) const;
+    StringSet getWidgetComponentNames(bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -606,7 +700,7 @@ public:
     \return
         A StringSet containing the PropertyInitialiser (Property) names.
     */
-    StringSet getPropertyInitialiserNames(bool includeInheritedLook = false) const;
+    StringSet getPropertyInitialiserNames(bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -618,7 +712,7 @@ public:
     \return
         A StringSet containing the PropertyDefinition names.
     */
-    StringSet getPropertyDefinitionNames(bool includeInheritedLook = false) const;
+    StringSet getPropertyDefinitionNames(bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -630,7 +724,7 @@ public:
     \return
         A StringSet containing the PropertyLinkDefinition names.
     */
-    StringSet getPropertyLinkDefinitionNames(bool includeInheritedLook = false) const;
+    StringSet getPropertyLinkDefinitionNames(bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -642,7 +736,7 @@ public:
     \return
         A StringSet containing the EventLinkDefinition names.
     */
-    StringSet getEventLinkDefinitionNames(bool includeInheritedLook = false) const;
+    StringSet getEventLinkDefinitionNames(bool includeInheritedLook = true) const;
 
     /*!
     \brief
@@ -654,7 +748,7 @@ public:
     \return
         A StringSet containing the Animation names.
     */
-    StringSet getAnimationNames(bool includeInheritedLook = false) const;
+    StringSet getAnimationNames(bool includeInheritedLook = true) const;
 
 private:
 

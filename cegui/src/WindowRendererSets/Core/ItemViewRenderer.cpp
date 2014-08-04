@@ -73,7 +73,7 @@ Rectf ItemViewRenderer::getViewRenderArea(const ItemView* item_view,
         {
             const String full_area_name(area_names[area_id] + suffix);
 
-            if (wlf.isNamedAreaDefined(full_area_name))
+            if (wlf.isNamedAreaPresent(full_area_name))
                 return wlf.getNamedArea(full_area_name).getArea().
                     getPixelRect(*item_view);
         }
