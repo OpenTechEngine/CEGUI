@@ -482,6 +482,7 @@ macro (cegui_add_test_executable _NAME _EXTRA_HEADER_FILES _EXTRA_SOURCE_FILES)
         )
     endif()
 
+    add_definitions(-DBOOST_ALL_NO_LIB)
     # set boost to use dynamic linking
     if (NOT CEGUI_BUILD_STATIC_CONFIGURATION)
         add_definitions( -DBOOST_TEST_DYN_LINK )

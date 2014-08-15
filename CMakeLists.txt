@@ -190,19 +190,17 @@ if (CEGUI_USE_MINIBIDI AND CEGUI_USE_FRIBIDI)
     message(SEND_ERROR "You may not enable both CEGUI_USE_FRIBIDI and CEGUI_USE_MINIBIDI. Please choose only one of these options.")
 endif()
 
-# This vile construct is needed because of things that changed in boost and the
-# total fail that is Ogre forcing its boost dependency onto its clients.
+# Here we check if Ogre is built to use boost, and if yes, if the necessary dependencies are available and found by CEGUI
+set (CEGUI_OGRE_DEPS_AVAILABLE FALSE)
+set (CEGUI_OGRE_SAMPLES_EXTRALIBS)
+
 if (CEGUI_BUILD_RENDERER_OGRE AND OIS_FOUND)
     if (NOT Boost_VERSION LESS 105000 AND "${OGRE_THREAD_PROVIDER}" STREQUAL "1") #Check additionally if we use boost as thread provider at all
         if (Boost_SYSTEM_FOUND)
             set (CEGUI_OGRE_SAMPLES_EXTRALIBS ${Boost_SYSTEM_LIBRARY})
             set (CEGUI_OGRE_DEPS_AVAILABLE TRUE)
-        else()
-            set (CEGUI_OGRE_SAMPLES_EXTRALIBS)
-            set (CEGUI_OGRE_DEPS_AVAILABLE FALSE)
         endif()
     else()
-        set (CEGUI_OGRE_SAMPLES_EXTRALIBS)
         set (CEGUI_OGRE_DEPS_AVAILABLE TRUE)
     endif()
 endif()
@@ -219,7 +217,7 @@ set (CEGUI_SAMPLES_RENDERER_DIRECT3D11_ACTIVE ${CEGUI_BUILD_RENDERER_DIRECT3D11}
 set (CEGUI_SAMPLES_RENDERER_DIRECTFB_ACTIVE ${CEGUI_BUILD_RENDERER_DIRECTFB})
 
 # Ogre and OpenGL have dependencies for the sample browser, if these are not available then the samples will be OFF by default   
-if (CEGUI_BUILD_RENDERER_OGRE AND NOT CEGUI_OGRE_SAMPLES_AVAILABLE)
+if (CEGUI_BUILD_RENDERER_OGRE AND NOT CEGUI_OGRE_DEPS_AVAILABLE)
     set (_CEGUI_SAMPLES_ENABLED_DEFAULT FALSE)
     if (NOT OIS_FOUND)
         message(STATUS "The SampleFramework is deactivated due to missing Ogre dependencies (OIS not found)")

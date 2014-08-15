@@ -212,6 +212,8 @@
 
 #include "FrameComponentIterator.pypp.hpp"
 
+#include "FrameComponentVector.pypp.hpp"
+
 #include "FrameWindow.pypp.hpp"
 
 #include "GUIContext.pypp.hpp"
@@ -247,6 +249,8 @@
 #include "ImageryComponent.pypp.hpp"
 
 #include "ImageryComponentIterator.pypp.hpp"
+
+#include "ImageryComponentVector.pypp.hpp"
 
 #include "ImageryIterator.pypp.hpp"
 
@@ -576,6 +580,8 @@
 
 #include "TextComponentIterator.pypp.hpp"
 
+#include "TextComponentVector.pypp.hpp"
+
 #include "TextUtils.pypp.hpp"
 
 #include "Texture.pypp.hpp"
@@ -694,6 +700,8 @@
 
 #include "WindowRendererManager.pypp.hpp"
 
+#include "Workarounds.pypp.hpp"
+
 #include "XMLAttributes.pypp.hpp"
 
 #include "XMLHandler.pypp.hpp"
@@ -806,6 +814,8 @@ BOOST_PYTHON_MODULE(PyCEGUI){
 
     register_LBItemList_class();
 
+    register_TextComponentVector_class();
+
     register_TargetTypeStack_class();
 
     register_ComponentList_class();
@@ -815,6 +825,10 @@ BOOST_PYTHON_MODULE(PyCEGUI){
     register_vector_less__CEGUI_scope_PropertyDefinitionBase_ptr___greater__class();
 
     register_LineList_class();
+
+    register_ImageryComponentVector_class();
+
+    register_FrameComponentVector_class();
 
     register_StringSet_class();
 
@@ -1481,6 +1495,8 @@ BOOST_PYTHON_MODULE(PyCEGUI){
     register_WindowRendererFactory_class();
 
     register_WindowRendererManager_class();
+
+    register_Workarounds_class();
 
     register_XMLAttributes_class();
 

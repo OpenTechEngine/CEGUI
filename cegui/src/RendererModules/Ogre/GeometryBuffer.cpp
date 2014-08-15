@@ -109,8 +109,18 @@ void OgreGeometryBuffer::draw() const
         memcpy(&converted_mat[3][0], &d_previousFinalMatrix[3][0], 
             sizeof(float)*4);
 
-        shaderParameterBindings->setParameter("modelViewPerspMatrix", 
-            converted_mat);
+        OgreShaderWrapper* ogreShader = static_cast<OgreShaderWrapper*>(d_renderMaterial->getShaderWrapper());
+        if (ogreShader->getVertexParameters()->getTransposeMatrices())
+        {
+            glm::mat4 transpose_mat = glm::transpose (converted_mat); 
+            shaderParameterBindings->setParameter("modelViewPerspMatrix", 
+              transpose_mat);
+        }
+        else
+        { 
+            shaderParameterBindings->setParameter("modelViewPerspMatrix", 
+                converted_mat);
+        }
     }
 
     if (d_alpha != d_previousAlphaValue)

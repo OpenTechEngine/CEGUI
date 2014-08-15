@@ -143,6 +143,7 @@ struct OgreRenderer_impl :
         d_worldViewProjMatrix(),
         d_combinedMatrixValid(true),
         d_useGLSL(false),
+        d_useGLSLES(false),
         d_useGLSLCore(false),
         d_texturedShaderWrapper(0),
         d_colouredShaderWrapper(0)
@@ -201,6 +202,8 @@ struct OgreRenderer_impl :
     bool d_useShaders;
     //! Whether shaders are glsl or hlsl
     bool d_useGLSL;
+    //! Whether shaders are glsles
+    bool d_useGLSLES;
     //! Whether we use the ARB glsl shaders or the OpenGL 3.2 Core shader profile (140 core)
     bool d_useGLSLCore;
 
@@ -225,8 +228,10 @@ String OgreRenderer_impl::d_rendererID(
 #endif // CEGUI_USE_OGRE_COMPOSITOR2
 ".");
 
+#if defined(CEGUI_USE_OGRE_COMPOSITOR2)
 int OgreRenderer_impl::s_createdSceneNumber = 0;
 bool OgreRenderer_impl::s_compositorResourcesInitialized = false;
+#endif
 
 //----------------------------------------------------------------------------//
 OgreRenderer& OgreRenderer::bootstrapSystem(const int abi)
@@ -733,7 +738,9 @@ OgreRenderer::~OgreRenderer()
 
     cleanupShaders();
 
+#ifdef CEGUI_USE_OGRE_COMPOSITOR2
     CEGUI_DELETE_AO d_pimpl->d_frameListener;
+#endif
 
     destroyAllGeometryBuffers();
     destroyAllTextureTargets();
@@ -857,12 +864,18 @@ void OgreRenderer::initialiseShaders()
 
     d_pimpl->d_useGLSL = Ogre::HighLevelGpuProgramManager::getSingleton().
         isLanguageSupported("glsl");
+    d_pimpl->d_useGLSLES = Ogre::HighLevelGpuProgramManager::getSingleton().
+        isLanguageSupported("glsles");
 
     Ogre::String shaderLanguage;
 
     if (d_pimpl->d_useGLSL)
     {
         shaderLanguage = "glsl";
+    }
+    else if (d_pimpl->d_useGLSLES)
+    {
+        shaderLanguage = "glsles";
     }
     else
     {
@@ -931,7 +944,20 @@ void OgreRenderer::initialiseShaders()
             colour_ps->setParameter("target", "arbfp1");
             colour_ps->setSource(PixelShaderColoured_GLSL_Compat);
         }
+    }
+    else if (d_pimpl->d_useGLSLES)
+    {
+        texture_vs->setParameter("target", "glsles");
+        texture_vs->setSource(VertexShaderTextured_GLSLES1);
 
+        colour_vs->setParameter("target", "glsles");
+        colour_vs->setSource(VertexShaderColoured_GLSLES1);
+
+        texture_ps->setParameter("target", "glsles");
+        texture_ps->setSource(PixelShaderTextured_GLSLES1);
+
+        colour_ps->setParameter("target", "glsles");
+        colour_ps->setSource(PixelShaderColoured_GLSLES1);
     }
     else // else we use a hlsl shader with an available syntax code
     {
@@ -1273,9 +1299,11 @@ GeometryBuffer& OgreRenderer::createGeometryBufferTextured(
 }
 
 //----------------------------------------------------------------------------//
+#ifdef CEGUI_USE_OGRE_COMPOSITOR2
 Ogre::SceneManager& OgreRenderer::getDummyScene() const{
     return *d_pimpl->d_dummyScene;
 }
+#endif
 
 //----------------------------------------------------------------------------//
 Ogre::HardwareVertexBufferSharedPtr OgreRenderer::getVertexBuffer(size_t 

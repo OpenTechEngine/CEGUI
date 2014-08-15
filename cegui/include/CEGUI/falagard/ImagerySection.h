@@ -100,14 +100,22 @@ namespace CEGUI
         \brief
             Add an ImageryComponent to this ImagerySection.
 
-        \param img
+        \param imageryComponent
             ImageryComponent to be added to the section (a copy is made)
-
-        \return
-            Nothing
         */
-        void addImageryComponent(const ImageryComponent& img);
-        void removeImageryComponent(const ImageryComponent& img);
+        void addImageryComponent(const ImageryComponent& imageryComponent);
+
+        /*!
+        \brief
+            Removes an ImageryComponent from this ImagerySection. The supplied ImagerySection reference should be
+            retrieved via the getImageryComponents function. The check to find out which ImagerySection to remove
+            is done using memory address comparison (identity check).
+
+        \param imageryComponent
+            A reference to the ImageryComponent to be removed to the section
+        */
+        void removeImageryComponent(const ImageryComponent& imageryComponent);
+
         /*!
         \brief
             Clear all ImageryComponents from this ImagerySection.
@@ -121,14 +129,22 @@ namespace CEGUI
         \brief
             Add a TextComponent to this ImagerySection.
 
-        \param text
+        \param textComponent
             TextComponent to be added to the section (a copy is made)
-
-        \return
-            Nothing
         */
-        void addTextComponent(const TextComponent& text);
-        void removeTextComponent(const TextComponent& text);
+        void addTextComponent(const TextComponent& textComponent);
+
+        /*!
+        \brief
+            Removes an TextComponent from this ImagerySection. The supplied TextComponent reference should be
+            retrieved via the getTextComponents function. The check to find out which TextComponent to remove
+            is done using memory address comparison (identity check).
+
+        \param textComponent
+            A reference to the TextComponent to be removed to the section
+        */
+        void removeTextComponent(const TextComponent& textComponent);
+
         /*!
         \brief
             Clear all TextComponents from this ImagerySection.
@@ -153,12 +169,19 @@ namespace CEGUI
 
         \param frame
             FrameComponent to be added to the section (a copy is made)
-
-        \return
-            Nothing
         */
-        void addFrameComponent(const FrameComponent& frame);
-        void removeFrameComponent(const FrameComponent& frame);
+        void addFrameComponent(const FrameComponent& frameComponent);
+
+        /*!
+        \brief
+            Removes an FrameComponent from this ImagerySection. The supplied FrameComponent reference should be
+            retrieved via the getFrameComponents function. The check to find out which FrameComponent to remove
+            is done using memory address comparison (identity check).
+
+        \param frameComponent
+            A reference to the FrameComponent to be removed to the section
+        */
+        void removeFrameComponent(const FrameComponent& frameComponent);
 
         /*!
         \brief
@@ -251,6 +274,47 @@ namespace CEGUI
         //! perform any processing required due to the given font having changed.
         bool handleFontRenderSizeChange(Window& window, const Font* font) const;
 
+
+        //! Vector of ImageryComponent Pointers
+        typedef std::vector<ImageryComponent* CEGUI_VECTOR_ALLOC(ImageryComponent*)> ImageryComponentPointerList;
+        //! Vector of TextComponent Pointers
+        typedef std::vector<TextComponent* CEGUI_VECTOR_ALLOC(TextComponent*)> TextComponentPointerList;
+        //! Vector of FrameComponent Pointers
+        typedef std::vector<FrameComponent* CEGUI_VECTOR_ALLOC(FrameComponent*)> FrameComponentPointerList;
+
+        /*!
+        \brief
+            Returns a vector of pointers to the ImageryComponents that are currently added to this ImagerySection. If an
+            ImageryComponent is added or removed from this ImagerySection, then the pointers in this vector are not valid
+            anymore. The function should then be called again to retrieve valid pointers.
+
+         \return
+            A vector of pointers to the ImageryComponents that are currently added to this ImagerySection
+        */
+        ImageryComponentPointerList getImageryComponents();
+
+        /*!
+        \brief
+            Returns a vector of pointers to the TextComponents that are currently added to this ImagerySection. If a
+            TextComponent is added or removed from this ImagerySection, then the pointers in this vector are not valid
+            anymore. The function should then be called again to retrieve valid pointers.
+
+         \return
+            A vector of pointers to the TextComponents that are currently added to this ImagerySection
+        */
+        TextComponentPointerList getTextComponents();
+
+        /*!
+        \brief
+            Returns a vector of pointers to the FrameComponents that are currently added to this ImagerySection. If a
+            FrameComponent is added or removed from this ImagerySection, then the pointers in this vector are not valid
+            anymore. The function should then be called again to retrieve valid pointers.
+
+         \return
+            A vector of pointers to the FrameComponents that are currently added to this ImagerySection
+        */
+        FrameComponentPointerList getFrameComponents();
+
     protected:
         /*!
         \brief
@@ -277,33 +341,6 @@ namespace CEGUI
         ImageryList         d_images;           //!< Collection of ImageryComponent objects to be drawn for this ImagerySection.
         TextList            d_texts;            //!< Collection of TextComponent objects to be drawn for this ImagerySection.
         String              d_colourPropertyName;   //!< name of property to fetch colours from.
-
-    public:
-        typedef ConstVectorIterator<ImageryList> ImageryComponentIterator;
-        typedef ConstVectorIterator<TextList> TextComponentIterator;
-        typedef ConstVectorIterator<FrameList> FrameComponentIterator;
-        /*!
-        \brief
-            Return a ImagerySection::ImageryComponentIterator object to iterate
-            over the ImageryComponent elements currently added to the
-            ImagerySection.
-        */
-        ImageryComponentIterator getImageryComponentIterator() const;
-        /*!
-        \brief
-            Return a ImagerySection::TextComponentIterator object to iterate
-            over the TextComponent elements currently added to the
-            ImagerySection.
-        */
-        TextComponentIterator getTextComponentIterator() const;
-        /*!
-        \brief
-            Return a ImagerySection::FrameComponentIterator object to iterate
-            over the FrameComponent elements currently added to the
-            ImagerySection.
-        */
-        FrameComponentIterator getFrameComponentIterator() const;
-
     };
 
 } // End of  CEGUI namespace section

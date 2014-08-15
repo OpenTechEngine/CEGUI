@@ -163,7 +163,7 @@ static Ogre::String PixelShaderColoured_GLSL_Compat(""
 
 //! A string containing an OpenGL3 vertex shader for solid colouring of a polygon
 static Ogre::String VertexShaderColoured_GLSL(""
-    "#version 150 core\n"
+    "#version 130\n"
 
     "uniform mat4 worldViewProjMatrix;\n"
 
@@ -182,7 +182,7 @@ static Ogre::String VertexShaderColoured_GLSL(""
 
 //! A string containing an OpenGL3 fragment shader for solid colouring of a polygon
 static Ogre::String PixelShaderColoured_GLSL(""
-    "#version 150 core\n"
+    "#version 130\n"
 
     "in vec4 exColour;\n"
 
@@ -203,7 +203,7 @@ based on a texture. The fetched texture colour will be multiplied by a colour
 supplied to the shader, resulting in the final colour.
 */
 static Ogre::String VertexShaderTextured_GLSL("" 
-    "#version 150 core\n"
+    "#version 130\n"
 
     "uniform mat4 worldViewProjMatrix;\n"
 
@@ -229,7 +229,7 @@ based on a texture. The fetched texture colour will be multiplied by a colour
 supplied to the shader, resulting in the final colour.
 */
 static Ogre::String PixelShaderTextured_GLSL("" 
-    "#version 150 core\n"
+    "#version 130\n"
 
     "uniform sampler2D texture0;\n"
     "uniform float alphaPercentage;\n"
@@ -246,6 +246,75 @@ static Ogre::String PixelShaderTextured_GLSL(""
     "   fragColour.a *= alphaPercentage;\n"
     "}"
 );
+
+//! A string containing an OpenGL ES 2.0 / GLES 1.0 vertex shader for solid colouring of a polygon
+static Ogre::String VertexShaderColoured_GLSLES1(""
+    "#version 100\n"
+    "uniform mat4 worldViewProjMatrix;\n"
+    "attribute vec4 vertex;\n"
+    "attribute vec4 colour;\n"
+    "varying vec4 exColour;\n"
+    "void main(void)\n"
+    "{\n"
+    "   exColour = colour;\n"
+    "   gl_Position = worldViewProjMatrix * vertex;\n"
+    "}"
+);
+
+//! A string containing an OpenGL ES 2.0 / GLES 1.0 fragment shader for solid colouring of a polygon
+static Ogre::String PixelShaderColoured_GLSLES1(""
+    "#version 100\n"
+    "varying vec4 exColour;\n"
+    //"varying vec4 dummyColor;\n"
+    "uniform float alphaPercentage;\n"
+    "void main(void)\n"
+    "{\n"
+    //"     dummyColor = exColour;\n"
+    "     gl_FragColor = exColour;\n"
+    //"     gl_FragColor.a = gl_FragColor.a * alphaPercentage;\n"
+    "     gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+    "}"
+);
+
+/*!
+A string containing an OpenGL ES 2.0 / GLES 1.0 vertex shader for polygons that should be coloured
+based on a texture. The fetched texture colour will be multiplied by a colour
+supplied to the shader, resulting in the final colour.
+*/
+static Ogre::String VertexShaderTextured_GLSLES1("" 
+    "#version 100\n"
+    "uniform mat4 worldViewProjMatrix;\n"
+    "attribute vec4 vertex;\n"
+    "attribute vec4 colour;\n"
+    "attribute vec2 uv0;\n"
+    "varying vec2 exTexCoord;\n"
+    "varying vec4 exColour;\n"
+    "void main()\n"
+    "{\n"
+    "   exTexCoord = uv0;\n"
+    "   exColour = colour;"
+    "   gl_Position = worldViewProjMatrix * vertex;\n"
+    "}"
+);
+
+/*!
+A string containing an OpenGL ES 2.0 / GLES 1.0 fragment shader for polygons that should be coloured
+based on a texture. The fetched texture colour will be multiplied by a colour
+supplied to the shader, resulting in the final colour.
+*/
+static Ogre::String PixelShaderTextured_GLSLES1("" 
+    "#version 100\n"
+    "uniform sampler2D texture0;\n"
+    "uniform lowp float alphaPercentage;\n"
+    "varying vec2 exTexCoord;\n"
+    "varying vec4 exColour;\n"
+    "void main(void)\n"
+    "{\n"
+    "     gl_FragColor = texture2D(texture0, exTexCoord) * exColour;\n"
+    "     gl_FragColor.a = gl_FragColor.a * alphaPercentage;\n"
+    "}"
+);
+
 
 }
 

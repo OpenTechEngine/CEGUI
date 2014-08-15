@@ -300,18 +300,11 @@ namespace CEGUI
         static String d_defaultResourceGroup;
 
 
-        //! Typedef for a map of Strings to WidgetLookFeel objects
-        typedef std::map<String, WidgetLookFeel, StringFastLessCompare> WidgetLookList;
-        // deprecated: Will use the correct allocator in the next version
+        //! Typedef for a map of Strings to WidgetLookFeel instances
+        typedef std::map<String, WidgetLookFeel, StringFastLessCompare CEGUI_MAP_ALLOC(String, WidgetLookFeel)> WidgetLookList;
 
         //! List of WidgetLookFeels added to this Manager
         WidgetLookList  d_widgetLooks;  
-
-    public:
-        //! \deprecated Marked for removal in the next version.
-        typedef ConstMapIterator<WidgetLookList> WidgetLookIterator;
-        //! \deprecated Marked for removal in the next version.
-        WidgetLookIterator getWidgetLookIterator() const;
     };
 
 } // End of  CEGUI namespace section

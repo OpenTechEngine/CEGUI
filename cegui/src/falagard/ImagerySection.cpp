@@ -27,6 +27,7 @@
 #include "CEGUI/falagard/ImagerySection.h"
 #include "CEGUI/falagard/XMLHandler.h"
 #include "CEGUI/PropertyHelper.h"
+#include "CEGUI/Logger.h"
 #include <iostream>
 #include <limits>
 
@@ -98,41 +99,58 @@ namespace CEGUI
         }
     }
 
-    void ImagerySection::addImageryComponent(const ImageryComponent& img)
+    void ImagerySection::addImageryComponent(const ImageryComponent& imageryComponent)
     {
-        d_images.push_back(img);
+        d_images.push_back(imageryComponent);
     }
 
-    void ImagerySection::removeImageryComponent(const ImageryComponent& img)
+    void ImagerySection::removeImageryComponent(const ImageryComponent& imageryComponent)
     {
-        for(ImageryList::iterator image = d_images.begin();
-                image < d_images.end();
-            ++image)
-            if(image->getImage() == img.getImage())
-                d_images.erase(image);
-    }
+        ImageryList::iterator imageryComponentIter = d_images.begin();
+        ImageryList::iterator imageryComponentIterEnd = d_images.end();
+        while(imageryComponentIter != imageryComponentIterEnd)
+        {
+            if(&(*imageryComponentIter) == &imageryComponent)
+            {
+                d_images.erase(imageryComponentIter);
+                return;
+            }
+            
+            ++imageryComponentIter;
+        }
 
+        Logger::getSingleton().logEvent("ImagerySection::removeImageryComponent: The ImageryComponent that has been supplied  "
+                                        "could not be found in this ImagerySection. No element has been removed");
+    }
 
     void ImagerySection::clearImageryComponents()
     {
         d_images.clear();
     }
 
-    void ImagerySection::addTextComponent(const TextComponent& text)
+    void ImagerySection::addTextComponent(const TextComponent& textComponent)
     {
-        d_texts.push_back(text);
+        d_texts.push_back(textComponent);
     }
 
-    void ImagerySection::removeTextComponent(const TextComponent& text)
+    void ImagerySection::removeTextComponent(const TextComponent& textComponent)
     {
-        for(TextList::iterator t = d_texts.begin();
-                t < d_texts.end();
-            ++t)
-            if(t->getText() == text.getText() &&
-                    t->getFont() == text.getFont())
-                d_texts.erase(t);
-    }
+        TextList::iterator textComponentIter = d_texts.begin();
+        TextList::iterator textComponentIterEnd = d_texts.end();
+        while(textComponentIter != textComponentIterEnd)
+        {
+            if(&(*textComponentIter) == &textComponent)
+            {
+                d_texts.erase(textComponentIter);
+                return;
+            }
 
+            ++textComponentIter;
+        }
+
+        Logger::getSingleton().logEvent("ImagerySection::removeTextComponent: The TextComponent that has been supplied  "
+            "could not be found in this ImagerySection. No element has been removed");
+    }
 
     void ImagerySection::clearTextComponents()
     {
@@ -144,20 +162,28 @@ namespace CEGUI
         d_frames.clear();
     }
 
-    void ImagerySection::addFrameComponent(const FrameComponent& frame)
+    void ImagerySection::addFrameComponent(const FrameComponent& frameComponent)
     {
-        d_frames.push_back(frame);
+        d_frames.push_back(frameComponent);
     }
 
-    void ImagerySection::removeFrameComponent(const FrameComponent& frame)
+    void ImagerySection::removeFrameComponent(const FrameComponent& frameComponent)
     {
-        for(FrameList::iterator f = d_frames.begin();
-            f < d_frames.end();
-            ++f)
+        FrameList::iterator frameComponentIter = d_frames.begin();
+        FrameList::iterator frameComponentIterEnd = d_frames.end();
+        while(frameComponentIter != frameComponentIterEnd)
         {
-            if ((*f) == frame)
-                d_frames.erase(f);
+            if(&(*frameComponentIter) == &frameComponent)
+            {
+                d_frames.erase(frameComponentIter);
+                return;
+            }
+
+            ++frameComponentIter;
         }
+
+        Logger::getSingleton().logEvent("ImagerySection::removeFrameComponent: The FrameComponent that has been supplied  "
+            "could not be found in this ImagerySection. No element has been removed");
     }
 
     const ColourRect& ImagerySection::getMasterColours() const
@@ -349,20 +375,49 @@ namespace CEGUI
         return result;
     }
 
-    ImagerySection::ImageryComponentIterator
-    ImagerySection::getImageryComponentIterator() const
+    ImagerySection::ImageryComponentPointerList ImagerySection::getImageryComponents()
     {
-        return ImageryComponentIterator(d_images.begin(), d_images.end());
+        ImagerySection::ImageryComponentPointerList pointerList;
+
+        ImageryList::iterator imageryComponentIter = d_images.begin();
+        ImageryList::iterator imageryComponentEnd = d_images.end();
+        while( imageryComponentIter != imageryComponentEnd )
+        {
+            pointerList.push_back(&(*imageryComponentIter));
+            ++imageryComponentIter;
+        }
+
+        return pointerList;
     }
-    ImagerySection::TextComponentIterator
-    ImagerySection::getTextComponentIterator() const
+
+    ImagerySection::TextComponentPointerList ImagerySection::getTextComponents()
     {
-        return TextComponentIterator(d_texts.begin(), d_texts.end());
+        ImagerySection::TextComponentPointerList pointerList;
+
+        TextList::iterator textComponentIter = d_texts.begin();
+        TextList::iterator textComponentEnd = d_texts.end();
+        while( textComponentIter != textComponentEnd )
+        {
+            pointerList.push_back(&(*textComponentIter));
+            ++textComponentIter;
+        }
+
+        return pointerList;
     }
-    ImagerySection::FrameComponentIterator
-    ImagerySection::getFrameComponentIterator() const
+
+    ImagerySection::FrameComponentPointerList ImagerySection::getFrameComponents()
     {
-        return FrameComponentIterator(d_frames.begin(), d_frames.end());
+        ImagerySection::FrameComponentPointerList pointerList;
+
+        FrameList::iterator frameComponentIter = d_frames.begin();
+        FrameList::iterator frameComponentEnd = d_frames.end();
+        while( frameComponentIter != frameComponentEnd )
+        {
+            pointerList.push_back(&(*frameComponentIter));
+            ++frameComponentIter;
+        }
+
+        return pointerList;
     }
 
 } // End of  CEGUI namespace section

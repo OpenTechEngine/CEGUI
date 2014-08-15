@@ -163,13 +163,14 @@ void register_WidgetLookManager_class(){
             WidgetLookManager_exposer.def( 
                 "getWidgetLookIterator"
                 , getWidgetLookIterator_function_type( &::CEGUI::WidgetLookManager::getWidgetLookIterator )
-                , "!  deprecated Marked for removal in the next version.\n\
-            !  deprecated Marked for removal in the next version.\n" );
+                , "!  deprecated Use WidgetLookPointerMap instead, which provides direct access to the added\
+            elements.\n\
+            !  deprecated Use getWidgetLookMap instead, which provides direct access to the added elements.\n" );
         
         }
         { //::CEGUI::WidgetLookManager::getWidgetLookMap
         
-            typedef ::std::map<CEGUI::String,CEGUI::WidgetLookFeel*,CEGUI::StringFastLessCompare,std::allocator<std::pair<const CEGUI::String, CEGUI::WidgetLookFeel*> > > ( ::CEGUI::WidgetLookManager::*getWidgetLookMap_function_type )(  ) ;
+            typedef ::std::map<CEGUI::String, CEGUI::WidgetLookFeel*, CEGUI::StringFastLessCompare, std::allocator<std::pair<CEGUI::String const, CEGUI::WidgetLookFeel*> > > ( ::CEGUI::WidgetLookManager::*getWidgetLookMap_function_type )(  ) ;
             
             WidgetLookManager_exposer.def( 
                 "getWidgetLookMap"

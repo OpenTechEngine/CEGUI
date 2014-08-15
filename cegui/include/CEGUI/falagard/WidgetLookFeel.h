@@ -539,7 +539,10 @@ public:
 
     /*!
     \brief
-        Returns a map of names to pointers for all StateImagery elements this WidgetLookFeel owns.
+        Returns a map of names to pointers for all StateImagery elements this WidgetLookFeel owns. If the list of
+        StateImageries of this or an inherited WidgetLookFeel is modified in any way (by clearing it, adding or
+        removing elements), then the pointers in this map are not valid anymore. The function should then be called
+        again to retrieve valid pointers.
 
     \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
@@ -551,7 +554,10 @@ public:
     
     /*!
     \brief
-        Returns a map of names to pointers for all ImagerySection elements this WidgetLookFeel owns.
+        Returns a map of names to pointers for all ImagerySection elements this WidgetLookFeel owns. If the list of
+        ImagerySections of this or an inherited WidgetLookFeel is modified in any way (by clearing it, adding or
+        removing elements), then the pointers in this map are not valid anymore. The function should then be called
+        again to retrieve valid pointers.
 
     \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
@@ -563,7 +569,10 @@ public:
 
     /*!
     \brief
-        Returns a map of names to pointers for all NamedArea elements this WidgetLookFeel owns.
+        Returns a map of names to pointers for all NamedArea elements this WidgetLookFeel owns. If the list of
+        NamedAreas of this or an inherited WidgetLookFeel is modified in any way (by clearing it, adding or
+        removing elements), then the pointers in this map are not valid anymore. The function should then be called
+        again to retrieve valid pointers.
 
     \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
@@ -575,7 +584,10 @@ public:
 
     /*!
     \brief
-        Returns a map of names to pointers for all WidgetComponent elements this WidgetLookFeel owns.
+        Returns a map of names to pointers for all WidgetComponent elements this WidgetLookFeel owns. If the list of
+        WidgetComponents of this or an inherited WidgetLookFeel is modified in any way (by clearing it, adding or
+        removing elements), then the pointers in this map are not valid anymore. The function should then be called
+        again to retrieve valid pointers.
 
     \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
@@ -587,7 +599,10 @@ public:
   
     /*!
     \brief
-        Returns a map of names to pointers for all PropertyInitialiser elements this WidgetLookFeel owns.
+        Returns a map of names to pointers for all PropertyInitialiser elements this WidgetLookFeel owns. If the list of
+        PropertyInitialisers of this or an inherited WidgetLookFeel is modified in any way (by clearing it, adding or
+        removing elements), then the pointers in this map are not valid anymore. The function should then be called
+        again to retrieve valid pointers.
 
     \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
@@ -599,7 +614,10 @@ public:
 
     /*!
     \brief
-        Returns a map of names to pointers for all PropertyDefinition elements this WidgetLookFeel owns.
+        Returns a map of names to pointers for all PropertyDefinition elements this WidgetLookFeel owns. If the list of
+        PropertyDefinitions of this or an inherited WidgetLookFeel is modified in any way (by clearing it, adding or
+        removing elements), then the pointers in this map are not valid anymore. The function should then be called
+        again to retrieve valid pointers.
 
     \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
@@ -611,7 +629,10 @@ public:
 
     /*!
     \brief
-        Returns a map of names to pointers for all PropertyLinkDefinition elements this WidgetLookFeel owns.
+        Returns a map of names to pointers for all PropertyLinkDefinition elements this WidgetLookFeel owns. If the list of
+        PropertyLinkDefinitions of this or an inherited WidgetLookFeel is modified in any way (by clearing it, adding or
+        removing elements), then the pointers in this map are not valid anymore. The function should then be called
+        again to retrieve valid pointers.
 
     \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
@@ -623,7 +644,10 @@ public:
 
     /*!
     \brief
-        Returns a map of names to pointers for all EventLinkDefinition elements this WidgetLookFeel owns.
+        Returns a map of names to pointers for all EventLinkDefinition elements this WidgetLookFeel owns. If the list of
+        EventLinkDefinitions of this or an inherited WidgetLookFeel is modified in any way (by clearing it, adding or
+        removing elements), then the pointers in this map are not valid anymore. The function should then be called
+        again to retrieve valid pointers.
 
     \param includeInheritedLook
         If set to true, this function will try to also include elements from the inherited WidgetLookFeel.
