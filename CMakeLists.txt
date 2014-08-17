@@ -42,7 +42,7 @@ set( CEGUI_VERSION ${CEGUI_VERSION_MAJOR}.${CEGUI_VERSION_MINOR}.${CEGUI_VERSION
 #
 # The following describes what these components are and how they are intended to
 # be managed.
-# 
+#
 #   - CURRENT: The binary interface version provided by the library.
 #   - REVISION: Revision of binary interface specified in CURRENT
 #   - AGE: Number of previous binary interfaces this library is compatible with.
@@ -267,9 +267,18 @@ if (APPLE)
     option( CEGUI_APPLE_DYLIB_SET_VERSION_INFO "Specifies whether to set VERSION and SOVERSION for libraries." FALSE )
 endif()
 
-# regression and performance tests
-cmake_dependent_option( CEGUI_BUILD_TESTS "Specifies whether to build the regression tests." FALSE "Boost_UNIT_TEST_FRAMEWORK_FOUND" FALSE )
+# unit tests
+cmake_dependent_option( CEGUI_BUILD_TESTS "Specifies whether to build the unit tests." FALSE "Boost_UNIT_TEST_FRAMEWORK_FOUND" FALSE )
+
 cmake_dependent_option( CEGUI_BUILD_PERFORMANCE_TESTS "Specifies whether to build the performance tests." FALSE "Boost_UNIT_TEST_FRAMEWORK_FOUND;Boost_TIMER_FOUND" FALSE )
+
+# sanity check on unit tests
+if ((CEGUI_BUILD_TESTS OR CEGUI_BUILD_PERFORMANCE_TESTS) AND NOT CEGUI_BUILD_RENDERER_NULL)
+    message(SEND_ERROR "The CEGUI tests (option CEGUI_BUILD_TESTS or CEGUI_BUILD_PERFORMANCE_TESTS) require the null renderer (CEGUI_BUILD_RENDERER_NULL). Please enable it.")
+endif()
+
+# datafiles tests
+cmake_dependent_option( CEGUI_BUILD_DATAFILES_TEST "Specifies whether to build the datafiles test." FALSE "PYTHONINTERP_FOUND" FALSE )
 
 option( CEGUI_INSTALL_WITH_RPATH "Specifies whether to install with RPATH set to the install location (TRUE) or with no RPATH set (FALSE)." FALSE )
 
@@ -539,7 +548,7 @@ if (DOXYGEN_FOUND)
         COMMENT "Generating documentation" VERBATIM)
 endif()
 
-if (CEGUI_BUILD_TESTS)
+if (CEGUI_BUILD_TESTS OR CEGUI_BUILD_PERFORMANCE_TESTS OR CEGUI_BUILD_DATAFILES_TEST)
     enable_testing()
 
     add_subdirectory(tests)
@@ -570,6 +579,7 @@ set(CPACK_SOURCE_IGNORE_FILES
 # the rest is modelled after .hgignore
 "build/"
 "~$"
+"\\\\.orig$"
 
 "Thumbs.db"
 "\\\\.directory"
@@ -579,6 +589,7 @@ set(CPACK_SOURCE_IGNORE_FILES
 "\\\\.project"
 "\\\\.cproject"
 "\\\\.pydevproject"
+"\\\\.ropeproject"
 )
 
 include(CPack)

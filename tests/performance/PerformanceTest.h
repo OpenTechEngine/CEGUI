@@ -28,44 +28,148 @@
 #define _CEGUITestsPerformanceTest_h_
 
 #include <boost/timer/timer.hpp>
+#include <fstream>
 
 #include "CEGUI/WindowManager.h"
 
 /*!
 \brief
-    Generic test on a Window.
+    General structure of a performance test.
+
+    It will print to console the total running time in seconds, and output the
+    result(s), by appending them in the performance-test-results.csv file.
 */
-template<typename TWindow>
 class PerformanceTest
 {
 public:
-    PerformanceTest(CEGUI::String windowType, CEGUI::String renderer) :
-        d_window(0)
+    explicit PerformanceTest(CEGUI::String test_name) : d_testName(test_name) { }
+    virtual ~PerformanceTest() {}
+
+
+    CEGUI::String d_testName;
+
+    void execute()
     {
-        d_window = static_cast<TWindow*>(CEGUI::WindowManager::getSingleton().createWindow(windowType, windowType + "perf-test"));
-        d_window->setWindowRenderer(renderer);
+        std::cout
+            << "Running performance test " << d_testName << "..." << std::endl;
+
+        boost::timer::auto_cpu_timer timer;
+
+        doTest();
+
+        logRunningTime(boost::timer::format(timer.elapsed(), timer.places(), "%u, %w"));
     }
 
-    virtual ~PerformanceTest() {}
+protected:
+    virtual void doTest() = 0;
+
+private:
+    void logRunningTime(std::string result)
+    {
+        std::ofstream fout("performance-test-results.csv",
+            std::ofstream::out | std::ofstream::app);
+
+        // fill column names if file is empty.
+        fout.seekp(0, std::ios::end);
+        long length = fout.tellp();
+        if (length == 0)
+        {
+            fout << "test name, user time (seconds), wall time (seconds)" << std::endl;
+        }
+
+        fout << d_testName << ", " << result << std::endl;
+        fout.close();
+    }
+};
+
+/*!
+\brief
+    Generic test on a Window. It will automatically create the specified
+    window type and set the renderer on it, so that the rendering phase's logic
+    is tested as well (using the NullRenderer - so no actual rendering is done).
+*/
+template<typename TWindow>
+class WindowPerformanceTest : public PerformanceTest
+{
+public:
+    WindowPerformanceTest(CEGUI::String window_type, CEGUI::String renderer) :
+        PerformanceTest(window_type),
+        d_window(0)
+    {
+        d_window = static_cast<TWindow*>(
+            CEGUI::WindowManager::getSingleton().createWindow(
+                window_type, window_type + "-perf-test"));
+        d_window->setWindowRenderer(renderer);
+    }
 
     virtual void render()
     {
         d_window->render();
     }
 
-    void execute()
+    TWindow* d_window;
+};
+
+/*!
+\brief
+    This represents a generic test made on list widgets. It adds items, deletes
+    some, then inserts items in the middle, and finally sorts them.
+
+    To add a new list test, you just inherit from this class, and implement the
+    required methods that do the actual item addition/removal/etc
+*/
+template<typename TWindow>
+class BaseListPerformanceTest : public WindowPerformanceTest<TWindow>
+{
+public:
+    BaseListPerformanceTest(CEGUI::String windowType, CEGUI::String renderer) :
+        WindowPerformanceTest<TWindow>(windowType, renderer)
     {
-        std::cout << "Performance test for " << d_window->getType() << std::endl;
-
-        boost::timer::auto_cpu_timer timer;
-
-        doTest();
     }
 
-    TWindow* d_window;
+    virtual void doTest()
+    {
+        addItems(500);
+        this->render();
 
-protected:
-    virtual void doTest() = 0;
+        clearItems();
+        this->render();
+
+
+        addItems(1000);
+        this->render();
+
+        deleteFirstItems(150);
+        this->render();
+
+        for (size_t step = 0; step < 17; ++step)
+        {
+            deleteFirstItems(3);
+            this->render();
+        }
+
+        deleteLastItems(123);
+        this->render();
+
+        clearItems();
+        this->render();
+
+        addItems(100);
+        this->render();
+
+        addItems(50, 50);
+        this->render();
+
+        sortItems();
+        this->render();
+    }
+
+    virtual void clearItems() = 0;
+    virtual void addItems(size_t count) = 0;
+    virtual void addItems(size_t count, size_t at_position) = 0;
+    virtual void deleteFirstItems(size_t count) = 0;
+    virtual void deleteLastItems(size_t count) = 0;
+    virtual void sortItems() = 0;
 };
 
 #endif
