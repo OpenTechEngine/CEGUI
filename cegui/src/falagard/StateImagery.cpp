@@ -29,6 +29,8 @@
 #include "CEGUI/GeometryBuffer.h"
 #include "CEGUI/System.h"
 #include "CEGUI/Renderer.h"
+
+#include <algorithm>
 #include <iostream>
 
 // Start of CEGUI namespace section
@@ -43,20 +45,27 @@ StateImagery::StateImagery(const String& name) :
 void StateImagery::render(Window& srcWindow, const ColourRect* modcols, const Rectf* clipper) const
 {
     // render all layers defined for this state
-    for(LayersList::const_iterator curr = d_layers.begin(); curr != d_layers.end(); ++curr)
+    for(LayerSpecificationList::const_iterator curr = d_layers.begin(); curr != d_layers.end(); ++curr)
         (*curr).render(srcWindow, modcols, clipper, d_clipToDisplay);
 }
 
 void StateImagery::render(Window& srcWindow, const Rectf& baseRect, const ColourRect* modcols, const Rectf* clipper) const
 {
     // render all layers defined for this state
-    for(LayersList::const_iterator curr = d_layers.begin(); curr != d_layers.end(); ++curr)
+    for(LayerSpecificationList::const_iterator curr = d_layers.begin(); curr != d_layers.end(); ++curr)
         (*curr).render(srcWindow, baseRect, modcols, clipper, d_clipToDisplay);
 }
 
 void StateImagery::addLayer(const LayerSpecification& layer)
 {
-    d_layers.insert(layer);
+    d_layers.push_back(layer);
+
+    sort();
+}
+
+void StateImagery::sort()
+{
+    std::sort(d_layers.begin(), d_layers.end());   
 }
 
 void StateImagery::clearLayers()
@@ -93,30 +102,26 @@ void StateImagery::writeXMLToStream(XMLSerializer& xml_stream) const
         xml_stream.attribute(Falagard_xmlHandler::ClippedAttribute, PropertyHelper<bool>::False);
 
     // output all layers defined for this state
-    for(LayersList::const_iterator curr = d_layers.begin(); curr != d_layers.end(); ++curr)
+    for(LayerSpecificationList::const_iterator curr = d_layers.begin(); curr != d_layers.end(); ++curr)
         (*curr).writeXMLToStream(xml_stream);
     // write closing </StateImagery> tag
     xml_stream.closeTag();
 }
 
-StateImagery::LayerIterator
-StateImagery::getLayerIterator() const
+const StateImagery::LayerSpecificationList& StateImagery::getLayerSpecifications() const
 {
-    return LayerIterator(d_layers.begin(),d_layers.end());
+    return d_layers;
 }
 
 StateImagery::LayerSpecificationPointerList StateImagery::getLayerSpecificationPointers()
 {
     StateImagery::LayerSpecificationPointerList pointerList;
 
-    LayersList::iterator layerSpecIter = d_layers.begin();
-    LayersList::iterator layerSpecIterEnd = d_layers.end();
+    LayerSpecificationList::iterator layerSpecIter = d_layers.begin();
+    LayerSpecificationList::iterator layerSpecIterEnd = d_layers.end();
     while( layerSpecIter != layerSpecIterEnd )
     {
-        //! This hack is necessary because in newer C++ versions the multiset and sets return only const iterators.
-        //! \deprecated This will be replaced with proper types and behaviour in the next version.
-        LayerSpecification* layerSpec = const_cast<LayerSpecification*>(&(*layerSpecIter));
-        pointerList.push_back(layerSpec);
+        pointerList.push_back(&(*layerSpecIter));
         ++layerSpecIter;
     }
 
