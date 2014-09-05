@@ -432,15 +432,6 @@ void MultiLineEditbox::configureScrollbars(void)
 	horzScrollbar->setScrollPosition(horzScrollbar->getScrollPosition());
 }
 
-
-/*************************************************************************
-	Format the text into lines as needed by the current formatting options.
-*************************************************************************/
-void MultiLineEditbox::formatText(void)
-{
-    formatText(true);
-}
-
 //----------------------------------------------------------------------------//
 void MultiLineEditbox::formatText(const bool update_scrollbars)
 {
@@ -566,7 +557,7 @@ void MultiLineEditbox::formatText(const bool update_scrollbars)
 			// skip to next 'paragraph' in text
 			currPos += paraLen;
 		}
-		
+
 		d_lastRenderWidth = areaWidth;
 	}
 
@@ -607,32 +598,32 @@ size_t MultiLineEditbox::getNextTokenLength(const String& text, size_t start_idx
 	Return the text code point index that is rendered closest to screen
 	position 'pt'.
 *************************************************************************/
-size_t MultiLineEditbox::getTextIndexFromPosition(const Vector2f& pt) const
+size_t MultiLineEditbox::getTextIndexFromPosition(const glm::vec2& pt) const
 {
 	//
 	// calculate final window position to be checked
 	//
-	Vector2f wndPt = CoordConverter::screenToWindow(*this, pt);
+    glm::vec2 wndPt = CoordConverter::screenToWindow(*this, pt);
 
 	Rectf textArea(getTextRenderArea());
 
-    wndPt -= textArea.d_min;
+    wndPt -= glm::vec2(textArea.d_min.d_x, textArea.d_min.d_y);
 
 	// factor in scroll bar values
-	wndPt.d_x += getHorzScrollbar()->getScrollPosition();
-	wndPt.d_y += getVertScrollbar()->getScrollPosition();
+    wndPt.x += getHorzScrollbar()->getScrollPosition();
+    wndPt.y += getVertScrollbar()->getScrollPosition();
 
 	size_t lineNumber = static_cast<size_t>(
-        ceguimax(0.0f, wndPt.d_y) / getFont()->getLineSpacing());
+        ceguimax(0.0f, wndPt.y) / getFont()->getLineSpacing());
 
 	if (lineNumber >= d_lines.size())
 	{
 		lineNumber = d_lines.size() - 1;
 	}
 
-    String lineText(getText().substr(d_lines[lineNumber].d_startIdx, d_lines[lineNumber].d_length));
+    const String lineText(getText().substr(d_lines[lineNumber].d_startIdx, d_lines[lineNumber].d_length));
 
-	size_t lineIdx = getFont()->getCharAtPixel(lineText, wndPt.d_x);
+    size_t lineIdx = getFont()->getCharAtPixel(lineText, wndPt.x);
 
 	if (lineIdx >= lineText.length() - 1)
 	{
@@ -734,10 +725,10 @@ bool MultiLineEditbox::performCopy(Clipboard& clipboard)
 {
     if (getSelectionLength() == 0)
         return false;
-    
+
     const String selectedText = getText().substr(
         getSelectionStartIndex(), getSelectionLength());
-    
+
     clipboard.setText(selectedText);
     return true;
 }
@@ -747,10 +738,10 @@ bool MultiLineEditbox::performCut(Clipboard& clipboard)
 {
     if (isReadOnly())
         return false;
-    
+
     if (!performCopy(clipboard))
         return false;
-    
+
     handleDelete();
     return true;
 }
@@ -760,19 +751,19 @@ bool MultiLineEditbox::performPaste(Clipboard& clipboard)
 {
     if (isReadOnly())
         return false;
-    
+
     String clipboardText = clipboard.getText();
-    
+
     if (clipboardText.empty())
         return false;
-    
+
     // backup current text
     String tmp(getText());
     tmp.erase(getSelectionStartIndex(), getSelectionLength());
-    
+
     // erase selected text
     eraseSelectedText();
-    
+
     // if there is room
     if (getText().length() - clipboardText.length() < d_maxTextLen)
     {
@@ -993,7 +984,7 @@ void MultiLineEditbox::handleDocEnd(bool select)
 
 
 /*************************************************************************
-    Processing to move caret to the start of the current line 
+    Processing to move caret to the start of the current line
     (and optionally select the text)
 *************************************************************************/
 void MultiLineEditbox::handleLineHome(bool select)
@@ -1489,17 +1480,17 @@ bool MultiLineEditbox::isWordWrapped(void) const
 void MultiLineEditbox::addMultiLineEditboxProperties(void)
 {
     const String& propertyOrigin = WidgetTypeName;
-    
+
     CEGUI_DEFINE_PROPERTY(MultiLineEditbox, bool,
         "ReadOnly","Property to get/set the read-only setting for the Editbox.  Value is either \"true\" or \"false\".",
         &MultiLineEditbox::setReadOnly, &MultiLineEditbox::isReadOnly, false
     );
-    
+
     CEGUI_DEFINE_PROPERTY(MultiLineEditbox, size_t,
         "CaretIndex","Property to get/set the current caret index.  Value is \"[uint]\".",
         &MultiLineEditbox::setCaretIndex, &MultiLineEditbox::getCaretIndex, 0
     );
-    
+
     CEGUI_DEFINE_PROPERTY(MultiLineEditbox, size_t,
         "SelectionStart","Property to get/set the zero based index of the selection start position within the text.  Value is \"[uint]\".",
         &MultiLineEditbox::setSelectionStart, &MultiLineEditbox::getSelectionStartIndex, 0
@@ -1508,7 +1499,7 @@ void MultiLineEditbox::addMultiLineEditboxProperties(void)
         "SelectionLength","Property to get/set the length of the selection (as a count of the number of code points selected).  Value is \"[uint]\".",
         &MultiLineEditbox::setSelectionLength, &MultiLineEditbox::getSelectionLength, 0
     );
-    
+
     CEGUI_DEFINE_PROPERTY(MultiLineEditbox, size_t,
         "MaxTextLength","Property to get/set the the maximum allowed text length (as a count of code points).  Value is \"[uint]\".",
         &MultiLineEditbox::setMaxTextLength, &MultiLineEditbox::getMaxTextLength, String().max_size()
@@ -1536,7 +1527,7 @@ void MultiLineEditbox::addMultiLineEditboxProperties(void)
 *************************************************************************/
 bool MultiLineEditbox::handle_scrollChange(const EventArgs&)
 {
-    // simply trigger a redraw of the Listbox.
+    // simply trigger a redraw of the MultiLineEditbox
     invalidate();
     return true;
 }
@@ -1665,7 +1656,7 @@ void MultiLineEditbox::onSemanticInputEvent(SemanticEventArgs& e)
     }
     else if (e.d_semanticValue == SV_SelectWord && e.d_payload.source == PS_Left)
     {
-        d_dragAnchorIdx = TextUtils::getWordStartIdx(getText(), 
+        d_dragAnchorIdx = TextUtils::getWordStartIdx(getText(),
             (d_caretPos == getText().length()) ? d_caretPos : d_caretPos + 1);
         d_caretPos      = TextUtils::getNextWordStartIdx(getText(), d_caretPos);
 

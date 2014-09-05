@@ -65,7 +65,36 @@ void register_StateImagery_class(){
             
             StateImagery_exposer.def( 
                 "getLayerIterator"
-                , getLayerIterator_function_type( &::CEGUI::StateImagery::getLayerIterator ) );
+                , getLayerIterator_function_type( &::CEGUI::StateImagery::getLayerIterator )
+                , "!  deprecated This function is deprecated. Instead the getLayerSpecifications will be used in the\
+            next version and getLayerSpecificationPointers can be used for editing.\n" );
+        
+        }
+        { //::CEGUI::StateImagery::getLayerSpecificationPointers
+        
+            typedef ::std::vector< CEGUI::LayerSpecification* > ( ::CEGUI::StateImagery::*getLayerSpecificationPointers_function_type )(  ) ;
+            
+            StateImagery_exposer.def( 
+                "getLayerSpecificationPointers"
+                , getLayerSpecificationPointers_function_type( &::CEGUI::StateImagery::getLayerSpecificationPointers )
+                , "*!\n\
+                    \n\
+                        Returns a vector of pointers to the LayerSpecifications that are currently added to this\
+                        StateImagery.\n\
+                        If a LayerSpecification is added or removed from this StateImagery, then the pointers in\
+                        this vector are\n\
+                        not valid anymore. The function should then be called again to retrieve valid\
+                        pointers.\n\
+            \n\
+                     \note\n\
+                         Whenever a pointer from this list is changed in a way that the multiset needs to be\
+                         resorted, the sort\n\
+                         function of this class must be called.\n\
+            \n\
+                     @return\n\
+                        A vector of pointers to the LayerSpecifications that are currently added to this\
+                        StateImagery\n\
+                    *\n" );
         
         }
         { //::CEGUI::StateImagery::getName
@@ -189,6 +218,21 @@ void register_StateImagery_class(){
                     @return\n\
                         String object holding the name of the StateImagery object.\n\
                     *\n" );
+        
+        }
+        { //::CEGUI::StateImagery::sort
+        
+            typedef void ( ::CEGUI::StateImagery::*sort_function_type )(  ) ;
+            
+            StateImagery_exposer.def( 
+                "sort"
+                , sort_function_type( &::CEGUI::StateImagery::sort )
+                , "*!\n\
+            \n\
+                Sorts the LayerSpecifications after their priority. Whenever a LayerSpecification, which has\
+                been added\n\
+                to this StateImagery, is changed, this sort function should be called.\n\
+            *\n" );
         
         }
         { //::CEGUI::StateImagery::writeXMLToStream

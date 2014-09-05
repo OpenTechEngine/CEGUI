@@ -1,4 +1,4 @@
-/***********************************************************************
+﻿/***********************************************************************
     created:    30th July 2013
     author:     Lukas Meindl
 *************************************************************************/
@@ -55,7 +55,6 @@ class SVGBasicShape;
     or be added manually by a user to draw custom geometry.
 */
 class CEGUIEXPORT SVGData :
-    public AllocatedObject<SVGData>,
     public ChainedXMLHandler
 {
 public:

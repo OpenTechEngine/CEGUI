@@ -31,7 +31,6 @@
 #include "CEGUI/RendererModules/Ogre/Renderer.h"
 #include "CEGUI/RendererModules/Ogre/ShaderWrapper.h"
 #include "CEGUI/Rect.h"
-#include "CEGUI/Quaternion.h"
 
 #include <OgreColourValue.h>
 #include <OgreRenderOperation.h>
@@ -79,14 +78,14 @@ public:
         The cached model view projection matrix.
     */
     const Ogre::Matrix4 getMatrix() const;
-
-    // implement CEGUI::GeometryBuffer interface.
     virtual void draw() const;
-    void appendGeometry(const std::vector<float>& vertex_data);
+    virtual void appendGeometry(const float* vertex_data, std::size_t array_size);
+    virtual void setClippingRegion(const Rectf& region);
+    virtual void reset();
+    virtual int getVertexAttributeElementCount() const;
 
-    void setClippingRegion(const Rectf& region);
-
-    void reset();
+    //! return the transformation matrix used for this buffer.
+    const Ogre::Matrix4& getMatrix() const;
 
     void finaliseVertexAttributes(MANUALOBJECT_TYPE type);
 
@@ -104,8 +103,6 @@ protected:
     void setTextureStates() const;
 
     void cleanUpVertexAttributes();
-
-    inline size_t getFloatsPerVertex() const;
 
     //! Renderer object that owns this GeometryBuffer
     OgreRenderer& d_owner;

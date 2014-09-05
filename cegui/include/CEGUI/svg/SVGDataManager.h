@@ -1,4 +1,4 @@
-/***********************************************************************
+﻿/***********************************************************************
     created:    1st August 2013
     author:     Lukas Meindl
 *************************************************************************/
@@ -45,8 +45,7 @@ namespace CEGUI
 class SVGData;
 
 class CEGUIEXPORT SVGDataManager :
-        public Singleton<SVGDataManager>,
-        public AllocatedObject<SVGDataManager>
+        public Singleton<SVGDataManager>
 {
 public:
     SVGDataManager();

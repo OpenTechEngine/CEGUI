@@ -37,7 +37,6 @@
 // Start of CEGUI namespace section
 namespace CEGUI
 {
-
     SectionSpecification::SectionSpecification() :
         d_usingColourOverride(false)
     {}

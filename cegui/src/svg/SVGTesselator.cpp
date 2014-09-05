@@ -1,4 +1,4 @@
-/***********************************************************************
+﻿/***********************************************************************
     created:    1st August 2013
     author:     Lukas Meindl
 *************************************************************************/
@@ -61,7 +61,7 @@ SVGTesselator::StrokeSegmentData::StrokeSegmentData(GeometryBuffer& geometry_buf
     d_strokeVertex.d_position.z = 0.0f;
     //Create the fade stroke colour from the normal colour and set the alpha to 0
     d_strokeFadeVertex = d_strokeVertex;
-    d_strokeFadeVertex.d_colour.setAlpha(0.0f);
+    d_strokeFadeVertex.d_colour.w = 0.0f;
 }
 
 //----------------------------------------------------------------------------//
@@ -303,17 +303,17 @@ void SVGTesselator::setupGeometryBuffers(GeometryBuffer*& fill_geometry_buffer,
 }
 
 //----------------------------------------------------------------------------//
-Colour SVGTesselator::getFillColour(const SVGPaintStyle &paint_style)
+glm::vec4 SVGTesselator::getFillColour(const SVGPaintStyle &paint_style)
 {
     const glm::vec3& fill_colour_values = paint_style.d_fill.d_colour;
-    return Colour(fill_colour_values.x, fill_colour_values.y, fill_colour_values.z, paint_style.d_fillOpacity);
+    return glm::vec4(fill_colour_values.x, fill_colour_values.y, fill_colour_values.z, paint_style.d_fillOpacity);
 }
 
 //----------------------------------------------------------------------------//
-Colour SVGTesselator::getStrokeColour(const SVGPaintStyle &paint_style)
+glm::vec4 SVGTesselator::getStrokeColour(const SVGPaintStyle &paint_style)
 {
     const glm::vec3& stroke_colour_values = paint_style.d_stroke.d_colour;
-    return Colour(stroke_colour_values.x, stroke_colour_values.y, stroke_colour_values.z, paint_style.d_strokeOpacity);
+    return glm::vec4(stroke_colour_values.x, stroke_colour_values.y, stroke_colour_values.z, paint_style.d_strokeOpacity);
 }
 
 //----------------------------------------------------------------------------//
@@ -815,7 +815,7 @@ void SVGTesselator::calculateCircleTesselationParameters(const float radius,
     float theta = std::acos( 1.0f - ( segment_length / radius ) );
 
     static const float two_pi = 2.0f * glm::pi<float>(); 
-    //Calculate the number of segments using 360� as angle and using theta
+    //Calculate the number of segments using 360° as angle and using theta
     num_segments = two_pi / theta;
 
     //Precalculate values we will need for our circle tesselation
@@ -1111,8 +1111,8 @@ void SVGTesselator::createStrokeLinejoinBevelOrRoundAA(StrokeSegmentData &stroke
                                                        const bool polygon_is_clockwise,
                                                        const bool draw)
 {
-    CEGUI::ColouredVertex& stroke_vertex = stroke_data.d_strokeVertex;
-    CEGUI::ColouredVertex& stroke_fade_vertex = stroke_data.d_strokeFadeVertex;
+    ColouredVertex& stroke_vertex = stroke_data.d_strokeVertex;
+    ColouredVertex& stroke_fade_vertex = stroke_data.d_strokeFadeVertex;
     GeometryBuffer& geometry_buffer = stroke_data.d_geometryBuffer;
 
     const glm::vec2& inner_point = polygon_is_clockwise ? segment_end_right : segment_end_left;
@@ -1558,7 +1558,7 @@ void SVGTesselator::createRectangleFill(const SVGPaintStyle& paint_style, std::v
         return;
 
     //Get colours
-    const Colour fill_colour = getFillColour(paint_style);
+    const glm::vec4 fill_colour = getFillColour(paint_style);
 
     //Create the rectangle fill vertex
     ColouredVertex rectFillVertex(glm::vec3(), fill_colour);
@@ -1566,22 +1566,28 @@ void SVGTesselator::createRectangleFill(const SVGPaintStyle& paint_style, std::v
     rectFillVertex.d_position.z = 0.0f;
 
     //Add the rectangle fill vertices
-    rectFillVertex.d_position.swizzle(glm::X, glm::Y) = rectangle_points[0];
+    rectFillVertex.d_position.x = rectangle_points[0].x;
+    rectFillVertex.d_position.y = rectangle_points[0].y;
     geometry_buffer.appendVertex(rectFillVertex);
 
-    rectFillVertex.d_position.swizzle(glm::X, glm::Y) = rectangle_points[1];
+    rectFillVertex.d_position.x = rectangle_points[1].x;
+    rectFillVertex.d_position.y = rectangle_points[1].y;
     geometry_buffer.appendVertex(rectFillVertex);
 
-    rectFillVertex.d_position.swizzle(glm::X, glm::Y) = rectangle_points[2];
+    rectFillVertex.d_position.x = rectangle_points[2].x;
+    rectFillVertex.d_position.y = rectangle_points[2].y;
     geometry_buffer.appendVertex(rectFillVertex);
 
-    rectFillVertex.d_position.swizzle(glm::X, glm::Y) = rectangle_points[2];
+    rectFillVertex.d_position.x = rectangle_points[2].x;
+    rectFillVertex.d_position.y = rectangle_points[2].y;
     geometry_buffer.appendVertex(rectFillVertex);
 
-    rectFillVertex.d_position.swizzle(glm::X, glm::Y) = rectangle_points[0];
+    rectFillVertex.d_position.x = rectangle_points[0].x;
+    rectFillVertex.d_position.y = rectangle_points[0].y;
     geometry_buffer.appendVertex(rectFillVertex);
 
-    rectFillVertex.d_position.swizzle(glm::X, glm::Y) = rectangle_points[3];
+    rectFillVertex.d_position.x = rectangle_points[3].x;
+    rectFillVertex.d_position.y = rectangle_points[3].y;
     geometry_buffer.appendVertex(rectFillVertex);
 }
 
@@ -1589,25 +1595,31 @@ void SVGTesselator::createRectangleFill(const SVGPaintStyle& paint_style, std::v
 void SVGTesselator::createStrokeSegmentConnection(StrokeSegmentData& stroke_data)
 {
     // Add the geometry
-    CEGUI::ColouredVertex& stroke_vertex = stroke_data.d_strokeVertex;
+    ColouredVertex& stroke_vertex = stroke_data.d_strokeVertex;
     GeometryBuffer& geometry_buffer = stroke_data.d_geometryBuffer;
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_currentPointLeft;
+    stroke_vertex.d_position.x = stroke_data.d_currentPointLeft.x;
+    stroke_vertex.d_position.y = stroke_data.d_currentPointLeft.y;
     geometry_buffer.appendVertex(stroke_vertex);
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_currentPointRight;
+    stroke_vertex.d_position.x = stroke_data.d_currentPointRight.x;
+    stroke_vertex.d_position.y = stroke_data.d_currentPointRight.y;
     geometry_buffer.appendVertex(stroke_vertex);
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_lastPointLeft;
+    stroke_vertex.d_position.x = stroke_data.d_lastPointLeft.x;
+    stroke_vertex.d_position.y = stroke_data.d_lastPointLeft.y;
     geometry_buffer.appendVertex(stroke_vertex);
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_lastPointLeft;
+    stroke_vertex.d_position.x = stroke_data.d_lastPointLeft.x;
+    stroke_vertex.d_position.y = stroke_data.d_lastPointLeft.y;
     geometry_buffer.appendVertex(stroke_vertex);
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_currentPointRight;
+    stroke_vertex.d_position.x = stroke_data.d_currentPointRight.x;
+    stroke_vertex.d_position.y = stroke_data.d_currentPointRight.y;
     geometry_buffer.appendVertex(stroke_vertex);
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_lastPointRight;
+    stroke_vertex.d_position.x = stroke_data.d_lastPointRight.x;
+    stroke_vertex.d_position.y = stroke_data.d_lastPointRight.y;
     geometry_buffer.appendVertex(stroke_vertex);
 }
 
@@ -1615,48 +1627,85 @@ void SVGTesselator::createStrokeSegmentConnection(StrokeSegmentData& stroke_data
 //----------------------------------------------------------------------------//
 void SVGTesselator::createStrokeSegmentConnectionAA(StrokeSegmentData &stroke_data)
 { 
-    CEGUI::ColouredVertex& stroke_vertex = stroke_data.d_strokeVertex;
-    CEGUI::ColouredVertex& stroke_fade_vertex = stroke_data.d_strokeFadeVertex;
+    ColouredVertex& stroke_vertex = stroke_data.d_strokeVertex;
+    ColouredVertex& stroke_fade_vertex = stroke_data.d_strokeFadeVertex;
     GeometryBuffer& geometry_buffer = stroke_data.d_geometryBuffer;
 
     //Fade1
-    stroke_fade_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_currentFadePointLeft;
+    stroke_fade_vertex.d_position.x = stroke_data.d_currentFadePointLeft.x;
+    stroke_fade_vertex.d_position.y = stroke_data.d_currentFadePointLeft.y;
     geometry_buffer.appendVertex(stroke_fade_vertex);
-    stroke_fade_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_lastFadePointLeft;
+
+    stroke_fade_vertex.d_position.x = stroke_data.d_lastFadePointLeft.x;
+    stroke_fade_vertex.d_position.y = stroke_data.d_lastFadePointLeft.y;
     geometry_buffer.appendVertex(stroke_fade_vertex);
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_currentPointLeft;
+
+    stroke_vertex.d_position.x = stroke_data.d_currentPointLeft.x;
+    stroke_vertex.d_position.y = stroke_data.d_currentPointLeft.y;
     geometry_buffer.appendVertex(stroke_vertex);
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_currentPointLeft;
+
+    stroke_vertex.d_position.x = stroke_data.d_currentPointLeft.x;
+    stroke_vertex.d_position.y = stroke_data.d_currentPointLeft.y;
     geometry_buffer.appendVertex(stroke_vertex);
-    stroke_fade_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_lastFadePointLeft;
+
+    stroke_fade_vertex.d_position.x = stroke_data.d_lastFadePointLeft.x;
+    stroke_fade_vertex.d_position.y = stroke_data.d_lastFadePointLeft.y;
     geometry_buffer.appendVertex(stroke_fade_vertex);
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_lastPointLeft;
+
+    stroke_vertex.d_position.x = stroke_data.d_lastPointLeft.x;
+    stroke_vertex.d_position.y = stroke_data.d_lastPointLeft.y;
     geometry_buffer.appendVertex(stroke_vertex);
+
+
     //Core
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_currentPointLeft;
+    stroke_vertex.d_position.x = stroke_data.d_currentPointLeft.x;
+    stroke_vertex.d_position.y = stroke_data.d_currentPointLeft.y;
     geometry_buffer.appendVertex(stroke_vertex);
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_lastPointLeft;
+
+    stroke_vertex.d_position.x = stroke_data.d_lastPointLeft.x;
+    stroke_vertex.d_position.y = stroke_data.d_lastPointLeft.y;
     geometry_buffer.appendVertex(stroke_vertex);
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_currentPointRight;
+
+    stroke_vertex.d_position.x = stroke_data.d_currentPointRight.x;
+    stroke_vertex.d_position.y = stroke_data.d_currentPointRight.y;
     geometry_buffer.appendVertex(stroke_vertex);
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_currentPointRight;
+
+    stroke_vertex.d_position.x = stroke_data.d_currentPointRight.x;
+    stroke_vertex.d_position.y = stroke_data.d_currentPointRight.y;
     geometry_buffer.appendVertex(stroke_vertex);
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_lastPointLeft;
+
+    stroke_vertex.d_position.x = stroke_data.d_lastPointLeft.x;
+    stroke_vertex.d_position.y = stroke_data.d_lastPointLeft.y;
     geometry_buffer.appendVertex(stroke_vertex);
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_lastPointRight;
+
+    stroke_vertex.d_position.x = stroke_data.d_lastPointRight.x;
+    stroke_vertex.d_position.y = stroke_data.d_lastPointRight.y;
     geometry_buffer.appendVertex(stroke_vertex);
+
+
     //Fade1
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_currentPointRight;
+    stroke_vertex.d_position.x = stroke_data.d_currentPointRight.x;
+    stroke_vertex.d_position.y = stroke_data.d_currentPointRight.y;
     geometry_buffer.appendVertex(stroke_vertex);
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_lastPointRight;
+
+    stroke_vertex.d_position.x = stroke_data.d_lastPointRight.x;
+    stroke_vertex.d_position.y = stroke_data.d_lastPointRight.y;
     geometry_buffer.appendVertex(stroke_vertex);
-    stroke_fade_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_currentFadePointRight;
+
+    stroke_fade_vertex.d_position.x = stroke_data.d_currentFadePointRight.x;
+    stroke_fade_vertex.d_position.y = stroke_data.d_currentFadePointRight.y;
     geometry_buffer.appendVertex(stroke_fade_vertex);
-    stroke_fade_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_currentFadePointRight;
+
+    stroke_fade_vertex.d_position.x = stroke_data.d_currentFadePointRight.x;
+    stroke_fade_vertex.d_position.y = stroke_data.d_currentFadePointRight.y;
     geometry_buffer.appendVertex(stroke_fade_vertex);
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_lastPointRight;
+
+    stroke_vertex.d_position.x = stroke_data.d_lastPointRight.x;
+    stroke_vertex.d_position.y = stroke_data.d_lastPointRight.y;
     geometry_buffer.appendVertex(stroke_vertex);
-    stroke_fade_vertex.d_position.swizzle(glm::X, glm::Y) = stroke_data.d_lastFadePointRight;
+
+    stroke_fade_vertex.d_position.x = stroke_data.d_lastFadePointRight.x;
+    stroke_fade_vertex.d_position.y = stroke_data.d_lastFadePointRight.y;
     geometry_buffer.appendVertex(stroke_fade_vertex);
 }
 
@@ -1665,21 +1714,27 @@ void SVGTesselator::addStrokeLinecapAAGeometryVertices(StrokeSegmentData &stroke
                                                        const glm::vec2& linecap_left, const glm::vec2& linecap_right,
                                                        const glm::vec2& linecap_fade_left, const glm::vec2& linecap_fade_right)
 { 
-    CEGUI::ColouredVertex& stroke_vertex = stroke_data.d_strokeVertex;
-    CEGUI::ColouredVertex& stroke_fade_vertex = stroke_data.d_strokeFadeVertex;
+    ColouredVertex& stroke_vertex = stroke_data.d_strokeVertex;
+    ColouredVertex& stroke_fade_vertex = stroke_data.d_strokeFadeVertex;
     GeometryBuffer& geometry_buffer = stroke_data.d_geometryBuffer;
 
-    stroke_fade_vertex.d_position.swizzle(glm::X, glm::Y) = linecap_fade_left;
+    stroke_fade_vertex.d_position.x = linecap_fade_left.x;
+    stroke_fade_vertex.d_position.y = linecap_fade_left.y;
     geometry_buffer.appendVertex(stroke_fade_vertex);
-    stroke_fade_vertex.d_position.swizzle(glm::X, glm::Y) = linecap_fade_right;
+    stroke_fade_vertex.d_position.x = linecap_fade_right.x;
+    stroke_fade_vertex.d_position.y = linecap_fade_right.y;
     geometry_buffer.appendVertex(stroke_fade_vertex);
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = linecap_left;
+    stroke_vertex.d_position.x = linecap_left.x;
+    stroke_vertex.d_position.y = linecap_left.y;
     geometry_buffer.appendVertex(stroke_vertex);
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = linecap_left;
+    stroke_vertex.d_position.x = linecap_left.x;
+    stroke_vertex.d_position.y = linecap_left.y;
     geometry_buffer.appendVertex(stroke_vertex);
-    stroke_fade_vertex.d_position.swizzle(glm::X, glm::Y) = linecap_fade_right;
+    stroke_fade_vertex.d_position.x = linecap_fade_right.x;
+    stroke_fade_vertex.d_position.y = linecap_fade_right.y;
     geometry_buffer.appendVertex(stroke_fade_vertex);
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = linecap_right;
+    stroke_vertex.d_position.x = linecap_right.x;
+    stroke_vertex.d_position.y = linecap_right.y;
     geometry_buffer.appendVertex(stroke_vertex);
 }
 
@@ -1690,13 +1745,16 @@ void SVGTesselator::addTriangleGeometry(const glm::vec2& point1,
                                         GeometryBuffer &geometry_buffer,
                                         ColouredVertex &vertex)
 {
-    vertex.d_position.swizzle(glm::X, glm::Y) = point1;
+    vertex.d_position.x = point1.x;
+    vertex.d_position.y = point1.y;
     geometry_buffer.appendVertex(vertex);
 
-    vertex.d_position.swizzle(glm::X, glm::Y) = point2;
+    vertex.d_position.x = point2.x;
+    vertex.d_position.y = point2.y;
     geometry_buffer.appendVertex(vertex);
 
-    vertex.d_position.swizzle(glm::X, glm::Y) = point3;
+    vertex.d_position.x = point3.x;
+    vertex.d_position.y = point3.y;
     geometry_buffer.appendVertex(vertex);
 }
 
@@ -1706,7 +1764,7 @@ void SVGTesselator::createStrokeGeometry(const std::vector<glm::vec2>& outer_poi
                                          StrokeSegmentData &stroke_data,
                                          const bool is_surface_closed)
 {
-    CEGUI::ColouredVertex& stroke_vertex = stroke_data.d_strokeVertex;
+    ColouredVertex& stroke_vertex = stroke_data.d_strokeVertex;
     GeometryBuffer& geometry_buffer = stroke_data.d_geometryBuffer;
 
     size_t circle_points_count = outer_points.size();
@@ -1727,8 +1785,8 @@ void SVGTesselator::createStrokeGeometryAA(const std::vector<glm::vec2>& outer_p
                                            StrokeSegmentData &stroke_data,
                                            const bool is_surface_closed)
 {
-    CEGUI::ColouredVertex& stroke_vertex = stroke_data.d_strokeVertex;
-    CEGUI::ColouredVertex& stroke_fade_vertex = stroke_data.d_strokeFadeVertex;
+    ColouredVertex& stroke_vertex = stroke_data.d_strokeVertex;
+    ColouredVertex& stroke_fade_vertex = stroke_data.d_strokeFadeVertex;
     GeometryBuffer& geometry_buffer = stroke_data.d_geometryBuffer;
 
     size_t points_count = outer_points.size();
@@ -1767,7 +1825,7 @@ void SVGTesselator::createFillGeometryAAFadeOnly(const std::vector<glm::vec2>& p
     fill_vertex.d_position.z = 0.0f;
     //Create the fade fill vertex from the fill vertex and set its alpha to 0
     ColouredVertex fill_fade_vertex = fill_vertex;
-    fill_fade_vertex.d_colour.setAlpha(0.0f);
+    fill_fade_vertex.d_colour.w = 0.0f;
 
     size_t points_count = points.size();
     for(size_t i = 0; i < points_count - 1; ++i)
@@ -1788,22 +1846,28 @@ void SVGTesselator::addFillQuad(const glm::vec2& point1,
                                 GeometryBuffer& geometry_buffer,
                                 ColouredVertex& fill_vertex)
 {
-    fill_vertex.d_position.swizzle(glm::X, glm::Y) = point1;
+    fill_vertex.d_position.x = point1.x;
+    fill_vertex.d_position.y = point1.y;
     geometry_buffer.appendVertex(fill_vertex);
 
-    fill_vertex.d_position.swizzle(glm::X, glm::Y) = point2;
+    fill_vertex.d_position.x = point2.x;
+    fill_vertex.d_position.y = point2.y;
     geometry_buffer.appendVertex(fill_vertex);
 
-    fill_vertex.d_position.swizzle(glm::X, glm::Y) = point3;
+    fill_vertex.d_position.x = point3.x;
+    fill_vertex.d_position.y = point3.y;
     geometry_buffer.appendVertex(fill_vertex);
 
-    fill_vertex.d_position.swizzle(glm::X, glm::Y) = point3;
+    fill_vertex.d_position.x = point3.x;
+    fill_vertex.d_position.y = point3.y;
     geometry_buffer.appendVertex(fill_vertex);
 
-    fill_vertex.d_position.swizzle(glm::X, glm::Y) = point2;
+    fill_vertex.d_position.x = point2.x;
+    fill_vertex.d_position.y = point2.y;
     geometry_buffer.appendVertex(fill_vertex);
 
-    fill_vertex.d_position.swizzle(glm::X, glm::Y) = point4;
+    fill_vertex.d_position.x = point4.x;
+    fill_vertex.d_position.y = point4.y;
     geometry_buffer.appendVertex(fill_vertex);
 }
 
@@ -1815,22 +1879,28 @@ void SVGTesselator::addStrokeQuad(const glm::vec2& point1,
                                   GeometryBuffer& geometry_buffer,
                                   ColouredVertex& stroke_vertex)
 {
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = point1;
+    stroke_vertex.d_position.x = point1.x;
+    stroke_vertex.d_position.y = point1.y;
     geometry_buffer.appendVertex(stroke_vertex);
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = point2;
+    stroke_vertex.d_position.x = point2.x;
+    stroke_vertex.d_position.y = point2.y;
     geometry_buffer.appendVertex(stroke_vertex);
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = point3;
+    stroke_vertex.d_position.x = point3.x;
+    stroke_vertex.d_position.y = point3.y;
     geometry_buffer.appendVertex(stroke_vertex);
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = point3;
+    stroke_vertex.d_position.x = point3.x;
+    stroke_vertex.d_position.y = point3.y;
     geometry_buffer.appendVertex(stroke_vertex);
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = point2;
+    stroke_vertex.d_position.x = point2.x;
+    stroke_vertex.d_position.y = point2.y;
     geometry_buffer.appendVertex(stroke_vertex);
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = point4;
+    stroke_vertex.d_position.x = point4.x;
+    stroke_vertex.d_position.y = point4.y;
     geometry_buffer.appendVertex(stroke_vertex);
 }
 
@@ -1844,22 +1914,28 @@ void SVGTesselator::addStrokeQuadAA(const glm::vec2& point1,
                                     ColouredVertex& stroke_vertex,
                                     ColouredVertex& stroke_fade_vertex)
 {
-    stroke_fade_vertex.d_position.swizzle(glm::X, glm::Y) = fade_point1;
+    stroke_fade_vertex.d_position.x = fade_point1.x;
+    stroke_fade_vertex.d_position.y = fade_point1.y;
     geometry_buffer.appendVertex(stroke_fade_vertex);
 
-    stroke_fade_vertex.d_position.swizzle(glm::X, glm::Y) = fade_point2;
+    stroke_fade_vertex.d_position.x = fade_point2.x;
+    stroke_fade_vertex.d_position.y = fade_point2.y;
     geometry_buffer.appendVertex(stroke_fade_vertex);
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = point1;
+    stroke_vertex.d_position.x = point1.x;
+    stroke_vertex.d_position.y = point1.y;
     geometry_buffer.appendVertex(stroke_vertex);
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = point1;
+    stroke_vertex.d_position.x = point1.x;
+    stroke_vertex.d_position.y = point1.y;
     geometry_buffer.appendVertex(stroke_vertex);
 
-    stroke_fade_vertex.d_position.swizzle(glm::X, glm::Y) = fade_point2;
+    stroke_fade_vertex.d_position.x = fade_point2.x;
+    stroke_fade_vertex.d_position.y = fade_point2.y;
     geometry_buffer.appendVertex(stroke_fade_vertex);
 
-    stroke_vertex.d_position.swizzle(glm::X, glm::Y) = point2;
+    stroke_vertex.d_position.x = point2.x;
+    stroke_vertex.d_position.y = point2.y;
     geometry_buffer.appendVertex(stroke_vertex);
 }
 
@@ -1913,7 +1989,7 @@ void SVGTesselator::setupGeometryBufferSettings(CEGUI::GeometryBuffer* geometry_
     else
         geometry_buffer->setClippingActive(false);
 
-    geometry_buffer->setScale(CEGUI::Vector2f(render_settings.d_scaleFactor.x, render_settings.d_scaleFactor.y));
+    geometry_buffer->setScale(glm::vec2(render_settings.d_scaleFactor.x, render_settings.d_scaleFactor.y));
     geometry_buffer->setCustomTransform(cegui_transformation_matrix);
     geometry_buffer->setAlpha(render_settings.d_alpha);
 }

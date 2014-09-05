@@ -42,7 +42,7 @@ set( CEGUI_VERSION ${CEGUI_VERSION_MAJOR}.${CEGUI_VERSION_MINOR}.${CEGUI_VERSION
 #
 # The following describes what these components are and how they are intended to
 # be managed.
-# 
+#
 #   - CURRENT: The binary interface version provided by the library.
 #   - REVISION: Revision of binary interface specified in CURRENT
 #   - AGE: Number of previous binary interfaces this library is compatible with.
@@ -106,7 +106,7 @@ find_package(Lua51)
 find_package(TOLUAPP)
 find_package(PythonInterp)
 find_package(PythonLibs)
-find_package(Boost 1.36.0 COMPONENTS python unit_test_framework system)
+find_package(Boost 1.36.0 COMPONENTS python unit_test_framework system timer)
 
 find_package(Doxygen)
 find_package(GTK2 COMPONENTS gtk)
@@ -130,27 +130,19 @@ option( CEGUI_BUILD_STATIC_FACTORY_MODULE "For static CEGUI builds, specifies wh
 if (CEGUI_BUILD_STATIC_FACTORY_MODULE AND NOT CEGUI_BUILD_STATIC_CONFIGURATION)
   message(SEND_ERROR "You may not enable CEGUI_BUILD_STATIC_FACTORY_MODULE without CEGUI_BUILD_STATIC_CONFIGURATION enabled.  CEGUI needs to be built statically if building the static factory method.")
 endif()
-option( CEGUI_CUSTOM_ALLOCATORS "If checked, CEGUI can use custom allocation. (for experienced developers only!)" FALSE )
-cmake_dependent_option( CEGUI_CUSTOM_ALLOCATORS_DEBUG "If checked, CEGUI allocations will pass debug info to allocators. (only used if CEGUI_CUSTOM_ALLOCATORS is checked)" FALSE "CEGUI_CUSTOM_ALLOCATORS" FALSE )
-set( CEGUI_CUSTOM_ALLOCATORS_INCLUDE "CEGUI/MemoryStdAllocator.h" CACHE STRING "Which include file contains memory allocators and allocation configuration. (only used if CEGUI_CUSTOM_ALLOCATORS is checked)
-We have bundled 2 allocators, mostly for demonstrational purposes.
-CEGUI/MemoryStdAllocator.h contains malloc allocator, use it as a starting point for your own allocators
-CEGUI/MemoryOgreAllocator.h delegates allocation to Ogre, which may be useful to Ogre users (you will have to manually change linking options of CEGUIBase!)" )
 
 set( CEGUI_STRING_CLASS 1 CACHE INT "Which string class should CEGUI use
 1 - utf8 and utf32 aware inbuilt string,
-2 - std::string without custom allocation,
-3 - std::basic_string allocated according to allocator config" )
+2 - regular std::string"
+)
 
-# sanity check std::basic_string and allocator and allocators actually being used
-if (${CEGUI_STRING_CLASS} MATCHES 3 AND NOT CEGUI_CUSTOM_ALLOCATORS)
-    message(SEND_ERROR "You requested std::basic_string allocated according to allocator as CEGUI::String even though CEGUI is not being built with custom allocators enabled!")
-endif()
 
 option( CEGUI_HAS_FREETYPE "Specifies whether to include Freetype font support" ${FREETYPE_FOUND} )
 option( CEGUI_HAS_PCRE_REGEX "Specifies whether to include PCRE regexp matching for editbox string validation" ${PCRE_FOUND} )
 option( CEGUI_HAS_MINIZIP_RESOURCE_PROVIDER "Specifies whether to build the minizip based resource provider" ${MINIZIP_FOUND} )
 option( CEGUI_HAS_DEFAULT_LOGGER "Specifies whether to build the DefaultLogger implementation" TRUE)
+
+option( CEGUI_BUILD_COMMON_DIALOGS "Specifies whether to build the CommonDialogs library, which contains the code for the ColourPicker and other dialogs" TRUE)
 
 option( CEGUI_BUILD_XMLPARSER_EXPAT "Specifies whether to build the Expat based XMLParser module" ${EXPAT_FOUND} )
 option( CEGUI_BUILD_XMLPARSER_XERCES "Specifies whether to build the Xerces-C++ based XMLParser module" ${XERCESC_FOUND} )
@@ -267,8 +259,18 @@ if (APPLE)
     option( CEGUI_APPLE_DYLIB_SET_VERSION_INFO "Specifies whether to set VERSION and SOVERSION for libraries." FALSE )
 endif()
 
-# regression and performance tests
-cmake_dependent_option( CEGUI_BUILD_TESTS "Specifies whether to build the regression and performance tests." FALSE "Boost_UNIT_TEST_FRAMEWORK_FOUND" FALSE )
+# unit tests
+cmake_dependent_option( CEGUI_BUILD_TESTS "Specifies whether to build the unit tests." FALSE "Boost_UNIT_TEST_FRAMEWORK_FOUND" FALSE )
+
+cmake_dependent_option( CEGUI_BUILD_PERFORMANCE_TESTS "Specifies whether to build the performance tests." FALSE "Boost_UNIT_TEST_FRAMEWORK_FOUND;Boost_TIMER_FOUND" FALSE )
+
+# sanity check on unit tests
+if ((CEGUI_BUILD_TESTS OR CEGUI_BUILD_PERFORMANCE_TESTS) AND NOT CEGUI_BUILD_RENDERER_NULL)
+    message(SEND_ERROR "The CEGUI tests (option CEGUI_BUILD_TESTS or CEGUI_BUILD_PERFORMANCE_TESTS) require the null renderer (CEGUI_BUILD_RENDERER_NULL). Please enable it.")
+endif()
+
+# datafiles tests
+cmake_dependent_option( CEGUI_BUILD_DATAFILES_TEST "Specifies whether to build the datafiles test." FALSE "PYTHONINTERP_FOUND" FALSE )
 
 option( CEGUI_INSTALL_WITH_RPATH "Specifies whether to install with RPATH set to the install location (TRUE) or with no RPATH set (FALSE)." FALSE )
 
@@ -512,6 +514,12 @@ if (UNIX AND NOT APPLE)
     endif()
 endif()
 
+
+# Activating the default multi-processor build setting for all Visual Studio versions
+if (MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif()
+
 ################################################################################
 # descend into subdirs
 ################################################################################
@@ -522,10 +530,11 @@ add_subdirectory(cegui/src/ImageCodecModules)
 add_subdirectory(cegui/src/WindowRendererSets)
 add_subdirectory(cegui/src/ScriptModules)
 
-add_subdirectory(cegui/src/CommonDialogs)
+if(CEGUI_BUILD_COMMON_DIALOGS)
+    add_subdirectory(cegui/src/CommonDialogs)
+endif()
 
 if (CEGUI_SAMPLES_ENABLED)
-    add_subdirectory(samples_framework)
     add_subdirectory(samples)
 endif()
 
@@ -538,7 +547,7 @@ if (DOXYGEN_FOUND)
         COMMENT "Generating documentation" VERBATIM)
 endif()
 
-if (CEGUI_BUILD_TESTS)
+if (CEGUI_BUILD_TESTS OR CEGUI_BUILD_PERFORMANCE_TESTS OR CEGUI_BUILD_DATAFILES_TEST)
     enable_testing()
 
     add_subdirectory(tests)
@@ -569,6 +578,7 @@ set(CPACK_SOURCE_IGNORE_FILES
 # the rest is modelled after .hgignore
 "build/"
 "~$"
+"\\\\.orig$"
 
 "Thumbs.db"
 "\\\\.directory"
@@ -578,6 +588,7 @@ set(CPACK_SOURCE_IGNORE_FILES
 "\\\\.project"
 "\\\\.cproject"
 "\\\\.pydevproject"
+"\\\\.ropeproject"
 )
 
 include(CPack)

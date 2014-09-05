@@ -6,6 +6,7 @@ The following is a list of primary authors and contributors for Crazy Eddie's GU
 - Paul D Turner (crayzed / CrazyEddie / ice-drezday)
 - Martin Preisler (Kulik)
 - Lukas Meindl (Ident)
+- Timotei Dolean (timootei)
 
 @section authors_sec_2 Retired or Semi-retired CEGUI Team Members
 - Patrick Kooman (scriptkid)
@@ -22,9 +23,6 @@ The following have made large, important, or on-going contributions to the syste
 (these people may have made additional contributions than those specifically mentioned):
 - 'Blakharaz':
     - Initial XmlHandlerHelper class and general cleanup of original XML parsing code.
-- Timotei Dolean:
-    - Reworked the input system to allow other devices besides mouse and keyboard.
-    - Support for GUI navigation.
 - Jeff Leigh:
     - Original CEGUI::ColourManipulator class (now re-factored into CEGUI::colour class) and related fixes.
 - Eugene Marcotte:
@@ -63,6 +61,8 @@ The following have made large, important, or on-going contributions to the syste
     - Font class rewrite.
 - Henri Hyyryläinen:
     - 3rd version of the Ogre3D renderer module.
+- Luca Ebach:
+    - SamplesBrowser rework to merge the 'zillion' sample libraries into the executable
 
 <br>
 @section authors_sec_5 Other Contributors
@@ -72,7 +72,6 @@ The following have contributed patches, bug reports, and other such valuable thi
 - Clay Culver
 - Paul Downey
 - Jeff Doyle
-- Luca Ebach
 - Jan Eickmann
 - Andrzej Krzysztof Haczewski
 - Markus Henschel

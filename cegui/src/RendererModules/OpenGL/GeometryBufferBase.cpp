@@ -25,15 +25,15 @@
  *   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  *   OTHER DEALINGS IN THE SOFTWARE.
  ***************************************************************************/
-#include <GL/glew.h>
-
-#include "glm/glm.hpp"
-#include "glm/gtc/quaternion.hpp"
-#include "glm/gtc/matrix_transform.hpp"
 #include "CEGUI/RendererModules/OpenGL/GeometryBufferBase.h"
 #include "CEGUI/RenderEffect.h"
 #include "CEGUI/RendererModules/OpenGL/Texture.h"
 #include "CEGUI/Vertex.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace CEGUI
 {
@@ -58,12 +58,6 @@ void OpenGLGeometryBufferBase::setClippingRegion(const Rectf& region)
     d_clipRect.left(ceguimax(0.0f, region.left()));
     d_clipRect.bottom(ceguimax(0.0f, region.bottom()));
     d_clipRect.right(ceguimax(0.0f, region.right()));
-}
-
-//----------------------------------------------------------------------------//
-void OpenGLGeometryBufferBase::reset()
-{
-    GeometryBuffer::reset();
 }
 
 //----------------------------------------------------------------------------//
@@ -110,10 +104,10 @@ glm::mat4 OpenGLGeometryBufferBase::getModelMatrix() const
     modelMatrix *= rotation_matrix * scale_matrix * translMatrix * d_customTransform;
 
     return modelMatrix;
+
 }
 
 
 //----------------------------------------------------------------------------//
 
 }
-

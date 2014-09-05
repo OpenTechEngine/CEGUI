@@ -87,7 +87,7 @@ public:
     bool isTextureDefined(const String& name) const;
     void setDisplaySize(const Sizef& sz);
     const Sizef& getDisplaySize() const;
-    const Vector2f& getDisplayDPI() const;
+    const glm::vec2& getDisplayDPI() const;
     uint getMaxTextureSize() const;
     const String& getIdentifierString() const;
 
@@ -235,7 +235,7 @@ protected:
     //! What the renderer considers to be the current display size.
     Sizef d_displaySize;
     //! What the renderer considers to be the current display DPI resolution.
-    Vector2f d_displayDPI;
+    glm::vec2 d_displayDPI;
     //! The default RenderTarget
     RenderTarget* d_defaultTarget;
     //! container type used to hold TextureTargets we create.
@@ -243,8 +243,7 @@ protected:
     //! Container used to track texture targets.
     TextureTargetList d_textureTargets;
     //! container type used to hold Textures we create.
-    typedef std::map<String, OpenGLTexture*, StringFastLessCompare
-                     CEGUI_MAP_ALLOC(String, OpenGLTexture*)> TextureMap;
+    typedef std::map<String, OpenGLTexture*, StringFastLessCompare> TextureMap;
     //! Container used to track textures.
     TextureMap d_textures;
     //! What the renderer thinks the max texture size is.
@@ -264,8 +263,7 @@ protected:
     TextureTarget based on what the host system can provide - or use the
     default 'null' factory if no suitable TextureTargets are available.
 */
-class OGLTextureTargetFactory :
-    public AllocatedObject<OGLTextureTargetFactory>
+class OGLTextureTargetFactory
 {
 public:
     OGLTextureTargetFactory() {}

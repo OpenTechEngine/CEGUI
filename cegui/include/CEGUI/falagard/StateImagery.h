@@ -43,10 +43,15 @@ namespace CEGUI
     \brief
         Class the encapsulates imagery for a given widget state.
     */
-    class CEGUIEXPORT StateImagery :
-        public AllocatedObject<StateImagery>
+    class CEGUIEXPORT StateImagery
     {
     public:
+        //! Container for LayerSpecifications. This container needs to be sorted for priority every time a member is changed, added or removed.
+        typedef std::vector<LayerSpecification> LayerSpecificationList;
+
+        //! Container type for LayerSpecification pointers
+        typedef std::vector<LayerSpecification*> LayerSpecificationPointerList;
+
         /*!
         \brief
             Constructor
@@ -70,9 +75,6 @@ namespace CEGUI
 
         \param srcWindow
             Window to use when convering BaseDim values to pixels.
-
-        \return
-            Nothing.
         */
         void render(Window& srcWindow, const ColourRect* modcols = 0, const Rectf* clipper = 0) const;
 
@@ -85,9 +87,6 @@ namespace CEGUI
 
         \param baseRect
             Rect to use when convering BaseDim values to pixels.
-
-        \return
-            Nothing.
         */
         void render(Window& srcWindow, const Rectf& baseRect, const ColourRect* modcols = 0, const Rectf* clipper = 0) const;
 
@@ -97,18 +96,20 @@ namespace CEGUI
 
         \param layer
             LayerSpecification to be added to this state (will be copied)
-
-        \return
-            Nothing.
         */
         void addLayer(const LayerSpecification& layer);
 
         /*!
         \brief
-            Removed all LayerSpecifications from this state.
+            Sorts the LayerSpecifications after their priority. Whenever a LayerSpecification, which has been added
+            to this StateImagery, is changed or an element is added to or removed from the list, this sort function
+            has to be called.
+        */
+        void sort();
 
-        \return
-            Nothing.
+        /*!
+        \brief
+            Removed all LayerSpecifications from this state.
         */
         void clearLayers();
 
@@ -151,9 +152,6 @@ namespace CEGUI
         \param setting
             - true if the imagery should be clipped to the display area.
             - false if the imagery should be clipped to the target window area.
-
-        \return
-            Nothing.
         */
         void setClippedToDisplay(bool setting);
 
@@ -163,24 +161,37 @@ namespace CEGUI
 
         \param xml_stream
             Stream where xml data should be output.
-
-
-        \return
-            Nothing.
         */
         void writeXMLToStream(XMLSerializer& xml_stream) const;
 
+        /*!
+        \brief
+            Returns a const reference to the list of LayerSpecifications that are currently added to this StateImagery.
+
+         \return
+            A const reference to the vector of LayerSpecifications that are currently added to this StateImagery
+        */
+        const LayerSpecificationList& getLayerSpecifications() const;
+
+        /*!
+        \brief
+            Returns a vector of pointers to the LayerSpecifications that are currently added to this StateImagery.
+            If a LayerSpecification is added or removed from this StateImagery, then the pointers in this vector are
+            not valid anymore. The function should then be called again to retrieve valid pointers.
+
+        \note
+            Whenever a pointer from this list is changed in a way that the multiset needs to be resorted, the sort
+            function of this class must be called.
+
+        \return
+            A vector of pointers to the LayerSpecifications that are currently added to this StateImagery
+        */
+        LayerSpecificationPointerList getLayerSpecificationPointers();
+
     private:
-        typedef std::multiset<LayerSpecification> LayersList;
-
-        CEGUI::String   d_stateName;    //!< Name of this state.
-        LayersList      d_layers;       //!< Collection of LayerSpecification objects to be drawn for this state.
-        bool            d_clipToDisplay; //!< true if Imagery for this state should be clipped to the display instead of winodw (effectively, not clipped).
-    public:
-        typedef ConstVectorIterator<LayersList> LayerIterator;
-
-        LayerIterator getLayerIterator() const;
-
+        CEGUI::String               d_stateName;    //!< Name of this state.
+        LayerSpecificationList      d_layers;       //!< Collection of LayerSpecification objects to be drawn for this state.
+        bool                        d_clipToDisplay; //!< true if Imagery for this state should be clipped to the display instead of winodw (effectively, not clipped).
     };
 
 } // End of  CEGUI namespace section

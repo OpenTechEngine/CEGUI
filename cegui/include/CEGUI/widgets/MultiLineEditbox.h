@@ -163,8 +163,7 @@ public:
         size_t  d_length;       //!< Code point length of this line.
         float   d_extent;       //!< Rendered extent of this line.
     };
-    typedef std::vector<LineInfo
-        CEGUI_VECTOR_ALLOC(LineInfo)>   LineList;   //!< Type for collection of LineInfos.
+    typedef std::vector<LineInfo>   LineList;   //!< Type for collection of LineInfos.
 
 	/*************************************************************************
 		Accessor Functions
@@ -508,13 +507,6 @@ protected:
 	/*************************************************************************
 		Implementation Methods
 	*************************************************************************/
-	/*!
-	\brief
-		Format the text into lines as needed by the current formatting options.
-    \deprecated
-        This is deprecated in favour of the version taking a boolean.
-	*/
-	void	formatText(void);
 
 	/*!
 	\brief
@@ -546,7 +538,7 @@ protected:
 	\return
 		Code point index into the text that is rendered closest to screen position \a pt.
 	*/
-	size_t	getTextIndexFromPosition(const Vector2f& pt) const;
+    size_t	getTextIndexFromPosition(const glm::vec2& pt) const;
 
 
 	/*!

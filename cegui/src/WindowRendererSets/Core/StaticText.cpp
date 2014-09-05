@@ -112,7 +112,7 @@ namespace CEGUI
     FalagardStaticText::~FalagardStaticText()
     {
         if (d_formattedRenderedString)
-            CEGUI_DELETE_AO d_formattedRenderedString;
+            delete d_formattedRenderedString;
     }
 
 //----------------------------------------------------------------------------//
@@ -154,18 +154,18 @@ namespace CEGUI
             case HTF_WORDWRAP_LEFT_ALIGNED:
             case HTF_JUSTIFIED:
             case HTF_WORDWRAP_JUSTIFIED:
-                absarea.offset(Vector2f(-horzScrollbar->getScrollPosition(), 0));
+                absarea.offset(glm::vec2(-horzScrollbar->getScrollPosition(), 0));
                 break;
 
             case HTF_CENTRE_ALIGNED:
             case HTF_WORDWRAP_CENTRE_ALIGNED:
                 absarea.setWidth(horzScrollbar->getDocumentSize());
-                absarea.offset(Vector2f(range / 2 - horzScrollbar->getScrollPosition(), 0));
+                absarea.offset(glm::vec2(range / 2 - horzScrollbar->getScrollPosition(), 0));
                 break;
 
             case HTF_RIGHT_ALIGNED:
             case HTF_WORDWRAP_RIGHT_ALIGNED:
-                absarea.offset(Vector2f(range - horzScrollbar->getScrollPosition(), 0));
+                absarea.offset(glm::vec2(range - horzScrollbar->getScrollPosition(), 0));
                 break;
             }
         }
@@ -191,10 +191,10 @@ namespace CEGUI
             }
 
         // calculate final colours
-        ColourRect final_cols(d_textCols);
+        const ColourRect final_cols(d_textCols);
         // cache the text for rendering.
         d_formattedRenderedString->draw(d_window, d_window->getGeometryBuffers(),
-                                        absarea.getPosition(),
+                                        absarea.getPositionGLM(),
                                         &final_cols, &clipper);
     }
 
@@ -499,45 +499,45 @@ namespace CEGUI
         {
         case HTF_LEFT_ALIGNED:
             d_formattedRenderedString =
-                CEGUI_NEW_AO LeftAlignedRenderedString(d_window->getRenderedString());
+                new LeftAlignedRenderedString(d_window->getRenderedString());
             break;
 
         case HTF_RIGHT_ALIGNED:
             d_formattedRenderedString =
-                CEGUI_NEW_AO RightAlignedRenderedString(d_window->getRenderedString());
+                new RightAlignedRenderedString(d_window->getRenderedString());
             break;
 
         case HTF_CENTRE_ALIGNED:
             d_formattedRenderedString =
-                CEGUI_NEW_AO CentredRenderedString(d_window->getRenderedString());
+                new CentredRenderedString(d_window->getRenderedString());
             break;
 
         case HTF_JUSTIFIED:
             d_formattedRenderedString =
-                CEGUI_NEW_AO JustifiedRenderedString(d_window->getRenderedString());
+                new JustifiedRenderedString(d_window->getRenderedString());
             break;
 
         case HTF_WORDWRAP_LEFT_ALIGNED:
             d_formattedRenderedString =
-                CEGUI_NEW_AO RenderedStringWordWrapper
+                new RenderedStringWordWrapper
                     <LeftAlignedRenderedString>(d_window->getRenderedString());
             break;
 
         case HTF_WORDWRAP_RIGHT_ALIGNED:
             d_formattedRenderedString =
-                CEGUI_NEW_AO RenderedStringWordWrapper
+                new RenderedStringWordWrapper
                     <RightAlignedRenderedString>(d_window->getRenderedString());
             break;
 
         case HTF_WORDWRAP_CENTRE_ALIGNED:
             d_formattedRenderedString =
-                CEGUI_NEW_AO RenderedStringWordWrapper
+                new RenderedStringWordWrapper
                     <CentredRenderedString>(d_window->getRenderedString());
             break;
 
         case HTF_WORDWRAP_JUSTIFIED:
             d_formattedRenderedString =
-                CEGUI_NEW_AO RenderedStringWordWrapper
+                new RenderedStringWordWrapper
                     <JustifiedRenderedString>(d_window->getRenderedString());
             break;
         }

@@ -107,8 +107,7 @@ enum DefaultShaderType
     or API to draw CEGUI imagery requires that an appropriate Renderer object be
     available.
 */
-class CEGUIEXPORT Renderer :
-    public AllocatedObject<Renderer>
+class CEGUIEXPORT Renderer
 {
 public:
     Renderer();
@@ -388,10 +387,10 @@ public:
         Returns the resolution of the display or host window in dots per inch.
 
     \return
-        Vector2 object that describes the resolution of the display or host
+        vec2 object that describes the resolution of the display or host
         window in DPI.
     */
-    virtual const Vector2f& getDisplayDPI() const = 0;
+    virtual const glm::vec2& getDisplayDPI() const = 0;
 
     /*!
     \brief

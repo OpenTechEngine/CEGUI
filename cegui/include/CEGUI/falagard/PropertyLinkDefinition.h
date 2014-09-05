@@ -39,7 +39,6 @@
 
 namespace CEGUI
 {
-
 /*!
 \brief
     Class representing a property that links to another property defined on
@@ -104,13 +103,13 @@ public:
     //------------------------------------------------------------------------//
     void initialisePropertyReceiver(PropertyReceiver* receiver) const
     {
-        updateLinkTargets(receiver, Helper::fromString(this->d_default));
+        updateLinkTargets(receiver, Helper::fromString(FalagardPropertyBase<T>::d_initialValue));
     }
 
     //------------------------------------------------------------------------//
     Property* clone() const
     {
-        return CEGUI_NEW_AO PropertyLinkDefinition<T>(*this);
+        return new PropertyLinkDefinition<T>(*this);
     }
 
 protected:
@@ -126,7 +125,7 @@ protected:
 
         // if no target, or target (currently) invalid, return the default value
         if (d_targets.empty() || !target_wnd)
-            return Helper::fromString(TypedProperty<T>::d_default);
+            return Helper::fromString(FalagardPropertyBase<T>::d_initialValue);
 
         // otherwise return the value of the property for first target, since
         // this is considered the 'master' target for get operations.
@@ -242,7 +241,7 @@ protected:
     //------------------------------------------------------------------------//
     typedef std::pair<String,String> StringPair;
     //! type used for the collection of targets.
-    typedef std::vector<StringPair CEGUI_VECTOR_ALLOC(StringPair)> LinkTargetCollection;
+    typedef std::vector<StringPair> LinkTargetCollection;
 
     //! collection of targets for this PropertyLinkDefinition.
     LinkTargetCollection d_targets;

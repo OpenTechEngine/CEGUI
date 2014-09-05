@@ -24,11 +24,11 @@ author:     Lukas E Meindl
 *   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 *   OTHER DEALINGS IN THE SOFTWARE.
 ***************************************************************************/
-#ifndef _First_Person_HUD_
-#define _First_Person_HUD_
+#ifndef _Restaurant_Game_h
+#define _Restaurant_Game_h
 
 #include "SampleBase.h"
-
+#include <glm/glm.hpp>
 #include <vector>
 
 namespace CEGUI
@@ -48,9 +48,11 @@ enum SelectedWeapon
 };
 
 // Sample class
-class HUDDemo : public Sample
+class RestaurantGameSample : public Sample
 {
 public:
+    RestaurantGameSample();
+
     // method to initialse the samples windows and events.
     virtual bool initialise(CEGUI::GUIContext* guiContext);
 
@@ -87,7 +89,7 @@ protected:
     bool handleRestartButtonClicked(const CEGUI::EventArgs& args);
 
     void updateScoreWindow();
-    void createScorePopup(const CEGUI::Vector2<float>& pointerPos, int points);
+    void createScorePopup(const glm::vec2& pointerPos, int points);
 
     void handleLivesChanged();
 

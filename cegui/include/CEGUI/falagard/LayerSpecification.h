@@ -42,10 +42,16 @@ namespace CEGUI
     \brief
         Class that encapsulates a single layer of imagery.
     */
-    class CEGUIEXPORT LayerSpecification :
-        public AllocatedObject<LayerSpecification>
+    class CEGUIEXPORT LayerSpecification
     {
     public:
+        //! The container type for SectionSpecifications
+        typedef std::vector<SectionSpecification> SectionSpecificationList;
+
+        //! The container type for pointers to SectionSpecifications
+        typedef std::vector<SectionSpecification*> SectionSpecificationPointerList;
+
+
         /*!
         \brief
             Constructor.
@@ -123,9 +129,6 @@ namespace CEGUI
         */
         void setLayerPriority(uint priority);
 
-        // required to sort layers according to priority
-        bool operator<(const LayerSpecification& other) const;
-
         /*!
         \brief
             Writes an xml representation of this Layer to \a out_stream.
@@ -139,16 +142,35 @@ namespace CEGUI
         */
         void writeXMLToStream(XMLSerializer& xml_stream) const;
 
+         /*!
+        \brief
+            Returns a reference to the vector of SectionSpecifications that are currently added to this LayerSpecification.
+
+         \return
+            A const reference to the vector SectionSpecifications that are currently added to this LayerSpecification
+        */
+        const SectionSpecificationList& getSectionSpecifications() const;  
+
+        /*!
+        \brief
+            Returns a vector of pointers to the SectionSpecifications that are currently added to this LayerSpecification. If a
+            SectionSpecification is added or removed from this LayerSpecification, then the pointers in this vector are not valid
+            anymore. The function should then be called again to retrieve valid pointers.
+
+         \return
+            A vector of pointers to the SectionSpecifications that are currently added to this LayerSpecification
+        */
+        SectionSpecificationPointerList getSectionSpecificationPointers();  
+
+
+        //! The comparison operator, which is used for sorting
+        bool operator< (const LayerSpecification& otherLayerSpec) const;
+
     private:
-        typedef std::vector<SectionSpecification
-            CEGUI_VECTOR_ALLOC(SectionSpecification)> SectionList;
-
-        SectionList d_sections;         //!< Collection of SectionSpecification objects descibing the sections to be drawn for this layer.
-        uint        d_layerPriority;    //!< Priority of the layer.
-    public:
-        typedef ConstVectorIterator<SectionList> SectionIterator;
-
-        SectionIterator getSectionIterator() const;
+        //! Collection of SectionSpecification instances
+        SectionSpecificationList    d_sections;
+        //! Priority of the layer
+        uint                        d_layerPriority;
     };
 
 } // End of  CEGUI namespace section

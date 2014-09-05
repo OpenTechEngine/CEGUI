@@ -58,7 +58,7 @@ public:
     virtual void activate();
     virtual void deactivate();
     virtual void unprojectPoint(const GeometryBuffer& buff,
-                        const Vector2f& p_in, Vector2f& p_out) const;
+                        const glm::vec2& p_in, glm::vec2& p_out) const;
     virtual bool isImageryCache() const;
     virtual Renderer& getOwner();
 

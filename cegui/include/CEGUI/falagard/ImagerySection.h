@@ -44,11 +44,19 @@ namespace CEGUI
     \brief
         Class that encapsulates a re-usable collection of imagery specifications.
     */
-    class CEGUIEXPORT ImagerySection :
-        public AllocatedObject<ImagerySection>
+    class CEGUIEXPORT ImagerySection
     {
     public:
+        //! Vector of ImageryComponent Pointers
+        typedef std::vector<ImageryComponent*> ImageryComponentPointerList;
+        //! Vector of TextComponent Pointers
+        typedef std::vector<TextComponent*> TextComponentPointerList;
+        //! Vector of FrameComponent Pointers
+        typedef std::vector<FrameComponent*> FrameComponentPointerList;
+
+
         /*!
+
         \brief
             Constructor.
         */
@@ -274,14 +282,6 @@ namespace CEGUI
         //! perform any processing required due to the given font having changed.
         bool handleFontRenderSizeChange(Window& window, const Font* font) const;
 
-
-        //! Vector of ImageryComponent Pointers
-        typedef std::vector<ImageryComponent* CEGUI_VECTOR_ALLOC(ImageryComponent*)> ImageryComponentPointerList;
-        //! Vector of TextComponent Pointers
-        typedef std::vector<TextComponent* CEGUI_VECTOR_ALLOC(TextComponent*)> TextComponentPointerList;
-        //! Vector of FrameComponent Pointers
-        typedef std::vector<FrameComponent* CEGUI_VECTOR_ALLOC(FrameComponent*)> FrameComponentPointerList;
-
         /*!
         \brief
             Returns a vector of pointers to the ImageryComponents that are currently added to this ImagerySection. If an
@@ -315,12 +315,9 @@ namespace CEGUI
         */
         FrameComponentPointerList getFrameComponentPointers();
 
-        typedef std::vector<ImageryComponent
-            CEGUI_VECTOR_ALLOC(ImageryComponent)> ImageryComponentList;
-        typedef std::vector<TextComponent
-            CEGUI_VECTOR_ALLOC(TextComponent)> TextComponentList;
-        typedef std::vector<FrameComponent
-            CEGUI_VECTOR_ALLOC(FrameComponent)> FrameComponentList;
+        typedef std::vector<ImageryComponent> ImageryComponentList;
+        typedef std::vector<TextComponent> TextComponentList;
+        typedef std::vector<FrameComponent> FrameComponentList;
 
         /*!
         \brief
@@ -362,12 +359,12 @@ namespace CEGUI
         void initMasterColourRect(const Window& wnd, ColourRect& cr) const;
 
     private:
-        CEGUI::String       d_name;             //!< Holds the name of the ImagerySection.
-        CEGUI::ColourRect   d_masterColours;    //!< Naster colours for the the ImagerySection (combined with colours of each ImageryComponent).
-        FrameComponentList           d_frames;           //!< Collection of FrameComponent objects to be drawn for this ImagerySection.
-        ImageryComponentList         d_images;           //!< Collection of ImageryComponent objects to be drawn for this ImagerySection.
-        TextComponentList            d_texts;            //!< Collection of TextComponent objects to be drawn for this ImagerySection.
-        String              d_colourPropertyName;   //!< name of property to fetch colours from.
+        CEGUI::String               d_name;             //!< Holds the name of the ImagerySection.
+        CEGUI::ColourRect           d_masterColours;    //!< Naster colours for the the ImagerySection (combined with colours of each ImageryComponent).
+        FrameComponentList          d_frames;           //!< Collection of FrameComponent objects to be drawn for this ImagerySection.
+        ImageryComponentList        d_images;           //!< Collection of ImageryComponent objects to be drawn for this ImagerySection.
+        TextComponentList           d_texts;            //!< Collection of TextComponent objects to be drawn for this ImagerySection.
+        String                      d_colourPropertyName;   //!< name of property to fetch colours from.
     };
 
 } // End of  CEGUI namespace section

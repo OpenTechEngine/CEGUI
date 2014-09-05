@@ -55,8 +55,7 @@ public:
     normally created via the Renderer object.
 */
 class CEGUIEXPORT RenderTarget :
-    public EventSet,
-    public AllocatedObject<RenderTarget>
+    public EventSet
 {
 public:
     RenderTarget();
@@ -167,7 +166,7 @@ public:
         Resulting point is local to GeometryBuffer \a buff.
     */
     virtual void unprojectPoint(const GeometryBuffer& buff,
-                                const Vector2f& p_in, Vector2f& p_out) const = 0;
+                                const glm::vec2& p_in, glm::vec2& p_out) const = 0;
 
     // TODO DOCU
     virtual Renderer& getOwner() = 0;

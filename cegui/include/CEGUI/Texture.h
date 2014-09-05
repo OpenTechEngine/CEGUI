@@ -49,8 +49,7 @@ namespace CEGUI
     for the rest of the system to work.  Texture objects are only created
     through the Renderer object's texture creation functions.
 */
-class CEGUIEXPORT Texture :
-    public AllocatedObject<Texture>
+class CEGUIEXPORT Texture
 {
 public:
     /*!
@@ -126,7 +125,7 @@ public:
         Reference to a Vector2 object that describes the scaling values required
         to accurately map pixel positions to texture co-ordinates.
     */
-    virtual const Vector2f& getTexelScaling() const = 0;
+    virtual const glm::vec2& getTexelScaling() const = 0;
 
     /*!
     \brief

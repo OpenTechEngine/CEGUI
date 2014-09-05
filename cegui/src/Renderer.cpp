@@ -53,7 +53,7 @@ void Renderer::destroyGeometryBuffer(const GeometryBuffer& buffer)
     if (d_geometryBuffers.end() != i)
     {
         d_geometryBuffers.erase(i);
-        CEGUI_DELETE_AO &buffer;
+        delete &buffer;
     }
 }
 

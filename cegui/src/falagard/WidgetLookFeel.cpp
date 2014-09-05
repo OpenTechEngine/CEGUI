@@ -327,8 +327,10 @@ void WidgetLookFeel::initialiseWidget(Window& widget) const
          pdi != pdc.end();
          ++pdi)
     {
+        PropertyDefinitionBase* propDefBase = *pdi;
+        Property* curProperty = dynamic_cast<Property*>(propDefBase);
         // add the property to the window
-        widget.addProperty(dynamic_cast<Property*>(*pdi));
+        widget.addProperty(curProperty);
     }
 
     // add required child widgets
@@ -622,7 +624,7 @@ void WidgetLookFeel::addPropertyDefinition(PropertyDefinitionBase* propertyDefin
     {
         Logger::getSingleton().logEvent("WidgetLookFeel::addPropertyDefinition - Entry for PropertyDefinition '" +
             name + "' already exists. Deleting and replacing previous definition.");
-        CEGUI_DELETE_AO( foundIter->second );
+        delete( foundIter->second );
         d_propertyDefinitionMap.erase(foundIter);
     }
 
@@ -636,7 +638,7 @@ void WidgetLookFeel::clearPropertyDefinitions()
     PropertyDefinitionMap::iterator propDefEnd = d_propertyDefinitionMap.end();
     while (propDefIter != propDefEnd)
     {
-        CEGUI_DELETE_AO (propDefIter->second);
+        delete (propDefIter->second);
         ++propDefIter;
     }
 
@@ -653,7 +655,7 @@ void WidgetLookFeel::addPropertyLinkDefinition(PropertyDefinitionBase* propertyL
     {
         Logger::getSingleton().logEvent("WidgetLookFeel::addPropertyLinkDefinition - Entry for PropertyLinkDefinition '" +
             name + "' already exists. Deleting and replacing previous definition.");
-        CEGUI_DELETE_AO( foundIter->second );
+        delete( foundIter->second );
         d_propertyLinkDefinitionMap.erase(foundIter);
     }
 
@@ -667,7 +669,7 @@ void WidgetLookFeel::clearPropertyLinkDefinitions()
     PropertyLinkDefinitionMap::iterator propLinkDefEnd = d_propertyLinkDefinitionMap.end();
     while (propLinkDefIter != propLinkDefEnd)
     {
-        CEGUI_DELETE_AO (propLinkDefIter->second);
+        delete (propLinkDefIter->second);
         ++propLinkDefIter;
     }
 
@@ -1376,7 +1378,7 @@ WidgetLookFeel* WidgetLookFeel::getInheritedWidgetLookFeel()
     if(d_inheritedLookName.empty())
         return 0;
 
-    WidgetLookManager::WidgetLookPointerMap pointerMap = WidgetLookManager::getSingleton().getWidgetLookMap();
+    WidgetLookManager::WidgetLookPointerMap pointerMap = WidgetLookManager::getSingleton().getWidgetLookPointerMap();
     WidgetLookManager::WidgetLookPointerMap::iterator foundIter = pointerMap.find(d_inheritedLookName);
 
     if(foundIter == pointerMap.end())

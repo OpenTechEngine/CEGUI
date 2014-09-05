@@ -33,11 +33,12 @@
 #include "CEGUI/Rect.h"
 #include "CEGUI/RefCounted.h"
 #include "CEGUI/RenderMaterial.h"
-#include "CEGUI/Quaternion.h"
 
-#include "glm/glm.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #include <vector>
+#include <cstddef> //size_t
 
 #if defined(_MSC_VER)
 #   pragma warning(push)
@@ -94,8 +95,7 @@ enum PolygonFillRule
     Abstract class defining the interface for objects that buffer geometry for
     later rendering.
 */
-class CEGUIEXPORT GeometryBuffer :
-    public AllocatedObject<GeometryBuffer>
+class CEGUIEXPORT GeometryBuffer
 {
 public:
     virtual ~GeometryBuffer();
@@ -114,7 +114,7 @@ public:
     \param translation
         Vector3 describing the three axis translation vector to be used.
     */
-    virtual void setTranslation(const Vector3f& translation);
+    virtual void setTranslation(const glm::vec3& translation);
 
     /*!
     \brief
@@ -124,7 +124,7 @@ public:
     \param rotationQuat
         Quaternion describing the rotation to be used.
     */
-    virtual void setRotation(const Quaternion& rotationQuat);
+    virtual void setRotation(const glm::quat& rotationQuat);
 
     /*!
     \brief
@@ -134,7 +134,7 @@ public:
     \param scale
         Vector3 describing the scale to be used.
     */
-    virtual void setScale(const Vector3f& scale);
+    virtual void setScale(const glm::vec3& scale);
 
     /*!
     \brief
@@ -144,7 +144,7 @@ public:
     \param scale
         Vector2 describing the x and y scale to be used.
     */
-    void setScale(const Vector2f& scale);
+    void setScale(const glm::vec2& scale);
 
     /*!
     \brief
@@ -154,7 +154,7 @@ public:
         Vector3 describing the location of the pivot point to be used when
         applying the rotation to the geometry.
     */
-    void setPivot(const Vector3f& p);
+    void setPivot(const glm::vec3& p);
 
     /*!
     \brief
@@ -199,20 +199,9 @@ public:
         should be added to the GeometryBuffer.
 
     \param array_size
-        The number of elements in the array.
+        The number of elements in the passed array.
     */
-    virtual void appendGeometry(const float* const vertex_data, uint array_size);
-
-
-    /*!
-    \brief
-        Append the geometry data to the existing data
-
-    \param vertex_data
-        Vector of floats containing the geometry data that should be added to the
-        GeometryBuffer.
-    */
-    virtual void appendGeometry(const std::vector<float>& vertex_data) = 0;
+    virtual void appendGeometry(const float* vertex_data, std::size_t array_size);
 
     /*!
     \brief
@@ -252,7 +241,7 @@ public:
         The number of Vertex objects from the array \a vertex_array that are to be
         added to the GeometryBuffer.
     */
-    virtual void appendGeometry(const ColouredVertex* vertex_array, uint vertex_count);
+    virtual void appendGeometry(const ColouredVertex* vertex_array, std::size_t vertex_count);
 
     /*!
     \brief
@@ -276,7 +265,7 @@ public:
         The number of Vertex objects from the array \a vertex_array that are to be
         added to the GeometryBuffer.
     */
-    virtual void appendGeometry(const TexturedColouredVertex* vertex_array, uint vertex_count);
+    virtual void appendGeometry(const TexturedColouredVertex* vertex_array, std::size_t vertex_count);
 
     /*!
     \brief
@@ -309,7 +298,7 @@ public:
     \return
         The number of vertices that have been appended to this GeometryBuffer.
     */
-    virtual uint getVertexCount() const;
+    virtual std::size_t getVertexCount() const;
 
     /*!
     \brief
@@ -320,7 +309,7 @@ public:
         The total number of floats used by the attributes of the current vertex
         layout.
     */
-    int getVertexAttributeElementCount() const;
+    virtual int getVertexAttributeElementCount() const;
 
 
     /*!
@@ -487,13 +476,13 @@ protected:
 
 
     //! translation vector
-    Vector3f        d_translation;
+    glm::vec3       d_translation;
     //! rotation quaternion
-    Quaternion      d_rotation;
+    glm::quat       d_rotation;
     //! scaling vector
-    Vector3f        d_scale;
+    glm::vec3       d_scale;
     //! pivot point for rotation
-    Vector3f        d_pivot;
+    glm::vec3       d_pivot;
     //! custom transformation matrix
     glm::mat4x4     d_customTransform;
     /*

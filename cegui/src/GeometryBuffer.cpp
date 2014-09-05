@@ -30,32 +30,32 @@
 #include "CEGUI/RenderTarget.h"
 
 #include <vector>
+#include <algorithm>
+#include <iterator>
+#include <stddef.h>
 
 namespace CEGUI
 {
 //---------------------------------------------------------------------------//
-GeometryBuffer::GeometryBuffer(RefCounted<RenderMaterial> renderMaterial)
-    : d_translation(0, 0, 0)
-    , d_rotation(Quaternion::IDENTITY)
-    , d_scale(1.0f, 1.0f, 1.0f)
-    , d_pivot(0, 0, 0)
-    , d_customTransform(1.0f)
-    , d_effect(0)
-    , d_blendMode(BM_NORMAL)
-    , d_renderMaterial(renderMaterial)
-    , d_polygonFillRule(PFR_NONE)
-    , d_postStencilVertexCount(0)
+GeometryBuffer::GeometryBuffer(RefCounted<RenderMaterial> renderMaterial):
+    d_translation(0, 0, 0),
+    d_rotation(1, 0, 0, 0), // <-- IDENTITY
+    d_scale(1.0f, 1.0f, 1.0f),
+    d_pivot(0, 0, 0),
+    d_customTransform(1.0f),
+    d_effect(0),
+    d_blendMode(BM_NORMAL),
+    d_renderMaterial(renderMaterial),
+    d_polygonFillRule(PFR_NONE),
+    d_postStencilVertexCount(0),
     , d_alpha(1.0f)
     , d_matrixValid(false)
     , d_lastRenderTarget(0)
     , d_lastRenderTargetActivCount(0)
-{
-}
 
 //---------------------------------------------------------------------------//
 GeometryBuffer::~GeometryBuffer()
-{
-}
+{}
 
 //---------------------------------------------------------------------------//
 void GeometryBuffer::setBlendMode(const BlendMode mode)
@@ -80,26 +80,34 @@ void GeometryBuffer::appendGeometry(const std::vector<ColouredVertex>& coloured_
 
 //---------------------------------------------------------------------------//
 void GeometryBuffer::appendGeometry(const ColouredVertex* vertex_array,
-                                    uint vertex_count)
+                                    std::size_t vertex_count)
 {
+    // Create a temporary array to contain our data
+    static const std::size_t vertexDataSize = 7;
+    std::size_t fullArraySize = vertexDataSize * vertex_count;
+    float* vertexData = new float[fullArraySize];
+
     // Add the vertex data in their default order into an array
-    std::vector<float> vertexData;
     const ColouredVertex* vs = vertex_array;
-    for (uint i = 0; i < vertex_count; ++i, ++vs)
+    for (std::size_t i = 0; i < vertex_count; ++i, ++vs)
     {
         // Add all the elements in the default order for textured and coloured
         // geometry into the vector
-        vertexData.push_back(vs->d_position.x);
-        vertexData.push_back(vs->d_position.y);
-        vertexData.push_back(vs->d_position.z);
-        vertexData.push_back(vs->d_colour.getRed());
-        vertexData.push_back(vs->d_colour.getGreen());
-        vertexData.push_back(vs->d_colour.getBlue());
-        vertexData.push_back(vs->d_colour.getAlpha());
+        std::size_t currentIndex = i * vertexDataSize;
+
+        vertexData[currentIndex + 0] = vs->d_position.x;
+        vertexData[currentIndex + 1] = vs->d_position.y;
+        vertexData[currentIndex + 2] = vs->d_position.z;
+        vertexData[currentIndex + 3] = vs->d_colour.x;
+        vertexData[currentIndex + 4] = vs->d_colour.y;
+        vertexData[currentIndex + 5] = vs->d_colour.z;
+        vertexData[currentIndex + 6] = vs->d_colour.w;
     }
 
     // Append the prepared geometry data
-    appendGeometry(vertexData);
+    appendGeometry(vertexData, fullArraySize);
+
+    delete[] vertexData;
 }
 
 //---------------------------------------------------------------------------//
@@ -113,36 +121,47 @@ void GeometryBuffer::appendGeometry(const std::vector<TexturedColouredVertex>& t
 
 //---------------------------------------------------------------------------//
 void GeometryBuffer::appendGeometry(const TexturedColouredVertex* vertex_array,
-                                    uint vertex_count)
+                                    std::size_t vertex_count)
 {
+    // Create a temporary array to contain our data
+    static const std::size_t vertexDataSize = 9;
+    std::size_t fullArraySize = vertexDataSize * vertex_count;
+    float* vertexData = new float[fullArraySize];
+
     // Add the vertex data in their default order into an array
-    std::vector<float> vertexData;
     const TexturedColouredVertex* vs = vertex_array;
-    for (uint i = 0; i < vertex_count; ++i, ++vs)
+    for (std::size_t i = 0; i < vertex_count; ++i, ++vs)
     {
         // Add all the elements in the default order for textured and coloured
         // geometry into the vector
-        vertexData.push_back(vs->d_position.x);
-        vertexData.push_back(vs->d_position.y);
-        vertexData.push_back(vs->d_position.z);
-        vertexData.push_back(vs->d_colour.getRed());
-        vertexData.push_back(vs->d_colour.getGreen());
-        vertexData.push_back(vs->d_colour.getBlue());
-        vertexData.push_back(vs->d_colour.getAlpha());
-        vertexData.push_back(vs->d_texCoords.x);
-        vertexData.push_back(vs->d_texCoords.y);
+        std::size_t currentIndex = i * vertexDataSize;
+        
+        vertexData[currentIndex + 0] = vs->d_position.x;
+        vertexData[currentIndex + 1] = vs->d_position.y;
+        vertexData[currentIndex + 2] = vs->d_position.z;
+        vertexData[currentIndex + 3] = vs->d_colour.x;
+        vertexData[currentIndex + 4] = vs->d_colour.y;
+        vertexData[currentIndex + 5] = vs->d_colour.z;
+        vertexData[currentIndex + 6] = vs->d_colour.w;
+        vertexData[currentIndex + 7] = vs->d_texCoords.x;
+        vertexData[currentIndex + 8] = vs->d_texCoords.y;
     }
 
     // Append the prepared geometry data
-    appendGeometry(vertexData);
+    appendGeometry(vertexData, fullArraySize);
+
+    delete[] vertexData;
 }
 
 //---------------------------------------------------------------------------//
-void GeometryBuffer::appendGeometry(const float* const vertex_data,
-                                    uint array_size)
+void GeometryBuffer::appendGeometry(const float* vertex_data,
+                                    std::size_t array_size)
 {
-    std::vector<float> vectorVertexData(vertex_data, vertex_data + array_size);
-    appendGeometry(vectorVertexData);
+    d_vertexData.reserve( d_vertexData.size() + array_size);
+    std::copy(vertex_data, vertex_data + array_size, std::back_inserter(d_vertexData));
+
+    // Update size of geometry buffer
+    d_vertexCount = d_vertexData.size() / getVertexAttributeElementCount();
 }
 
 //---------------------------------------------------------------------------//
@@ -155,10 +174,10 @@ void GeometryBuffer::appendVertex(const TexturedColouredVertex& vertex)
     vertexData[0] = vertex.d_position.x;
     vertexData[1] = vertex.d_position.y;
     vertexData[2] = vertex.d_position.z;
-    vertexData[3] = vertex.d_colour.getRed();
-    vertexData[4] = vertex.d_colour.getGreen();
-    vertexData[5] = vertex.d_colour.getBlue();
-    vertexData[6] = vertex.d_colour.getAlpha();
+    vertexData[3] = vertex.d_colour.x;
+    vertexData[4] = vertex.d_colour.y;
+    vertexData[5] = vertex.d_colour.z;
+    vertexData[6] = vertex.d_colour.w;
     vertexData[7] = vertex.d_texCoords.x;
     vertexData[8] = vertex.d_texCoords.y;
 
@@ -175,10 +194,10 @@ void GeometryBuffer::appendVertex(const ColouredVertex& vertex)
     vertexData[0] = vertex.d_position.x;
     vertexData[1] = vertex.d_position.y;
     vertexData[2] = vertex.d_position.z;
-    vertexData[3] = vertex.d_colour.getRed();
-    vertexData[4] = vertex.d_colour.getGreen();
-    vertexData[5] = vertex.d_colour.getBlue();
-    vertexData[6] = vertex.d_colour.getAlpha();
+    vertexData[3] = vertex.d_colour.x;
+    vertexData[4] = vertex.d_colour.y;
+    vertexData[5] = vertex.d_colour.z;
+    vertexData[6] = vertex.d_colour.w;
 
     appendGeometry(vertexData, 7);
 }
@@ -259,9 +278,9 @@ RenderEffect* GeometryBuffer::getRenderEffect()
 }
 
 //----------------------------------------------------------------------------//
-void GeometryBuffer::setTranslation(const Vector3f& translation)
+void GeometryBuffer::setTranslation(const glm::vec3& translation)
 {
-    if(d_translation != translation)
+    if (d_translation != translation)
     {
         d_translation = translation;
         d_matrixValid = false;
@@ -269,9 +288,9 @@ void GeometryBuffer::setTranslation(const Vector3f& translation)
 }
 
 //----------------------------------------------------------------------------//
-void GeometryBuffer::setRotation(const Quaternion& rotationQuat)
+void GeometryBuffer::setRotation(const glm::quat& rotationQuat)
 {
-    if(d_rotation != rotationQuat)
+    if (d_rotation != rotationQuat)
     {
         d_rotation = rotationQuat;
         d_matrixValid = false;
@@ -279,9 +298,9 @@ void GeometryBuffer::setRotation(const Quaternion& rotationQuat)
 }
 
 //----------------------------------------------------------------------------//
-void GeometryBuffer::setScale(const Vector3f& scale)
+void GeometryBuffer::setScale(const glm::vec3& scale)
 {
-    if(d_scale != scale)
+    if (d_scale != scale)
     {
         d_scale = scale;
         d_matrixValid = false;
@@ -289,17 +308,17 @@ void GeometryBuffer::setScale(const Vector3f& scale)
 }
 
 //----------------------------------------------------------------------------//
-void GeometryBuffer::setScale(const Vector2f& scale)
+void GeometryBuffer::setScale(const glm::vec2& scale)
 {
-    setScale(Vector3f(scale, 0.f));
+    setScale(glm::vec3(scale, 0));
 }
 
 //----------------------------------------------------------------------------//
-void GeometryBuffer::setPivot(const Vector3f& p)
+void GeometryBuffer::setPivot(const glm::vec3& p)
 {
-    if(d_pivot != p)
+    if (d_pivot != p)
     {
-        d_pivot = Vector3f(p.d_x, p.d_y, p.d_z);
+        d_pivot = p;
         d_matrixValid = false;
     }
 }
@@ -328,7 +347,7 @@ bool GeometryBuffer::isClippingActive() const
 
 
 //----------------------------------------------------------------------------//
-uint GeometryBuffer::getVertexCount() const
+std::size_t GeometryBuffer::getVertexCount() const
 {
     return d_vertexCount;
 }

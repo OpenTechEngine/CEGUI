@@ -95,6 +95,7 @@ void OgreGeometryBuffer::draw() const
     // Set the ModelViewProjection matrix in the bindings
     shaderParameterBindings->setParameter("modelViewPerspMatrix", d_matrix);
 
+
     if (d_alpha != d_previousAlphaValue)
     {
         d_previousAlphaValue = d_alpha;
@@ -143,16 +144,11 @@ void OgreGeometryBuffer::setClippingRegion(const Rectf& region)
 }
 
 //----------------------------------------------------------------------------//
-void OgreGeometryBuffer::appendGeometry(const std::vector<float>& vertex_data)
+void OgreGeometryBuffer::appendGeometry(const float* vertex_data, std::size_t array_size)
 {
-    d_vertexData.insert(d_vertexData.end(), vertex_data.begin(), 
-        vertex_data.end());
+    GeometryBuffer::appendGeometry(vertex_data, array_size);
 
     d_dataAppended = true;
-
-    size_t float_per_element = getFloatsPerVertex();
-
-    d_vertexCount = d_vertexData.size()/float_per_element;
 }
 
 void OgreGeometryBuffer::syncVertexData() const
@@ -208,7 +204,7 @@ void OgreGeometryBuffer::updateMatrix() const
     // translation to position geometry and offset to pivot point
     Ogre::Matrix4 trans;
 
-    trans.makeTrans(d_translation.d_x + d_pivot.d_x,
+    trans.makeTrans(d_translation.x + d_pivot.x,
                     d_translation.d_y + d_pivot.d_y,
                     d_translation.d_z + d_pivot.d_z);
 
@@ -217,7 +213,7 @@ void OgreGeometryBuffer::updateMatrix() const
 
     // translation to remove rotation pivot offset
     Ogre::Matrix4 inv_pivot_trans;
-    inv_pivot_trans.makeTrans(-d_pivot.d_x, -d_pivot.d_y, -d_pivot.d_z);
+    inv_pivot_trans.makeTrans(-d_pivot.x, -d_pivot.y, -d_pivot.z);
 
     // calculate final matrix
     Ogre::Matrix4 finalMatrix = trans * rot * inv_pivot_trans;
@@ -301,7 +297,7 @@ void OgreGeometryBuffer::setVertexBuffer(size_t count) const
 
         // Create the a new vertex buffer
         d_hwBuffer = Ogre::HardwareBufferManager::getSingleton().
-            createVertexBuffer(getFloatsPerVertex()*sizeof(float), count,
+            createVertexBuffer(getVertexAttributeElementCount()*sizeof(float), count,
             Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE,
             false);
     }
@@ -350,13 +346,19 @@ void OgreGeometryBuffer::setTextureStates() const
 }
 
 // ------------------------------------ //
-size_t OgreGeometryBuffer::getFloatsPerVertex() const
+int OgreGeometryBuffer::getVertexAttributeElementCount() const
 {
-    
-    switch(d_expectedData){
-    case MT_COLOURED: return FLOATS_PER_COLOURED;
-    case MT_TEXTURED: return FLOATS_PER_TEXTURED;
-    default: return 0;
+    switch(d_expectedData)
+    {
+        case MT_COLOURED:
+            return FLOATS_PER_COLOURED;
+            break;
+        case MT_TEXTURED:
+            return FLOATS_PER_TEXTURED;
+            break;
+        default:
+            return 0;
+            break;
     }
 }
 

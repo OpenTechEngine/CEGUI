@@ -50,8 +50,7 @@ namespace CEGUI
 {
 //!	Class that provides pointer indicator support.
 class CEGUIEXPORT PointerIndicator :
-    public EventSet,
-    public AllocatedObject<PointerIndicator>
+    public EventSet
 {
 public:
     //! Namespace for global events.
@@ -167,7 +166,7 @@ public:
         Point object describing the new location for the pointer. This will
         be clipped to within the renderer screen area.
 	*/
-	void setPosition(const Vector2f& position);
+    void setPosition(const glm::vec2& position);
 
 
 	/*!
@@ -180,7 +179,7 @@ public:
 	\return
 		Nothing.
 	*/
-	void	offsetPosition(const Vector2f& offset);
+    void offsetPosition(const glm::vec2& offset);
 
 
 	/*!
@@ -268,9 +267,10 @@ public:
 	\return
 		Point object describing the pointer indicator position in screen pixels.
 	*/
-	Vector2f getPosition(void) const
-    { return d_position; }
-
+    inline glm::vec2 getPosition() const
+    {
+        return d_position;
+    }
 
 	/*!
 	\brief
@@ -303,7 +303,7 @@ public:
         represents the left-most and top-most positions, and 1.0f represents
         the right-most and bottom-most positions.
 	*/
-	Vector2f getDisplayIndependantPosition(void) const;
+    glm::vec2 getDisplayIndependantPosition(void) const;
 
     /*!
     \brief
@@ -353,10 +353,10 @@ public:
         no effect.
 
     \param position
-        Reference to a point object describing the initial pixel position to
+        vec2 object describing the initial pixel position to
         be used for the pointer indicator.
     */
-    static void setInitialPointerPosition(const Vector2f& position);
+    static void setInitialPointerPosition(const glm::vec2& position);
 
     /*!
     \brief
@@ -421,7 +421,7 @@ private:
     //! Image that will be used as the default image for this pointer indicator.
 	const Image* d_defaultIndicatorImage;
     //! Current location of the indicator
-    Vector2f d_position;
+    glm::vec2 d_position;
     //! true if the indicator will be drawn, else false.
     bool    d_visible;
     //! Specifies the area (in screen pixels) that the indicator can move around in.
@@ -431,11 +431,11 @@ private:
     //! custom explicit size to render the indicator image at
     Sizef d_customSize;
     //! correctly scaled offset used when using custom image size.
-    mutable Vector2f d_customOffset;
+    mutable glm::vec2 d_customOffset;
     //! true if the pointer initial position has been pre-set
     static bool s_initialPositionSet;
     //! value set as initial position (if any)
-    static Vector2f s_initialPosition;
+    static glm::vec2 s_initialPosition;
     //! boolean indicating whether cached pointer geometry is valid.
     mutable bool d_cachedGeometryValid;
 };

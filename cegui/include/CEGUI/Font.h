@@ -55,8 +55,7 @@ namespace CEGUI
 */
 class CEGUIEXPORT Font :
     public PropertySet,
-    public EventSet,
-    public AllocatedObject<Font>
+    public EventSet
 {
 public:
     //! Colour value used whenever a colour is not specified.
@@ -138,7 +137,7 @@ public:
         extent measurement functions).
     */
     float drawText(std::vector<GeometryBuffer*>& geom_buffers, const String& text,
-                   const Vector2f& position, const Rectf* clip_rect,
+                   const glm::vec2& position, const Rectf* clip_rect,
                    const bool clipping_enabled, const ColourRect& colours,
                    const float space_extra = 0.0f, const float x_scale = 1.0f,
                    const float y_scale = 1.0f) const;
@@ -497,8 +496,7 @@ protected:
     uint* d_glyphPageLoaded;
 
     //! Definition of CodepointMap type.
-    typedef std::map<utf32, FontGlyph, std::less<utf32>
-        CEGUI_MAP_ALLOC(utf32, FontGlyph)> CodepointMap;
+    typedef std::map<utf32, FontGlyph, std::less<utf32> > CodepointMap;
     //! Contains mappings from code points to Image objects
     mutable CodepointMap d_cp_map;
 };

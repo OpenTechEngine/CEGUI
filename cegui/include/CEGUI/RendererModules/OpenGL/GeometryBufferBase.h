@@ -28,10 +28,9 @@
 #ifndef _CEGUIGeometryBufferBase_h_
 #define _CEGUIGeometryBufferBase_h_
 
-#include "../../GeometryBuffer.h"
+#include "CEGUI/GeometryBuffer.h"
 #include "CEGUI/RendererModules/OpenGL/RendererBase.h"
-#include "../../Rect.h"
-#include "../../Quaternion.h"
+#include "CEGUI/Rect.h"
 
 #include "CEGUI/RefCounted.h"
 
@@ -59,11 +58,8 @@ public:
     OpenGLGeometryBufferBase(OpenGLRendererBase& owner, CEGUI::RefCounted<RenderMaterial> renderMaterial);
     virtual ~OpenGLGeometryBufferBase();
 
-    // implementation of abstract members from GeometryBuffer
-    void setCustomTransform(const glm::mat4x4& transformation);
-    void setClippingRegion(const Rectf& region);
-    void appendGeometry(const std::vector<float>& vertex_data);
-    void reset();
+    // Overrides of virtual and abstract methods inherited from GeometryBuffer
+    virtual void setClippingRegion(const Rectf& region);
     
     /*
     \brief
