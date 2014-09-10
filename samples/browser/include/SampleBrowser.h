@@ -24,10 +24,10 @@ author:     Lukas E Meindl
 *   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 *   OTHER DEALINGS IN THE SOFTWARE.
 ***************************************************************************/
-#ifndef _Samples_Framework_h_
-#define _Samples_Framework_h_
+#ifndef _Samples_Browser_h_
+#define _Samples_Browser_h_
 
-#include "SamplesFrameworkBase.h"
+#include "SampleBrowserBase.h"
 #include "SampleHandler.h"
 #include "Sample.h"
 
@@ -41,17 +41,17 @@ using namespace CEGUI;
 class SampleHandler;
 class Sample;
 class MetaDataWindowManager;
-class SamplesBrowserManager;
+class SampleBrowserManager;
 
 /*!
 \brief
 This is 
 */
-class SamplesFramework : public SamplesFrameworkBase
+class SampleBrowser : public SampleBrowserBase
 {
 public:
-    SamplesFramework();
-    virtual ~SamplesFramework();
+    SampleBrowser();
+    virtual ~SampleBrowser();
 
     typedef std::vector<SampleHandler*> SampleList;
 
@@ -112,7 +112,7 @@ protected:
     SampleList              d_samples;
 
     MetaDataWindowManager*  d_metaDataWinMgr;
-    SamplesBrowserManager*  d_samplesWinMgr;
+    SampleBrowserManager*       d_samplesWinMgr;
 
     SampleHandler*             d_selectedSampleData;
 

@@ -30,7 +30,7 @@
 
 #include "CEGuiD3D11BaseApplication.h"
 #include "CEGUI/RendererModules/Direct3D11/Renderer.h"
-#include "SamplesFrameworkBase.h"
+#include "SampleBrowserBase.h"
 #include "Win32AppHelper.h"
 #include "CEGUI/CEGUI.h"
 
@@ -108,7 +108,7 @@ CEGuiD3D11BaseApplication::~CEGuiD3D11BaseApplication()
 void CEGuiD3D11BaseApplication::run()
 {
     d_sampleApp->initialise();
-    Win32AppHelper::setSamplesFramework(d_sampleApp);
+    Win32AppHelper::setSampleBrowser(d_sampleApp);
 
     float clear_colour[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 
