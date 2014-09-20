@@ -88,7 +88,7 @@ void MenuItem::updateInternalState(const glm::vec2& cursor_pos)
     const Window* capture_wnd = getCaptureWindow();
 
     if (capture_wnd == 0)
-        d_hovering = (getGUIContext().getWindowContainingPointer() == this && isHit(cursor_pos));
+        d_hovering = (getGUIContext().getWindowContainingCursor() == this && isHit(cursor_pos));
     else
         d_hovering = (capture_wnd == this && isHit(cursor_pos));
 
@@ -370,7 +370,7 @@ void MenuItem::onClicked(WindowEventArgs& e)
 /*************************************************************************
     Handler for when the cursor moves
 *************************************************************************/
-void MenuItem::onPointerMove(PointerEventArgs& e)
+void MenuItem::onCursorMove(CursorInputEventArgs& e)
 {
     // this is needed to discover whether cursor is in the widget area or not.
     // The same thing used to be done each frame in the rendering method,
@@ -379,7 +379,7 @@ void MenuItem::onPointerMove(PointerEventArgs& e)
     // more efficient anyway.
 
     // base class processing
-    ItemEntry::onPointerMove(e);
+    ItemEntry::onCursorMove(e);
 
     updateInternalState(e.position);
     ++e.handled;
@@ -389,12 +389,12 @@ void MenuItem::onPointerMove(PointerEventArgs& e)
 /*************************************************************************
     Handler for cursor pressed events
 *************************************************************************/
-void MenuItem::onPointerPressHold(PointerEventArgs& e)
+void MenuItem::onCursorPressHold(CursorInputEventArgs& e)
 {
     // default processing
-    ItemEntry::onPointerPressHold(e);
+    ItemEntry::onCursorPressHold(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
     {
         d_popupWasClosed = false;
 
@@ -415,12 +415,12 @@ void MenuItem::onPointerPressHold(PointerEventArgs& e)
 /*************************************************************************
     Handler for cursor activation events
 *************************************************************************/
-void MenuItem::onPointerActivate(PointerEventArgs& e)
+void MenuItem::onCursorActivate(CursorInputEventArgs& e)
 {
     // default processing
-    ItemEntry::onPointerActivate(e);
+    ItemEntry::onCursorActivate(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
     {
         releaseInput();
 
@@ -460,10 +460,10 @@ void MenuItem::onCaptureLost(WindowEventArgs& e)
 /*************************************************************************
     Handler for when cursor leaves the widget
 *************************************************************************/
-void MenuItem::onPointerLeaves(PointerEventArgs& e)
+void MenuItem::onCursorLeaves(CursorInputEventArgs& e)
 {
     // default processing
-    ItemEntry::onPointerLeaves(e);
+    ItemEntry::onCursorLeaves(e);
 
     d_hovering = false;
     invalidate();

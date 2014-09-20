@@ -453,12 +453,12 @@ bool Editbox::performPaste(Clipboard& clipboard)
 }
 
 //----------------------------------------------------------------------------//
-void Editbox::onPointerPressHold(PointerEventArgs& e)
+void Editbox::onCursorPressHold(CursorInputEventArgs& e)
 {
     // base class handling
-    Window::onPointerPressHold(e);
+    Window::onCursorPressHold(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
     {
         // grab inputs
         if (captureInput())
@@ -480,12 +480,12 @@ void Editbox::onPointerPressHold(PointerEventArgs& e)
 }
 
 //----------------------------------------------------------------------------//
-void Editbox::onPointerActivate(PointerEventArgs& e)
+void Editbox::onCursorActivate(CursorInputEventArgs& e)
 {
     // base class processing
-    Window::onPointerActivate(e);
+    Window::onCursorActivate(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
     {
         releaseInput();
         ++e.handled;
@@ -493,10 +493,10 @@ void Editbox::onPointerActivate(PointerEventArgs& e)
 }
 
 //----------------------------------------------------------------------------//
-void Editbox::onPointerMove(PointerEventArgs& e)
+void Editbox::onCursorMove(CursorInputEventArgs& e)
 {
     // base class processing
-    Window::onPointerMove(e);
+    Window::onCursorMove(e);
 
     if (d_dragging)
     {
@@ -932,7 +932,7 @@ void Editbox::onSemanticInputEvent(SemanticEventArgs& e)
         return;
 
     if (e.d_semanticValue == SV_SelectAll &&
-        e.d_payload.source == PS_Left)
+        e.d_payload.source == CIS_Left)
     {
         d_dragAnchorIdx = 0;
         setCaretIndex(getText().length());
@@ -940,7 +940,7 @@ void Editbox::onSemanticInputEvent(SemanticEventArgs& e)
         ++e.handled;
     }
     else if (e.d_semanticValue == SV_SelectWord &&
-        e.d_payload.source == PS_Left)
+        e.d_payload.source == CIS_Left)
     {
         // if masked, set up to select all
         if (isTextMasked())

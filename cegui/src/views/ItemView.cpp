@@ -379,25 +379,25 @@ bool ItemView::onScrollPositionChanged(const EventArgs& args)
 }
 
 //----------------------------------------------------------------------------//
-void ItemView::onPointerPressHold(PointerEventArgs& e)
+void ItemView::onCursorPressHold(CursorInputEventArgs& e)
 {
-    if (e.source != PS_Left)
+    if (e.source != CIS_Left)
         return;
 
     handleSelection(e.position, true, false, false);
 
     ++e.handled;
-    Window::onPointerPressHold(e);
+    Window::onCursorPressHold(e);
 }
 
 //----------------------------------------------------------------------------//
-void ItemView::onPointerMove(PointerEventArgs& e)
+void ItemView::onCursorMove(CursorInputEventArgs& e)
 {
     if (d_isItemTooltipsEnabled)
         setupTooltip(e.position);
 
     ++e.handled;
-    Window::onPointerMove(e);
+    Window::onCursorMove(e);
 }
 
 static void disconnectIfNotNull(Event::Connection& connection)
@@ -642,7 +642,7 @@ void ItemView::updateScrollbarDisplayMode(ScrollbarDisplayMode& target_mode,
 }
 
 //----------------------------------------------------------------------------//
-void ItemView::onScroll(PointerEventArgs& e)
+void ItemView::onScroll(CursorInputEventArgs& e)
 {
     handleOnScroll(getVertScrollbar(), e.scroll);
 

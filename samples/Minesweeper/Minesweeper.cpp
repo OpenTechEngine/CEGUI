@@ -78,7 +78,7 @@ bool MinesweeperSample::initialise(CEGUI::GUIContext* guiContext)
     SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
     guiContext->setDefaultTooltipType("TaharezLook/Tooltip");
 
-    // set default pointer image
+    // set default cursor image
     guiContext->getCursor().setDefaultImage("Vanilla-Images/MouseArrow");
 
     // load an image to use as a background
@@ -181,7 +181,7 @@ bool MinesweeperSample::initialise(CEGUI::GUIContext* guiContext)
             d_buttons[i][j]->setID(0);
             // Connect event handlers
             d_buttons[i][j]->subscribeEvent(PushButton::EventClicked, Event::Subscriber(&MinesweeperSample::handleMineButtonClicked, this));
-            d_buttons[i][j]->subscribeEvent(Window::EventPointerPressHold, Event::Subscriber(&MinesweeperSample::handleMinePointerPressHold, this));
+            d_buttons[i][j]->subscribeEvent(Window::EventCursorPressHold, Event::Subscriber(&MinesweeperSample::handleMinePointerPressHold, this));
         }
     }
     d_result = winMgr.createWindow("Vanilla/StaticText");
@@ -280,12 +280,12 @@ bool MinesweeperSample::handleMineButtonClicked(const CEGUI::EventArgs& event)
     return true;
 }
 /************************************************************************
-Handle click on a mine button (any pointer source)
+Handle click on a mine button (any cursor source)
 ************************************************************************/
 bool MinesweeperSample::handleMinePointerPressHold(const CEGUI::EventArgs& event)
 {
-    const CEGUI::PointerEventArgs& me = static_cast<const CEGUI::PointerEventArgs&>(event);
-    if (me.source == CEGUI::PS_Right)
+    const CEGUI::CursorInputEventArgs& me = static_cast<const CEGUI::CursorInputEventArgs&>(event);
+    if (me.source == CEGUI::CIS_Right)
     {
         CEGUI::Window* button = me.window;
         if (!button->isDisabled())

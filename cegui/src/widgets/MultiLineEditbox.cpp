@@ -1185,12 +1185,12 @@ void MultiLineEditbox::handlePageDown(bool select)
 /*************************************************************************
     Handler for when a cursor is pressed
 *************************************************************************/
-void MultiLineEditbox::onPointerPressHold(PointerEventArgs& e)
+void MultiLineEditbox::onCursorPressHold(CursorInputEventArgs& e)
 {
 	// base class handling
-    Window::onPointerPressHold(e);
+    Window::onCursorPressHold(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
 	{
 		// grab inputs
 		if (captureInput())
@@ -1210,12 +1210,12 @@ void MultiLineEditbox::onPointerPressHold(PointerEventArgs& e)
 /*************************************************************************
     Handler for when cursor is activated
 *************************************************************************/
-void MultiLineEditbox::onPointerActivate(PointerEventArgs& e)
+void MultiLineEditbox::onCursorActivate(CursorInputEventArgs& e)
 {
 	// base class processing
-    Window::onPointerActivate(e);
+    Window::onCursorActivate(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
 	{
 		releaseInput();
 		++e.handled;
@@ -1225,10 +1225,10 @@ void MultiLineEditbox::onPointerActivate(PointerEventArgs& e)
 /*************************************************************************
 	Handler for when cursor moves in the window.
 *************************************************************************/
-void MultiLineEditbox::onPointerMove(PointerEventArgs& e)
+void MultiLineEditbox::onCursorMove(CursorInputEventArgs& e)
 {
 	// base class processing
-	Window::onPointerMove(e);
+	Window::onCursorMove(e);
 
 	if (d_dragging)
 	{
@@ -1355,7 +1355,7 @@ void MultiLineEditbox::onSized(ElementEventArgs& e)
 /*************************************************************************
     Handler for scroll actions
 *************************************************************************/
-void MultiLineEditbox::onScroll(PointerEventArgs& e)
+void MultiLineEditbox::onScroll(CursorInputEventArgs& e)
 {
 	// base class processing.
 	Window::onScroll(e);
@@ -1650,11 +1650,11 @@ void MultiLineEditbox::onSemanticInputEvent(SemanticEventArgs& e)
     if (isDisabled())
         return;
 
-    if (e.d_semanticValue == SV_SelectAll && e.d_payload.source == PS_Left)
+    if (e.d_semanticValue == SV_SelectAll && e.d_payload.source == CIS_Left)
     {
         handleSelectAllText(e);
     }
-    else if (e.d_semanticValue == SV_SelectWord && e.d_payload.source == PS_Left)
+    else if (e.d_semanticValue == SV_SelectWord && e.d_payload.source == CIS_Left)
     {
         d_dragAnchorIdx = TextUtils::getWordStartIdx(getText(),
             (d_caretPos == getText().length()) ? d_caretPos : d_caretPos + 1);

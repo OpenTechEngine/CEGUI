@@ -86,8 +86,8 @@ namespace CEGUI
         decreaseButton->setCursorAutoRepeatEnabled(true);
 
         // perform event subscriptions.
-        increaseButton->subscribeEvent(Window::EventPointerPressHold, Event::Subscriber(&Spinner::handleIncreaseButton, this));
-        decreaseButton->subscribeEvent(Window::EventPointerPressHold, Event::Subscriber(&Spinner::handleDecreaseButton, this));
+        increaseButton->subscribeEvent(Window::EventCursorPressHold, Event::Subscriber(&Spinner::handleIncreaseButton, this));
+        decreaseButton->subscribeEvent(Window::EventCursorPressHold, Event::Subscriber(&Spinner::handleDecreaseButton, this));
         editbox->subscribeEvent(Window::EventTextChanged, Event::Subscriber(&Spinner::handleEditTextChange, this));
 
         // final initialisation
@@ -404,7 +404,7 @@ namespace CEGUI
 
     bool Spinner::handleIncreaseButton(const EventArgs& e)
     {
-        if (((const PointerEventArgs&)e).source == PS_Left)
+        if (((const CursorInputEventArgs&)e).source == CIS_Left)
         {
             setCurrentValue(d_currentValue + d_stepSize);
             return true;
@@ -415,7 +415,7 @@ namespace CEGUI
 
     bool Spinner::handleDecreaseButton(const EventArgs& e)
     {
-        if (((const PointerEventArgs&)e).source == PS_Left)
+        if (((const CursorInputEventArgs&)e).source == CIS_Left)
         {
             setCurrentValue(d_currentValue - d_stepSize);
             return true;

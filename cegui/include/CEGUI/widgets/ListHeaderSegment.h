@@ -326,7 +326,7 @@ protected:
 		Update state for drag sizing.
 
     \param local_cursor
-        Pointer position as a pixel offset from the top-left corner of this window.
+        Cursor position as a pixel offset from the top-left corner of this window.
 
 	\return
 		Nothing.
@@ -339,7 +339,7 @@ protected:
 		Update state for drag moving.
 
     \param local_cursor
-        Pointer position as a pixel offset from the top-left corner of this window.
+        Cursor position as a pixel offset from the top-left corner of this window.
 
 	\return
 		Nothing.
@@ -374,7 +374,7 @@ protected:
 		has been exceeded.
 
     \param local_cursor
-        Pointer position as a pixel offset from the top-left corner of this window.
+        Cursor position as a pixel offset from the top-left corner of this window.
 
 	\return
 		true if the threshold has been exceeded and drag-moving should be initiated, or false
@@ -458,10 +458,10 @@ protected:
 	/*************************************************************************
 		Overridden Event Handlers
 	*************************************************************************/
-    virtual void onPointerMove(PointerEventArgs& e);
-    virtual void onPointerPressHold(PointerEventArgs& e);
-    virtual void onPointerActivate(PointerEventArgs& e);
-    virtual void onPointerLeaves(PointerEventArgs& e);
+    virtual void onCursorMove(CursorInputEventArgs& e);
+    virtual void onCursorPressHold(CursorInputEventArgs& e);
+    virtual void onCursorActivate(CursorInputEventArgs& e);
+    virtual void onCursorLeaves(CursorInputEventArgs& e);
     virtual void onCaptureLost(WindowEventArgs& e);
     virtual void onSemanticInputEvent(SemanticEventArgs& e);
 

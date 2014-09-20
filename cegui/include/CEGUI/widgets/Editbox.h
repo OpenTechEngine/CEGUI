@@ -610,9 +610,9 @@ protected:
     virtual void onTextAcceptedEvent(WindowEventArgs& e);
 
     // Overridden event handlers
-    void onPointerPressHold(PointerEventArgs& e);
-    void onPointerActivate(PointerEventArgs& e);
-    void onPointerMove(PointerEventArgs& e);
+    void onCursorPressHold(CursorInputEventArgs& e);
+    void onCursorActivate(CursorInputEventArgs& e);
+    void onCursorMove(CursorInputEventArgs& e);
     void onCaptureLost(WindowEventArgs& e);
     void onCharacter(TextEventArgs& e);
     void onTextChanged(WindowEventArgs& e);

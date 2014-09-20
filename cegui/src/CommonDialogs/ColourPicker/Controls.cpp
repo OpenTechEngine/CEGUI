@@ -582,19 +582,19 @@ void ColourPickerControls::initialiseComponents()
         Event::Subscriber(&ColourPickerControls::handleAlphaSliderValueChanged, this));
 
     getColourPickerStaticImage()->subscribeEvent(
-        Window::EventPointerLeavesSurface,
+        Window::EventCursorLeavesSurface,
         Event::Subscriber(&ColourPickerControls::handleColourPickerStaticImagePointerLeaves, this));
 
     getColourPickerStaticImage()->subscribeEvent(
-        Window::EventPointerActivate,
+        Window::EventCursorActivate,
         Event::Subscriber(&ColourPickerControls::handleColourPickerStaticImagePointerActivate, this));
 
     getColourPickerStaticImage()->subscribeEvent(
-        Window::EventPointerPressHold,
+        Window::EventCursorPressHold,
         Event::Subscriber(&ColourPickerControls::handleColourPickerStaticImagePointerPressHold, this));
 
     getColourPickerStaticImage()->subscribeEvent(
-        Window::EventPointerMove,
+        Window::EventCursorMove,
         Event::Subscriber(&ColourPickerControls::handleColourPickerStaticImagePointerMove, this));
 
     initColourPicker();
@@ -1136,9 +1136,9 @@ bool ColourPickerControls::handleAlphaSliderValueChanged(const EventArgs& args)
 bool ColourPickerControls::handleColourPickerStaticImagePointerActivate(
     const EventArgs& args)
 {
-    const PointerEventArgs& pointerArgs = static_cast<const PointerEventArgs&>(args);
+    const CursorInputEventArgs& cursor_args = static_cast<const CursorInputEventArgs&>(args);
 
-    if (pointerArgs.source == PS_Left)
+    if (cursor_args.source == CIS_Left)
         d_draggingColourPickerIndicator = false;
 
     return true;
@@ -1148,13 +1148,13 @@ bool ColourPickerControls::handleColourPickerStaticImagePointerActivate(
 bool ColourPickerControls::handleColourPickerStaticImagePointerPressHold(
     const EventArgs& args)
 {
-    const PointerEventArgs& pointerArgs = static_cast<const PointerEventArgs&>(args);
+    const CursorInputEventArgs& cursor_args = static_cast<const CursorInputEventArgs&>(args);
 
-    if (pointerArgs.source == PS_Left)
+    if (cursor_args.source == CIS_Left)
     {
         d_draggingColourPickerIndicator = true;
 
-        refreshColourPickerIndicatorPosition(pointerArgs);
+        refreshColourPickerIndicatorPosition(cursor_args);
     }
 
     return true;
@@ -1166,7 +1166,7 @@ bool ColourPickerControls::handleColourPickerStaticImagePointerMove(
 {
     if (d_colourPickerIndicator && d_draggingColourPickerIndicator)
         refreshColourPickerIndicatorPosition(
-            static_cast<const PointerEventArgs&>(args));
+            static_cast<const CursorInputEventArgs&>(args));
 
     return true;
 }
@@ -1403,7 +1403,7 @@ void ColourPickerControls::refreshColourPickerIndicatorPosition()
 
 //----------------------------------------------------------------------------//
 void ColourPickerControls::refreshColourPickerIndicatorPosition(
-    const PointerEventArgs& pointerEventArgs)
+    const CursorInputEventArgs& pointerEventArgs)
 {
     const glm::vec2 position = pointerEventArgs.position;
 

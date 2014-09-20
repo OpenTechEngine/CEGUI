@@ -177,10 +177,10 @@ void Thumb::onThumbTrackEnded(WindowEventArgs& e)
 /*************************************************************************
 	Handler for cursor movement events
 *************************************************************************/
-void Thumb::onPointerMove(PointerEventArgs& e)
+void Thumb::onCursorMove(CursorInputEventArgs& e)
 {
 	// default processing
-	PushButton::onPointerMove(e);
+	PushButton::onCursorMove(e);
 
 	// only react if we are being dragged
 	if (d_beingDragged)
@@ -241,12 +241,12 @@ void Thumb::onPointerMove(PointerEventArgs& e)
 /*************************************************************************
     Handler for cursor press events
 *************************************************************************/
-void Thumb::onPointerPressHold(PointerEventArgs& e)
+void Thumb::onCursorPressHold(CursorInputEventArgs& e)
 {
 	// default processing
-    PushButton::onPointerPressHold(e);
+    PushButton::onCursorPressHold(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
 	{
 		// initialise the dragging state
 		d_beingDragged = true;

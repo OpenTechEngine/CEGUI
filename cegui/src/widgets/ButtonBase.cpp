@@ -73,13 +73,13 @@ bool ButtonBase::calculateCurrentHoverState(const glm::vec2& cursor_pos)
             (capture_wnd == this ||
             (capture_wnd->distributesCapturedInputs() && isAncestor(capture_wnd))) && isHit(cursor_pos);
     else
-	    return getGUIContext().getWindowContainingPointer() == this;
+	    return getGUIContext().getWindowContainingCursor() == this;
 }
 
 /*************************************************************************
 	Handler for when the cursor moves
 *************************************************************************/
-void ButtonBase::onPointerMove(PointerEventArgs& e)
+void ButtonBase::onCursorMove(CursorInputEventArgs& e)
 {
     // this is needed to discover whether cursor is in the widget area or not.
 	// The same thing used to be done each frame in the rendering method,
@@ -88,7 +88,7 @@ void ButtonBase::onPointerMove(PointerEventArgs& e)
 	// more efficient anyway.
 
 	// base class processing
-	Window::onPointerMove(e);
+	Window::onCursorMove(e);
 
 	updateInternalState(e.position);
 	++e.handled;
@@ -98,12 +98,12 @@ void ButtonBase::onPointerMove(PointerEventArgs& e)
 /*************************************************************************
 	Handler for cursor press hold events
 *************************************************************************/
-void ButtonBase::onPointerPressHold(PointerEventArgs& e)
+void ButtonBase::onCursorPressHold(CursorInputEventArgs& e)
 {
 	// default processing
-    Window::onPointerPressHold(e);
+    Window::onCursorPressHold(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
 	{
         if (captureInput())
         {
@@ -134,12 +134,12 @@ void ButtonBase::setPushedState(const bool pushed)
 /*************************************************************************
 	Handler for cursor activation events
 *************************************************************************/
-void ButtonBase::onPointerActivate(PointerEventArgs& e)
+void ButtonBase::onCursorActivate(CursorInputEventArgs& e)
 {
 	// default processing
-    Window::onPointerActivate(e);
+    Window::onCursorActivate(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
 	{
 		releaseInput();
 
@@ -158,7 +158,7 @@ void ButtonBase::onCaptureLost(WindowEventArgs& e)
 	Window::onCaptureLost(e);
 
 	d_pushed = false;
-    getGUIContext().updateWindowContainingPointer();
+    getGUIContext().updateWindowContainingCursor();
 	invalidate();
 
 	// event was handled by us.
@@ -169,10 +169,10 @@ void ButtonBase::onCaptureLost(WindowEventArgs& e)
 /*************************************************************************
     Handler for when cursor leaves the widget
 *************************************************************************/
-void ButtonBase::onPointerLeaves(PointerEventArgs& e)
+void ButtonBase::onCursorLeaves(CursorInputEventArgs& e)
 {
     // default processing
-    Window::onPointerLeaves(e);
+    Window::onCursorLeaves(e);
 
 	d_hovering = false;
 	invalidate();

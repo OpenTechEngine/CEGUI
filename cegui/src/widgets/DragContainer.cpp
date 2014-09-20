@@ -242,11 +242,11 @@ namespace CEGUI
             setImage(d_dragging ? getDragIndicatorImage() : getCursor());
     }
 
-    void DragContainer::onPointerPressHold(PointerEventArgs& e)
+    void DragContainer::onCursorPressHold(CursorInputEventArgs& e)
     {
-        Window::onPointerPressHold(e);
+        Window::onCursorPressHold(e);
 
-        if (e.source == PS_Left)
+        if (e.source == CIS_Left)
         {
             // ensure all inputs come to us for now
             if (captureInput())
@@ -264,11 +264,11 @@ namespace CEGUI
         }
     }
 
-    void DragContainer::onPointerActivate(PointerEventArgs& e)
+    void DragContainer::onCursorActivate(CursorInputEventArgs& e)
     {
-        Window::onPointerActivate(e);
+        Window::onCursorActivate(e);
 
-        if (e.source == PS_Left)
+        if (e.source == CIS_Left)
         {
             if (d_dragging)
             {
@@ -295,9 +295,9 @@ namespace CEGUI
         }
     }
 
-    void DragContainer::onPointerMove(PointerEventArgs& e)
+    void DragContainer::onCursorMove(CursorInputEventArgs& e)
     {
-        Window::onPointerMove(e);
+        Window::onCursorMove(e);
 
         // get position of cursor as co-ordinates local to this window.
         const glm::vec2 localPointerPos = CoordConverter::screenToWindow(*this, e.position);

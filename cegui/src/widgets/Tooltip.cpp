@@ -338,11 +338,11 @@ namespace CEGUI
         }
     }
 
-    void Tooltip::onPointerEnters(PointerEventArgs& e)
+    void Tooltip::onCursorEnters(CursorInputEventArgs& e)
     {
         positionSelf();
 
-        Window::onPointerEnters(e);
+        Window::onCursorEnters(e);
     }
 
     void Tooltip::onTextChanged(WindowEventArgs& e)

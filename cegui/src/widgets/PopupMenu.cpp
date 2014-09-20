@@ -356,9 +356,9 @@ void PopupMenu::onHidden(WindowEventArgs& e)
 /************************************************************************
     Handler for cursor press events
 ************************************************************************/
-void PopupMenu::onPointerPressHold(PointerEventArgs& e)
+void PopupMenu::onCursorPressHold(CursorInputEventArgs& e)
 {
-    MenuBase::onPointerPressHold(e);
+    MenuBase::onCursorPressHold(e);
         // don't reach our parent
         ++e.handled;
 }
@@ -367,9 +367,9 @@ void PopupMenu::onPointerPressHold(PointerEventArgs& e)
 /************************************************************************
     Handler for cursor activation events
 ************************************************************************/
-void PopupMenu::onPointerActivate(PointerEventArgs& e)
+void PopupMenu::onCursorActivate(CursorInputEventArgs& e)
 {
-    MenuBase::onPointerActivate(e);
+    MenuBase::onCursorActivate(e);
         // don't reach our parent
         ++e.handled;
 }

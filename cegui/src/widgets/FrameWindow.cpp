@@ -206,7 +206,7 @@ void FrameWindow::toggleRollup(void)
         WindowEventArgs args(this);
         onRollupToggled(args);
 
-        getGUIContext().updateWindowContainingPointer();
+        getGUIContext().updateWindowContainingCursor();
     }
 
 }
@@ -553,13 +553,13 @@ void FrameWindow::onCloseClicked(WindowEventArgs& e)
 /*************************************************************************
 	Handler for cursor move events
 *************************************************************************/
-void FrameWindow::onPointerMove(PointerEventArgs& e)
+void FrameWindow::onCursorMove(CursorInputEventArgs& e)
 {
 	// default processing (this is now essential as it controls event firing).
-	Window::onPointerMove(e);
+	Window::onCursorMove(e);
 
     // if we are not the window containing the cursor, do NOT change the indicator
-	if (getGUIContext().getWindowContainingPointer() != this)
+	if (getGUIContext().getWindowContainingCursor() != this)
 	{
 		return;
 	}
@@ -614,19 +614,19 @@ void FrameWindow::onPointerMove(PointerEventArgs& e)
 /*************************************************************************
     Handler for cursor press events
 *************************************************************************/
-void FrameWindow::onPointerPressHold(PointerEventArgs& e)
+void FrameWindow::onCursorPressHold(CursorInputEventArgs& e)
 {
 	// default processing (this is now essential as it controls event firing).
-    Window::onPointerPressHold(e);
+    Window::onCursorPressHold(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
 	{
 		if (isSizingEnabled())
 		{
-            // get position of pointer as co-ordinates local to this window.
+            // get position of cursor as co-ordinates local to this window.
             const glm::vec2 localPos(CoordConverter::screenToWindow(*this, e.position));
 
-            // if the pointer is on the sizing border
+            // if the cursor is on the sizing border
 			if (getSizingBorderAtPoint(localPos) != SizingNone)
 			{
 				// ensure all inputs come to us for now
@@ -651,12 +651,12 @@ void FrameWindow::onPointerPressHold(PointerEventArgs& e)
 /*************************************************************************
     Handler for cursor activation events
 *************************************************************************/
-void FrameWindow::onPointerActivate(PointerEventArgs& e)
+void FrameWindow::onCursorActivate(CursorInputEventArgs& e)
 {
 	// default processing (this is now essential as it controls event firing).
-    Window::onPointerActivate(e);
+    Window::onCursorActivate(e);
 
-    if (e.source == PS_Left && isCapturedByThis())
+    if (e.source == CIS_Left && isCapturedByThis())
 	{
 		// release our capture on the input data
 		releaseInput();

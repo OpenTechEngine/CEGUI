@@ -103,10 +103,10 @@ const glm::vec2& Titlebar::getDragPoint() const
 /*************************************************************************
 	Handler for cursor movement events
 *************************************************************************/
-void Titlebar::onPointerMove(PointerEventArgs& e)
+void Titlebar::onCursorMove(CursorInputEventArgs& e)
 {
 	// Base class processing.
-	Window::onPointerMove(e);
+	Window::onCursorMove(e);
 
 	if (d_dragging && (d_parent != 0))
 	{
@@ -124,12 +124,12 @@ void Titlebar::onPointerMove(PointerEventArgs& e)
 /*************************************************************************
     Handler for cursor press events
 *************************************************************************/
-void Titlebar::onPointerPressHold(PointerEventArgs& e)
+void Titlebar::onCursorPressHold(CursorInputEventArgs& e)
 {
 	// Base class processing
-    Window::onPointerPressHold(e);
+    Window::onCursorPressHold(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
 	{
 		if ((d_parent != 0) && d_dragEnabled)
 		{
@@ -170,12 +170,12 @@ void Titlebar::onPointerPressHold(PointerEventArgs& e)
 /*************************************************************************
     Handler for cursor activation events
 *************************************************************************/
-void Titlebar::onPointerActivate(PointerEventArgs& e)
+void Titlebar::onCursorActivate(CursorInputEventArgs& e)
 {
 	// Base class processing
-    Window::onPointerActivate(e);
+    Window::onCursorActivate(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
 	{
 		releaseInput();
 		++e.handled;
@@ -190,7 +190,7 @@ void Titlebar::onSemanticInputEvent(SemanticEventArgs& e)
     if (isDisabled())
         return;
 
-    if (e.d_semanticValue == SV_SelectWord && e.d_payload.source == PS_Left)
+    if (e.d_semanticValue == SV_SelectWord && e.d_payload.source == CIS_Left)
     {
 
         // if we do not have a parent window, then obviously nothing should happen.

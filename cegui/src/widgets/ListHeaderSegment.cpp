@@ -411,10 +411,10 @@ bool ListHeaderSegment::isDragMoveThresholdExceeded(const glm::vec2& local_curso
 /*************************************************************************
     Handler for when cursor position changes in widget area (or captured)
 *************************************************************************/
-void ListHeaderSegment::onPointerMove(PointerEventArgs& e)
+void ListHeaderSegment::onCursorMove(CursorInputEventArgs& e)
 {
 	// base class processing
-	Window::onPointerMove(e);
+	Window::onCursorMove(e);
 
     // convert cursor position to something local
     const glm::vec2 local_cursor_pos(CoordConverter::screenToWindow(*this, e.position));
@@ -478,12 +478,12 @@ void ListHeaderSegment::onPointerMove(PointerEventArgs& e)
 /*************************************************************************
     Handler for when cursor is pressed
 *************************************************************************/
-void ListHeaderSegment::onPointerPressHold(PointerEventArgs& e)
+void ListHeaderSegment::onCursorPressHold(CursorInputEventArgs& e)
 {
 	// base class processing
-    Window::onPointerPressHold(e);
+    Window::onCursorPressHold(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
 	{
 		// ensure all inputs come to us for now
 		if (captureInput())
@@ -516,12 +516,12 @@ void ListHeaderSegment::onPointerPressHold(PointerEventArgs& e)
 /*************************************************************************
     Handler for when the cursor is activated
 *************************************************************************/
-void ListHeaderSegment::onPointerActivate(PointerEventArgs& e)
+void ListHeaderSegment::onCursorActivate(CursorInputEventArgs& e)
 {
 	// base class processing
-    Window::onPointerActivate(e);
+    Window::onCursorActivate(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
 	{
 		// if we were pushed and cursor was released (activated) within our segment area
 		if (d_segmentPushed && d_segmentHover)
@@ -546,10 +546,10 @@ void ListHeaderSegment::onPointerActivate(PointerEventArgs& e)
 /*************************************************************************
     Handler for when cursor leaves the widget area (uncaptured)
 *************************************************************************/
-void ListHeaderSegment::onPointerLeaves(PointerEventArgs& e)
+void ListHeaderSegment::onCursorLeaves(CursorInputEventArgs& e)
 {
 	// base class processing
-    Window::onPointerLeaves(e);
+    Window::onCursorLeaves(e);
 
 	d_splitterHover = false;
 	d_dragSizing = false;
@@ -565,7 +565,7 @@ void ListHeaderSegment::onSemanticInputEvent(SemanticEventArgs& e)
     if (isDisabled())
         return;
 
-    if (e.d_semanticValue == SV_SelectWord && e.d_payload.source == PS_Left &&
+    if (e.d_semanticValue == SV_SelectWord && e.d_payload.source == CIS_Left &&
         d_splitterHover)
     {
         WindowEventArgs args(this);

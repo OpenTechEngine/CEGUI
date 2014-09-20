@@ -90,13 +90,13 @@ void Scrollbar::initialiseComponents(void)
 
     // set up Increase button
     getIncreaseButton()->
-    subscribeEvent(PushButton::EventPointerPressHold,
+    subscribeEvent(PushButton::EventCursorPressHold,
                    Event::Subscriber(&CEGUI::Scrollbar::handleIncreaseClicked,
                                      this));
 
     // set up Decrease button
     getDecreaseButton()->
-    subscribeEvent(PushButton::EventPointerPressHold,
+    subscribeEvent(PushButton::EventCursorPressHold,
                    Event::Subscriber(&CEGUI::Scrollbar::handleDecreaseClicked,
                                      this));
 
@@ -212,12 +212,12 @@ void Scrollbar::onScrollConfigChanged(WindowEventArgs& e)
 }
 
 //----------------------------------------------------------------------------//
-void Scrollbar::onPointerPressHold(PointerEventArgs& e)
+void Scrollbar::onCursorPressHold(CursorInputEventArgs& e)
 {
     // base class processing
-    Window::onPointerPressHold(e);
+    Window::onCursorPressHold(e);
 
-    if (e.source != PS_Left)
+    if (e.source != CIS_Left)
         return;
 
     const float adj = getAdjustDirectionFromPoint(e.position);
@@ -231,7 +231,7 @@ void Scrollbar::onPointerPressHold(PointerEventArgs& e)
 }
 
 //----------------------------------------------------------------------------//
-void Scrollbar::onScroll(PointerEventArgs& e)
+void Scrollbar::onScroll(CursorInputEventArgs& e)
 {
     // base class processing
     Window::onScroll(e);
@@ -255,7 +255,7 @@ bool Scrollbar::handleThumbMoved(const EventArgs&)
 //----------------------------------------------------------------------------//
 bool Scrollbar::handleIncreaseClicked(const EventArgs& e)
 {
-    if (((const PointerEventArgs&)e).source != PS_Left)
+    if (((const CursorInputEventArgs&)e).source != CIS_Left)
         return false;
 
     scrollForwardsByStep();
@@ -265,7 +265,7 @@ bool Scrollbar::handleIncreaseClicked(const EventArgs& e)
 //----------------------------------------------------------------------------//
 bool Scrollbar::handleDecreaseClicked(const EventArgs& e)
 {
-    if (((const PointerEventArgs&)e).source != PS_Left)
+    if (((const CursorInputEventArgs&)e).source != CIS_Left)
         return false;
 
     scrollBackwardsByStep();

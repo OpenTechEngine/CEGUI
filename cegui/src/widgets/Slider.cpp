@@ -178,12 +178,12 @@ void Slider::onThumbTrackEnded(WindowEventArgs& e)
 /*************************************************************************
     Handler for when a cursor is pressed
 *************************************************************************/
-void Slider::onPointerPressHold(PointerEventArgs& e)
+void Slider::onCursorPressHold(CursorInputEventArgs& e)
 {
 	// base class processing
-    Window::onPointerPressHold(e);
+    Window::onCursorPressHold(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
 	{
 		float adj = getAdjustDirectionFromPoint(e.position);
 
@@ -201,7 +201,7 @@ void Slider::onPointerPressHold(PointerEventArgs& e)
 /*************************************************************************
 	Handler for scroll wheel changes
 *************************************************************************/
-void Slider::onScroll(PointerEventArgs& e)
+void Slider::onScroll(CursorInputEventArgs& e)
 {
 	// base class processing
 	Window::onScroll(e);

@@ -336,17 +336,17 @@ public:
 
     // generated externally (inputs)
     /** Event fired when the cursor has entered the Window's area.
-     * Handlers are passed a const PointerEventArgs reference with all fields
+     * Handlers are passed a const CursorInputEventArgs reference with all fields
      * valid.
      */
     static const String EventCursorEntersArea;
     /** Event fired when the cursor has left the Window's area.
-     * Handlers are passed a const PointerEventArgs reference with all fields
+     * Handlers are passed a const CursorInputEventArgs reference with all fields
      * valid.
      */
     static const String EventCursorLeavesArea;
     /** Event fired when the cursor enters the Window's area.
-     * Handlers are passed a const PointerEventArgs reference with all fields
+     * Handlers are passed a const CursorInputEventArgs reference with all fields
      * valid.
      *\note This event is fired if - and only if - the cursor is actually
      * over some part of this Window's surface area, and will not fire for
@@ -355,10 +355,10 @@ public:
      * For an alternative version of this event see the
      * Window::EventCursorEntersArea event.
      */
-    static const String EventPointerEntersSurface;
+    static const String EventCursorEntersSurface;
     /** Event fired when the cursor is no longer over the Window's surface
      * area.
-     * Handlers are passed a const PointerEventArgs reference with all fields
+     * Handlers are passed a const CursorInputEventArgs reference with all fields
      * valid.
      *\note This event will fire whenever the cursor is no longer actually over
      * some part of this Window's surface area, for example if the cursor is
@@ -366,27 +366,27 @@ public:
      * actually 'left' this Window's area).  For an alternative version of this
      * event see the Window::EventCursorLeavesArea event.
      */
-    static const String EventPointerLeavesSurface;
+    static const String EventCursorLeavesSurface;
     /** Event fired when the cursor moves within the area of the Window.
-     * Handlers are passed a const PointerEventArgs reference with all fields
+     * Handlers are passed a const CursorInputEventArgs reference with all fields
      * valid.
      */
-    static const String EventPointerMove;
+    static const String EventCursorMove;
     /** Event fired when there is a scroll event within the Window's area.
-     * Handlers are passed a const PointerEventArgs reference with all fields
+     * Handlers are passed a const CursorInputEventArgs reference with all fields
      * valid.
      */
     static const String EventScroll;
     /** Event fired when a cursor is pressed and held down within the Window.
-     * Handlers are passed a const PointerEventArgs reference with all fields
+     * Handlers are passed a const CursorInputEventArgs reference with all fields
      * valid.
      */
-    static const String EventPointerPressHold;
+    static const String EventCursorPressHold;
     /** Event fired when the cursor is activated within the Window.
-     * Handlers are passed a const PointerEventArgs reference with all fields
+     * Handlers are passed a const CursorInputEventArgs reference with all fields
      * valid.
      */
-    static const String EventPointerActivate;
+    static const String EventCursorActivate;
     /** Event fired when the Window receives a character key input event.
      * Handlers are passed a const KeyEventArgs reference with
      * WindowEventArgs::window set to the Window receiving the character input,
@@ -535,8 +535,8 @@ public:
         return true if this is the active Window.  An active window is a window
         that may receive user inputs.
 
-        Pointer events are always sent to the window containing the pointer
-        indicator regardless of what this function reports (unless a window has
+        Cursor events are always sent to the window containing the cursor
+        regardless of what this function reports (unless a window has
         captured inputs). The active state mainly determines where send other,
         for example keyboard inputs.
 
@@ -2963,18 +2963,18 @@ protected:
         Handler called when the cursor has entered this window's area.
 
     \param e
-        PointerEventArgs object.  All fields are valid.
+        CursorInputEventArgs object.  All fields are valid.
     */
-    virtual void onCursorEntersArea(PointerEventArgs& e);
+    virtual void onCursorEntersArea(CursorInputEventArgs& e);
 
     /*!
     \brief
         Handler called when the cursor has left this window's area.
 
     \param e
-        PointerEventArgs object.  All fields are valid.
+        CursorInputEventArgs object.  All fields are valid.
     */
-    virtual void onCursorLeavesArea(PointerEventArgs& e);
+    virtual void onCursorLeavesArea(CursorInputEventArgs& e);
 
     /*!
     \brief
@@ -2985,12 +2985,12 @@ protected:
         called.
 
     \param e
-        PointerEventArgs object.  All fields are valid.
+        CursorInputEventArgs object.  All fields are valid.
 
     \see
         Window::onCursorEntersArea
     */
-    virtual void onPointerEnters(PointerEventArgs& e);
+    virtual void onCursorEnters(CursorInputEventArgs& e);
 
     /*!
     \brief
@@ -3001,21 +3001,21 @@ protected:
         child window.
 
     \param e
-        PointerEventArgs object.  All fields are valid.
+        CursorInputEventArgs object.  All fields are valid.
 
     \see
         Window::onCursorLeavesArea
     */
-    virtual void onPointerLeaves(PointerEventArgs& e);
+    virtual void onCursorLeaves(CursorInputEventArgs& e);
 
     /*!
     \brief
         Handler called when the cursor has been moved within this window's area.
 
     \param e
-        PointerEventArgs object.  All fields are valid.
+        CursorInputEventArgs object.  All fields are valid.
     */
-    virtual void onPointerMove(PointerEventArgs& e);
+    virtual void onCursorMove(CursorInputEventArgs& e);
 
     /*!
     \brief
@@ -3023,27 +3023,27 @@ protected:
         this window's area.
 
     \param e
-        PointerEventArgs object.  All fields are valid.
+        CursorInputEventArgs object.  All fields are valid.
     */
-    virtual void onScroll(PointerEventArgs& e);
+    virtual void onScroll(CursorInputEventArgs& e);
 
     /*!
     \brief
         Handler called when a cursor is held pressed within this window's area.
 
     \param e
-        PointerEventArgs object.  All fields are valid.
+        CursorInputEventArgs object.  All fields are valid.
     */
-    virtual void onPointerPressHold(PointerEventArgs& e);
+    virtual void onCursorPressHold(CursorInputEventArgs& e);
 
     /*!
     \brief
         Handler called when a cursor is activated within this window's area.
 
     \param e
-        PointerEventArgs object.  All fields are valid.
+        CursorInputEventArgs object.  All fields are valid.
     */
-    virtual void onPointerActivate(PointerEventArgs& e);
+    virtual void onCursorActivate(CursorInputEventArgs& e);
 
     /*!
     \brief
@@ -3234,7 +3234,7 @@ protected:
     /*!
     \brief
     */
-    void generateAutoRepeatEvent(PointerSource source);
+    void generateAutoRepeatEvent(CursorInputSource source);
 
     /*!
     \brief
@@ -3567,7 +3567,7 @@ protected:
     //! seconds between further repeats after delay has expired.
     float d_repeatRate;
     //! Cursor source we're tracking for auto-repeat purposes.
-    PointerSource d_repeatPointerSource;
+    CursorInputSource d_repeatPointerSource;
     //! implements repeating - is true after delay has elapsed,
     bool d_repeating;
     //! implements repeating - tracks time elapsed.

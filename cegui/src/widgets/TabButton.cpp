@@ -86,9 +86,9 @@ void TabButton::onClicked(WindowEventArgs& e)
 /*************************************************************************
     Handler for cursor press events
 *************************************************************************/
-void TabButton::onPointerPressHold(PointerEventArgs& e)
+void TabButton::onCursorPressHold(CursorInputEventArgs& e)
 {
-    if (e.source == PS_Middle)
+    if (e.source == CIS_Middle)
     {
         captureInput ();
         ++e.handled;
@@ -98,12 +98,12 @@ void TabButton::onPointerPressHold(PointerEventArgs& e)
     }
 
 	// default handling
-    ButtonBase::onPointerPressHold(e);
+    ButtonBase::onCursorPressHold(e);
 }
 
-void TabButton::onPointerActivate(PointerEventArgs& e)
+void TabButton::onCursorActivate(CursorInputEventArgs& e)
 {
-    if ((e.source == PS_Left) && isPushed())
+    if ((e.source == CIS_Left) && isPushed())
 	{
 		Window* sheet = getGUIContext().getRootWindow();
 
@@ -122,7 +122,7 @@ void TabButton::onPointerActivate(PointerEventArgs& e)
 
 		++e.handled;
     }
-    else if (e.source == PS_Middle)
+    else if (e.source == CIS_Middle)
     {
         d_dragging = false;
         releaseInput ();
@@ -130,10 +130,10 @@ void TabButton::onPointerActivate(PointerEventArgs& e)
     }
 
 	// default handling
-    ButtonBase::onPointerActivate(e);
+    ButtonBase::onCursorActivate(e);
 }
 
-void TabButton::onPointerMove(PointerEventArgs& e)
+void TabButton::onCursorMove(CursorInputEventArgs& e)
 {
     if (d_dragging)
     {
@@ -142,15 +142,15 @@ void TabButton::onPointerMove(PointerEventArgs& e)
     }
 
 	// default handling
-	ButtonBase::onPointerMove(e);
+	ButtonBase::onCursorMove(e);
 }
 
-void TabButton::onScroll(PointerEventArgs& e)
+void TabButton::onScroll(CursorInputEventArgs& e)
 {
     fireEvent(EventScrolled, e, EventNamespace);
 
 	// default handling
-	ButtonBase::onPointerMove(e);
+	ButtonBase::onCursorMove(e);
 }
 
 } // End of  CEGUI namespace section

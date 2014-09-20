@@ -99,13 +99,13 @@ const String Window::EventTextParsingChanged("TextParsingChanged");
 const String Window::EventMarginChanged("MarginChanged");
 const String Window::EventCursorEntersArea("CursorEntersArea");
 const String Window::EventCursorLeavesArea("CursorLeavesArea");
-const String Window::EventPointerEntersSurface("PointerEntersSurface");
-const String Window::EventPointerLeavesSurface("PointerLeavesSurface");
-const String Window::EventPointerMove("PointerMove");
-const String Window::EventScroll("Scroll");
-const String Window::EventPointerPressHold("PointerPressHold");
-const String Window::EventPointerActivate("PointerActivate");
+const String Window::EventCursorEntersSurface("CursorEntersSurface");
+const String Window::EventCursorLeavesSurface("CursorLeavesSurface");
+const String Window::EventCursorMove("CursorMove");
+const String Window::EventCursorPressHold("CursorPressHold");
+const String Window::EventCursorActivate("CursorActivate");
 const String Window::EventCharacterKey("CharacterKey");
+const String Window::EventScroll("Scroll");
 const String Window::EventSemanticEvent("SemanticEvent");
 
 //----------------------------------------------------------------------------//
@@ -238,7 +238,7 @@ Window::Window(const String& type, const String& name):
     d_autoRepeat(false),
     d_repeatDelay(0.3f),
     d_repeatRate(0.06f),
-    d_repeatPointerSource(PS_None),
+    d_repeatPointerSource(CIS_None),
     d_repeating(false),
     d_repeatElapsed(0.0f),
 
@@ -609,7 +609,7 @@ Window* Window::getChildAtPosition(const glm::vec2& position,
             // recursively scan for hit on children of this child window...
             if (Window* const wnd = (*child)->getChildAtPosition(p, hittestfunc, allow_disabled))
                 return wnd;
-            // see if this child is hit and return it's pointer if it is
+            // see if this child is hit and return it's cursor if it is
             else if (((*child)->*hittestfunc)(p, allow_disabled))
                 return *child;
         }
@@ -681,7 +681,7 @@ void Window::setEnabled(bool setting)
         onDisabled(args);
     }
 
-    getGUIContext().updateWindowContainingPointer();
+    getGUIContext().updateWindowContainingCursor();
 }
 
 //----------------------------------------------------------------------------//
@@ -701,7 +701,7 @@ void Window::setVisible(bool setting)
     WindowEventArgs args(this);
     d_visible ? onShown(args) : onHidden(args);
 
-    getGUIContext().updateWindowContainingPointer();
+    getGUIContext().updateWindowContainingCursor();
 }
 
 //----------------------------------------------------------------------------//
@@ -1238,7 +1238,7 @@ void Window::onZChange_impl(void)
 
     }
 
-    getGUIContext().updateWindowContainingPointer();
+    getGUIContext().updateWindowContainingCursor();
 }
 
 //----------------------------------------------------------------------------//
@@ -1262,7 +1262,7 @@ void Window::setCursor(const Image* image)
 {
     d_cursor = image;
 
-    if (getGUIContext().getWindowContainingPointer() == this)
+    if (getGUIContext().getWindowContainingCursor() == this)
         getGUIContext().getCursor().setImage(image);
 }
 
@@ -1291,15 +1291,15 @@ void Window::setDestroyedByParent(bool setting)
 }
 
 //----------------------------------------------------------------------------//
-void Window::generateAutoRepeatEvent(PointerSource source)
+void Window::generateAutoRepeatEvent(CursorInputSource source)
 {
-    PointerEventArgs pa(this);
-    pa.position = getUnprojectedPosition(
+    CursorInputEventArgs ciea(this);
+    ciea.position = getUnprojectedPosition(
         getGUIContext().getCursor().getPosition());
-    pa.moveDelta = glm::vec2(0, 0);
-    pa.source = source;
-    pa.scroll = 0;
-    onPointerPressHold(pa);
+    ciea.moveDelta = glm::vec2(0, 0);
+    ciea.source = source;
+    ciea.scroll = 0;
+    onCursorPressHold(ciea);
 }
 
 //----------------------------------------------------------------------------//
@@ -1413,7 +1413,7 @@ void Window::addWindowProperties(void)
     );
 
     CEGUI_DEFINE_PROPERTY(Window, bool,
-        "CursorPassThroughEnabled", "Property to get/set whether the window ignores pointer events and pass them through to any windows behind it. Value is either \"true\" or \"false\".",
+        "CursorPassThroughEnabled", "Property to get/set whether the window ignores cursor events and pass them through to any windows behind it. Value is either \"true\" or \"false\".",
         &Window::setCursorPassThroughEnabled, &Window::isCursorPassThroughEnabled, false
     );
 
@@ -1506,7 +1506,7 @@ void Window::setCursorAutoRepeatEnabled(bool setting)
         return;
 
     d_autoRepeat = setting;
-    d_repeatPointerSource = PS_None;
+    d_repeatPointerSource = CIS_None;
 
     // FIXME: There is a potential issue here if this setting is
     // FIXME: changed _while_ the cursor is auto-repeating, and
@@ -1561,7 +1561,7 @@ void Window::update(float elapsed)
 void Window::updateSelf(float elapsed)
 {
     // cursor autorepeat processing.
-    if (d_autoRepeat && d_repeatPointerSource != PS_None)
+    if (d_autoRepeat && d_repeatPointerSource != CIS_None)
     {
         d_repeatElapsed += elapsed;
 
@@ -1831,7 +1831,7 @@ void Window::setArea_impl(const UVector2& pos, const USize& size,
 
     //if (moved || sized)
     // FIXME: This is potentially wasteful
-    getGUIContext().updateWindowContainingPointer();
+    getGUIContext().updateWindowContainingCursor();
 
     // update geometry position and clipping if nothing from above appears to
     // have done so already (NB: may be occasionally wasteful, but fixes bugs!)
@@ -2359,7 +2359,7 @@ void Window::onCaptureGained(WindowEventArgs& e)
 void Window::onCaptureLost(WindowEventArgs& e)
 {
     // reset auto-repeat state
-    d_repeatPointerSource = PS_None;
+    d_repeatPointerSource = CIS_None;
 
     // handle restore of previous capture window as required.
     if (d_restoreOldCapture && (d_oldCapture != 0)) {
@@ -2370,7 +2370,7 @@ void Window::onCaptureLost(WindowEventArgs& e)
     // handle case where cursor is now in a different window
     // (this is a bit of a hack that uses the injection of a semantic event to handle
     // this for us).
-    SemanticInputEvent moveEvent(SV_PointerMove);
+    SemanticInputEvent moveEvent(SV_CursorMove);
     const glm::vec2 cursorPosition = getGUIContext().getCursor().getPosition();
     moveEvent.d_payload.array[0] = cursorPosition.x;
     moveEvent.d_payload.array[1] = cursorPosition.y;
@@ -2477,21 +2477,21 @@ void Window::onChildRemoved(ElementEventArgs& e)
 }
 
 //----------------------------------------------------------------------------//
-void Window::onCursorEntersArea(PointerEventArgs& e)
+void Window::onCursorEntersArea(CursorInputEventArgs& e)
 {
     d_containsPointer = true;
     fireEvent(EventCursorEntersArea, e, EventNamespace);
 }
 
 //----------------------------------------------------------------------------//
-void Window::onCursorLeavesArea(PointerEventArgs& e)
+void Window::onCursorLeavesArea(CursorInputEventArgs& e)
 {
     d_containsPointer = false;
     fireEvent(EventCursorLeavesArea, e, EventNamespace);
 }
 
 //----------------------------------------------------------------------------//
-void Window::onPointerEnters(PointerEventArgs& e)
+void Window::onCursorEnters(CursorInputEventArgs& e)
 {
     // set the cursor
     getGUIContext().getCursor().setImage(getCursor());
@@ -2501,48 +2501,48 @@ void Window::onPointerEnters(PointerEventArgs& e)
     if (tip && !isAncestor(tip))
         tip->setTargetWindow(this);
 
-    fireEvent(EventPointerEntersSurface, e, EventNamespace);
+    fireEvent(EventCursorEntersSurface, e, EventNamespace);
 }
 
 //----------------------------------------------------------------------------//
-void Window::onPointerLeaves(PointerEventArgs& e)
+void Window::onCursorLeaves(CursorInputEventArgs& e)
 {
     // perform tooltip control
-    const Window* const mw = getGUIContext().getWindowContainingPointer();
+    const Window* const mw = getGUIContext().getWindowContainingCursor();
     Tooltip* const tip = getTooltip();
     if (tip && mw != tip && !(mw && mw->isAncestor(tip)))
         tip->setTargetWindow(0);
 
-    fireEvent(EventPointerLeavesSurface, e, EventNamespace);
+    fireEvent(EventCursorLeavesSurface, e, EventNamespace);
 }
 
 //----------------------------------------------------------------------------//
-void Window::onPointerMove(PointerEventArgs& e)
+void Window::onCursorMove(CursorInputEventArgs& e)
 {
     // perform tooltip control
     Tooltip* const tip = getTooltip();
     if (tip)
         tip->resetTimer();
 
-    fireEvent(EventPointerMove, e, EventNamespace);
+    fireEvent(EventCursorMove, e, EventNamespace);
 
     // optionally propagate to parent
     if (!e.handled && d_propagatePointerInputs &&
         d_parent && this != getGUIContext().getModalWindow())
     {
         e.window = getParent();
-        getParent()->onPointerMove(e);
+        getParent()->onCursorMove(e);
 
         return;
     }
 
-    // by default we now mark pointer events as handled
+    // by default we now mark cursor events as handled
     // (derived classes may override, of course!)
     ++e.handled;
 }
 
 //----------------------------------------------------------------------------//
-void Window::onScroll(PointerEventArgs& e)
+void Window::onScroll(CursorInputEventArgs& e)
 {
     fireEvent(EventScroll, e, EventNamespace);
 
@@ -2556,20 +2556,20 @@ void Window::onScroll(PointerEventArgs& e)
         return;
     }
 
-    // by default we now mark pointer events as handled
+    // by default we now mark cursor events as handled
     // (derived classes may override, of course!)
     ++e.handled;
 }
 
 //----------------------------------------------------------------------------//
-void Window::onPointerPressHold(PointerEventArgs& e)
+void Window::onCursorPressHold(CursorInputEventArgs& e)
 {
     // perform tooltip control
     Tooltip* const tip = getTooltip();
     if (tip)
         tip->setTargetWindow(0);
 
-    if ((e.source == PS_Left) && moveToFront_impl(true))
+    if ((e.source == CIS_Left) && moveToFront_impl(true))
         ++e.handled;
 
     // if auto repeat is enabled and we are not currently tracking
@@ -2577,7 +2577,7 @@ void Window::onPointerPressHold(PointerEventArgs& e)
     // it could be us that generated this event via auto-repeat).
     if (d_autoRepeat)
     {
-        if (d_repeatPointerSource == PS_None)
+        if (d_repeatPointerSource == CIS_None)
             captureInput();
 
         if ((d_repeatPointerSource != e.source) && isCapturedByThis())
@@ -2588,41 +2588,41 @@ void Window::onPointerPressHold(PointerEventArgs& e)
         }
     }
 
-    fireEvent(EventPointerPressHold, e, EventNamespace);
+    fireEvent(EventCursorPressHold, e, EventNamespace);
 
     // optionally propagate to parent
     if (!e.handled && d_propagatePointerInputs &&
         d_parent && this != getGUIContext().getModalWindow())
     {
         e.window = getParent();
-        getParent()->onPointerPressHold(e);
+        getParent()->onCursorPressHold(e);
 
         return;
     }
 
-    // by default we now mark pointer events as handled
+    // by default we now mark cursor events as handled
     // (derived classes may override, of course!)
     ++e.handled;
 }
 
 //----------------------------------------------------------------------------//
-void Window::onPointerActivate(PointerEventArgs& e)
+void Window::onCursorActivate(CursorInputEventArgs& e)
 {
     // reset auto-repeat state
-    if (d_autoRepeat && d_repeatPointerSource != PS_None)
+    if (d_autoRepeat && d_repeatPointerSource != CIS_None)
     {
         releaseInput();
-        d_repeatPointerSource = PS_None;
+        d_repeatPointerSource = CIS_None;
     }
 
-    fireEvent(EventPointerActivate, e, EventNamespace);
+    fireEvent(EventCursorActivate, e, EventNamespace);
 
     // optionally propagate to parent
     if (!e.handled && d_propagatePointerInputs &&
         d_parent && this != getGUIContext().getModalWindow())
     {
         e.window = getParent();
-        getParent()->onPointerActivate(e);
+        getParent()->onCursorActivate(e);
 
         return;
     }

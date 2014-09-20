@@ -67,15 +67,15 @@ GUIContext::GUIContext(RenderTarget& target) :
     d_semanticEventHandlers(),
     d_windowNavigator(0)
 {
-    resetWindowContainingPointer();
+    resetWindowContainingCursor();
     initializeSemanticEventHandlers();
 }
 
 //----------------------------------------------------------------------------//
-void GUIContext::resetWindowContainingPointer()
+void GUIContext::resetWindowContainingCursor()
 {
-    d_windowContainingPointer = 0;
-    d_windowContainingPointerIsUpToDate = true;
+    d_windowContainingCursor = 0;
+    d_windowContainingCursorIsUpToDate = true;
 }
 
 //----------------------------------------------------------------------------//
@@ -208,15 +208,15 @@ Window* GUIContext::getModalWindow() const
 }
 
 //----------------------------------------------------------------------------//
-Window* GUIContext::getWindowContainingPointer() const
+Window* GUIContext::getWindowContainingCursor() const
 {
-    if (!d_windowContainingPointerIsUpToDate)
+    if (!d_windowContainingCursorIsUpToDate)
     {
-        updateWindowContainingPointer_impl();
-        d_windowContainingPointerIsUpToDate = true;
+        updateWindowContainingCursor_impl();
+        d_windowContainingCursorIsUpToDate = true;
     }
 
-    return d_windowContainingPointer;
+    return d_windowContainingCursor;
 }
 
 //----------------------------------------------------------------------------//
@@ -311,8 +311,8 @@ bool GUIContext::windowDestroyedHandler(const EventArgs& args)
     if (window == d_rootWindow)
         d_rootWindow = 0;
 
-    if (window == getWindowContainingPointer())
-        resetWindowContainingPointer();
+    if (window == getWindowContainingCursor())
+        resetWindowContainingCursor();
 
     if (window == d_modalWindow)
         d_modalWindow = 0;
@@ -341,54 +341,54 @@ void GUIContext::onRootWindowChanged(WindowEventArgs& args)
 }
 
 //----------------------------------------------------------------------------//
-void GUIContext::updateWindowContainingPointer()
+void GUIContext::updateWindowContainingCursor()
 {
-    d_windowContainingPointerIsUpToDate = false;
+    d_windowContainingCursorIsUpToDate = false;
 }
 
 //----------------------------------------------------------------------------//
-bool GUIContext::updateWindowContainingPointer_impl() const
+bool GUIContext::updateWindowContainingCursor_impl() const
 {
-    PointerEventArgs pa(0);
+    CursorInputEventArgs ciea(0);
     const glm::vec2 cursor_pos(d_cursor.getPosition());
 
-    Window* const curr_wnd_with_pointer = getTargetWindow(cursor_pos, true);
+    Window* const window_with_cursor = getTargetWindow(cursor_pos, true);
 
     // exit if window containing cursor has not changed.
-    if (curr_wnd_with_pointer == d_windowContainingPointer)
+    if (window_with_cursor == d_windowContainingCursor)
         return false;
 
-    pa.scroll = 0;
-    pa.source = PS_None;
+    ciea.scroll = 0;
+    ciea.source = CIS_None;
 
-    Window* oldWindow = d_windowContainingPointer;
-    d_windowContainingPointer = curr_wnd_with_pointer;
+    Window* oldWindow = d_windowContainingCursor;
+    d_windowContainingCursor = window_with_cursor;
 
     // inform previous window the cursor has left it
     if (oldWindow)
     {
-        pa.window = oldWindow;
-        pa.position = oldWindow->getUnprojectedPosition(cursor_pos);
-        oldWindow->onPointerLeaves(pa);
+        ciea.window = oldWindow;
+        ciea.position = oldWindow->getUnprojectedPosition(cursor_pos);
+        oldWindow->onCursorLeaves(ciea);
     }
 
     // inform window containing cursor that cursor has entered it
-    if (d_windowContainingPointer)
+    if (d_windowContainingCursor)
     {
-        pa.handled = 0;
-        pa.window = d_windowContainingPointer;
-        pa.position = d_windowContainingPointer->getUnprojectedPosition(cursor_pos);
-        d_windowContainingPointer->onPointerEnters(pa);
+        ciea.handled = 0;
+        ciea.window = d_windowContainingCursor;
+        ciea.position = d_windowContainingCursor->getUnprojectedPosition(cursor_pos);
+        d_windowContainingCursor->onCursorEnters(ciea);
     }
 
     // do the 'area' version of the events
-    Window* root = getCommonAncestor(oldWindow, d_windowContainingPointer);
+    Window* root = getCommonAncestor(oldWindow, d_windowContainingCursor);
 
     if (oldWindow)
-        notifyPointerTransition(root, oldWindow, &Window::onCursorLeavesArea, pa);
+        notifyCursorTransition(root, oldWindow, &Window::onCursorLeavesArea, ciea);
 
-    if (d_windowContainingPointer)
-        notifyPointerTransition(root, d_windowContainingPointer, &Window::onCursorEntersArea, pa);
+    if (d_windowContainingCursor)
+        notifyCursorTransition(root, d_windowContainingCursor, &Window::onCursorEntersArea, ciea);
 
     return true;
 }
@@ -418,9 +418,9 @@ Window* GUIContext::getCommonAncestor(Window* w1, Window* w2) const
 }
 
 //----------------------------------------------------------------------------//
-void GUIContext::notifyPointerTransition(Window* top, Window* bottom,
-                                    void (Window::*func)(PointerEventArgs&),
-                                    PointerEventArgs& args) const
+void GUIContext::notifyCursorTransition(Window* top, Window* bottom,
+                                    void (Window::*func)(CursorInputEventArgs&),
+                                    CursorInputEventArgs& args) const
 {
     if (top == bottom)
         return;
@@ -428,7 +428,7 @@ void GUIContext::notifyPointerTransition(Window* top, Window* bottom,
     Window* const parent = bottom->getParent();
 
     if (parent && parent != top)
-        notifyPointerTransition(top, parent, func, args);
+        notifyCursorTransition(top, parent, func, args);
 
     args.handled = 0;
     args.window = bottom;
@@ -518,7 +518,7 @@ bool GUIContext::injectTimePulse(float timeElapsed)
         return false;
 
     // ensure window containing cursor is now valid
-    getWindowContainingPointer();
+    getWindowContainingCursor();
 
     // else pass to sheet for distribution.
     d_rootWindow->update(timeElapsed);
@@ -705,15 +705,15 @@ void GUIContext::initializeSemanticEventHandlers()
         new InputEventHandlerSlot<GUIContext, SemanticInputEvent>(
             &GUIContext::handleScrollEvent, this)));
 
-    d_semanticEventHandlers.insert(std::make_pair(SV_PointerActivate,
+    d_semanticEventHandlers.insert(std::make_pair(SV_CursorActivate,
         new InputEventHandlerSlot<GUIContext, SemanticInputEvent>(
-        &GUIContext::handlePointerActivateEvent, this)));
-    d_semanticEventHandlers.insert(std::make_pair(SV_PointerPressHold,
+        &GUIContext::handleCursorActivateEvent, this)));
+    d_semanticEventHandlers.insert(std::make_pair(SV_CursorPressHold,
         new InputEventHandlerSlot<GUIContext, SemanticInputEvent>(
-        &GUIContext::handlePointerPressHoldEvent, this)));
-    d_semanticEventHandlers.insert(std::make_pair(SV_PointerMove,
+        &GUIContext::handleCursorPressHoldEvent, this)));
+    d_semanticEventHandlers.insert(std::make_pair(SV_CursorMove,
         new InputEventHandlerSlot<GUIContext, SemanticInputEvent>(
-            &GUIContext::handlePointerMoveEvent, this)));
+            &GUIContext::handleCursorMoveEvent, this)));
 }
 
 //----------------------------------------------------------------------------//
@@ -727,135 +727,135 @@ void GUIContext::deleteSemanticEventHandlers()
 }
 
 //----------------------------------------------------------------------------//
-bool GUIContext::handlePointerActivateEvent(const SemanticInputEvent& event)
+bool GUIContext::handleCursorActivateEvent(const SemanticInputEvent& event)
 {
-    PointerEventArgs pa(0);
-    pa.position = d_cursor.getPosition();
-    pa.moveDelta = glm::vec2(0, 0);
-    pa.source = event.d_payload.source;
-    pa.scroll = 0;
-    pa.window = getTargetWindow(pa.position, false);
+    CursorInputEventArgs ciea(0);
+    ciea.position = d_cursor.getPosition();
+    ciea.moveDelta = glm::vec2(0, 0);
+    ciea.source = event.d_payload.source;
+    ciea.scroll = 0;
+    ciea.window = getTargetWindow(ciea.position, false);
     // make cursor position sane for this target window
-    if (pa.window)
-        pa.position = pa.window->getUnprojectedPosition(pa.position);
+    if (ciea.window)
+        ciea.position = ciea.window->getUnprojectedPosition(ciea.position);
 
     // if there is no target window, input can not be handled.
-    if (!pa.window)
+    if (!ciea.window)
         return false;
 
     if (d_windowNavigator != 0)
-        d_windowNavigator->setCurrentFocusedWindow(pa.window);
+        d_windowNavigator->setCurrentFocusedWindow(ciea.window);
 
-    pa.window->onPointerActivate(pa);
-    return pa.handled != 0;
+    ciea.window->onCursorActivate(ciea);
+    return ciea.handled != 0;
 }
 
 //----------------------------------------------------------------------------//
-bool GUIContext::handlePointerPressHoldEvent(const SemanticInputEvent& event)
+bool GUIContext::handleCursorPressHoldEvent(const SemanticInputEvent& event)
 {
-    PointerEventArgs pa(0);
-    pa.position = d_cursor.getPosition();
-    pa.moveDelta = glm::vec2(0, 0);
-    pa.source = event.d_payload.source;
-    pa.scroll = 0;
-    pa.window = getTargetWindow(pa.position, false);
+    CursorInputEventArgs ciea(0);
+    ciea.position = d_cursor.getPosition();
+    ciea.moveDelta = glm::vec2(0, 0);
+    ciea.source = event.d_payload.source;
+    ciea.scroll = 0;
+    ciea.window = getTargetWindow(ciea.position, false);
     // make cursor position sane for this target window
-    if (pa.window)
-        pa.position = pa.window->getUnprojectedPosition(pa.position);
+    if (ciea.window)
+        ciea.position = ciea.window->getUnprojectedPosition(ciea.position);
 
     if (d_windowNavigator != 0)
-        d_windowNavigator->setCurrentFocusedWindow(pa.window);
+        d_windowNavigator->setCurrentFocusedWindow(ciea.window);
 
-    pa.window->onPointerPressHold(pa);
-    return pa.handled != 0;
+    ciea.window->onCursorPressHold(ciea);
+    return ciea.handled != 0;
 }
 
 //----------------------------------------------------------------------------//
 bool GUIContext::handleScrollEvent(const SemanticInputEvent& event)
 {
-    PointerEventArgs pa(0);
-    pa.position = d_cursor.getPosition();
-    pa.moveDelta = glm::vec2(0, 0);
-    pa.source = PS_None;
-    pa.scroll = event.d_payload.single;
-    pa.window = getTargetWindow(pa.position, false);
+    CursorInputEventArgs ciea(0);
+    ciea.position = d_cursor.getPosition();
+    ciea.moveDelta = glm::vec2(0, 0);
+    ciea.source = CIS_None;
+    ciea.scroll = event.d_payload.single;
+    ciea.window = getTargetWindow(ciea.position, false);
     // make cursor position sane for this target window
-    if (pa.window)
-        pa.position = pa.window->getUnprojectedPosition(pa.position);
+    if (ciea.window)
+        ciea.position = ciea.window->getUnprojectedPosition(ciea.position);
 
     // if there is no target window, input can not be handled.
-    if (!pa.window)
+    if (!ciea.window)
         return false;
 
-    pa.window->onScroll(pa);
-    return pa.handled != 0;
+    ciea.window->onScroll(ciea);
+    return ciea.handled != 0;
 }
 
 //----------------------------------------------------------------------------//
-bool GUIContext::handlePointerMove_impl(PointerEventArgs& pa)
+bool GUIContext::handleCursorMove_impl(CursorInputEventArgs& pa)
 {
-    updateWindowContainingPointer();
+    updateWindowContainingCursor();
 
     // input can't be handled if there is no window to handle it.
-    if (!getWindowContainingPointer())
+    if (!getWindowContainingCursor())
         return false;
 
     // make cursor position sane for this target window
-    pa.position = getWindowContainingPointer()->getUnprojectedPosition(pa.position);
+    pa.position = getWindowContainingCursor()->getUnprojectedPosition(pa.position);
     // inform window about the input.
-    pa.window = getWindowContainingPointer();
+    pa.window = getWindowContainingCursor();
     pa.handled = 0;
-    pa.window->onPointerMove(pa);
+    pa.window->onCursorMove(pa);
 
     // return whether window handled the input.
     return pa.handled != 0;
 }
 
 //----------------------------------------------------------------------------//
-bool GUIContext::handlePointerMoveEvent(const SemanticInputEvent& event)
+bool GUIContext::handleCursorMoveEvent(const SemanticInputEvent& event)
 {
     const glm::vec2 new_position(
         event.d_payload.array[0],
         event.d_payload.array[1]);
 
     // setup cursor movement event args object.
-    PointerEventArgs pa(0);
-    pa.moveDelta = new_position - d_cursor.getPosition();
+    CursorInputEventArgs ciea(0);
+    ciea.moveDelta = new_position - d_cursor.getPosition();
 
     // no movement means no event
-    if ((pa.moveDelta.x == 0) && (pa.moveDelta.y == 0))
+    if ((ciea.moveDelta.x == 0) && (ciea.moveDelta.y == 0))
         return false;
 
-    pa.scroll = 0;
-    pa.source = PS_None;
-    pa.pointerState = d_pointersState;
+    ciea.scroll = 0;
+    ciea.source = CIS_None;
+    ciea.state = d_cursorsState;
 
-    // move pointer cursor to new position
+    // move cursor to new position
     d_cursor.setPosition(new_position);
     // update position in args (since actual position may be constrained)
-    pa.position = d_cursor.getPosition();
+    ciea.position = d_cursor.getPosition();
 
-    return handlePointerMove_impl(pa);
+    return handleCursorMove_impl(ciea);
 }
 
 //----------------------------------------------------------------------------//
-bool GUIContext::handlePointerLeave(const SemanticInputEvent& event)
+bool GUIContext::handleCursorLeave(const SemanticInputEvent& event)
 {
-    if (!getWindowContainingPointer())
+    if (!getWindowContainingCursor())
         return false;
 
-    PointerEventArgs pa(0);
-    pa.position = getWindowContainingPointer()->getUnprojectedPosition(
+    CursorInputEventArgs ciea(0);
+    ciea.position = getWindowContainingCursor()->getUnprojectedPosition(
         d_cursor.getPosition());
-    pa.moveDelta = glm::vec2(0, 0);
-    pa.source = PS_None;
-    pa.scroll = 0;
-    pa.window = getWindowContainingPointer();
+    ciea.moveDelta = glm::vec2(0, 0);
+    ciea.source = CIS_None;
+    ciea.scroll = 0;
+    ciea.window = getWindowContainingCursor();
 
-    getWindowContainingPointer()->onPointerLeaves(pa);
-    resetWindowContainingPointer();
+    getWindowContainingCursor()->onCursorLeaves(ciea);
+    resetWindowContainingCursor();
 
-    return pa.handled != 0;
+    return ciea.handled != 0;
 }
 
 //----------------------------------------------------------------------------//

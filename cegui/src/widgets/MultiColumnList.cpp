@@ -1918,14 +1918,14 @@ void MultiColumnList::onSized(ElementEventArgs& e)
 
 
 /*************************************************************************
-    Handler for when pointer is pressed
+    Handler for when cursor is pressed
 *************************************************************************/
-void MultiColumnList::onPointerPressHold(PointerEventArgs& e)
+void MultiColumnList::onCursorPressHold(CursorInputEventArgs& e)
 {
     // base class processing
-    Window::onPointerPressHold(e);
+    Window::onCursorPressHold(e);
 
-    if (e.source == PS_Left)
+    if (e.source == CIS_Left)
     {
         const glm::vec2 local_point = CoordConverter::screenToWindow(*this, e.position);
         handleSelection(local_point, false, false);
@@ -1952,7 +1952,7 @@ void MultiColumnList::onSemanticInputEvent(SemanticEventArgs& e)
 /*************************************************************************
     Handler for scroll actions
 *************************************************************************/
-void MultiColumnList::onScroll(PointerEventArgs& e)
+void MultiColumnList::onScroll(CursorInputEventArgs& e)
 {
 	// base class processing.
 	Window::onScroll(e);
