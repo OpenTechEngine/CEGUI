@@ -66,6 +66,39 @@ public:
 
     /*!
     \brief
+        Creates a SubscriberSlot that is bound to a free function.
+
+    \note
+        The handler doesn't have to return bool. True is always returned.
+    */
+    inline SubscriberSlot(FreeFunctionSlotVoid::SlotFunction* func):
+        d_functor_impl(CEGUI_NEW_AO FreeFunctionSlotVoid(func))
+    {}
+
+    /*!
+    \brief
+        Creates a SubscriberSlot that is bound to a free function.
+
+    \note
+        The handler doesn't have to take EventArgs. EventArgs are ignored.
+    */
+    inline SubscriberSlot(FreeFunctionSlotNoArgs::SlotFunction* func):
+        d_functor_impl(CEGUI_NEW_AO FreeFunctionSlotNoArgs(func))
+    {}
+
+    /*!
+    \brief
+        Creates a SubscriberSlot that is bound to a free function.
+
+    \note
+        The handler doesn't have to take EventArgs or return bool.
+    */
+    inline SubscriberSlot(FreeFunctionSlotVoidNoArgs::SlotFunction* func):
+        d_functor_impl(CEGUI_NEW_AO FreeFunctionSlotVoidNoArgs(func))
+    {}
+
+    /*!
+    \brief
         Destructor.  Note this is non-virtual, which should be telling you not
         to sub-class!
     */
@@ -106,6 +139,33 @@ public:
     template<typename T>
     SubscriberSlot(bool (T::*function)(const EventArgs&), T* obj) :
         d_functor_impl(new MemberFunctionSlot<T>(function, obj))
+    {}
+
+    /*!
+    \brief
+        Creates a SubscriberSlot that is bound to a member function.
+    */
+    template<typename T>
+    SubscriberSlot(void (T::*function)(const EventArgs&), T* obj) :
+        d_functor_impl(new MemberFunctionSlotVoid<T>(function, obj))
+    {}
+
+    /*!
+    \brief
+        Creates a SubscriberSlot that is bound to a member function.
+    */
+    template<typename T>
+    SubscriberSlot(bool (T::*function)(), T* obj) :
+        d_functor_impl(new MemberFunctionSlotNoArgs<T>(function, obj))
+    {}
+
+    /*!
+    \brief
+        Creates a SubscriberSlot that is bound to a member function.
+    */
+    template<typename T>
+    SubscriberSlot(void (T::*function)(), T* obj) :
+        d_functor_impl(new MemberFunctionSlotVoidNoArgs<T>(function, obj))
     {}
 
     /*!
