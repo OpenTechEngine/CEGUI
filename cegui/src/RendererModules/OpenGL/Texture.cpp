@@ -480,7 +480,7 @@ void OpenGLTexture::blitToMemory(void* targetData)
             glBindBuffer(GL_PIXEL_PACK_BUFFER, pixel_pack_buffer_old);
             glReadBuffer(read_buffer_old);
         }
-  	glBindFramebuffer(framebuffer_target, framebuffer_old);
+        glBindFramebuffer(framebuffer_target, framebuffer_old);
         glDeleteFramebuffers(1, &texture_framebuffer);
 
     }
